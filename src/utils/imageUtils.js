@@ -62,7 +62,6 @@ export const ImageWithFallback = ({ src, alt, className, ...props }) => {
       className={className}
       onError={handleError}
       loading="lazy"
-      crossOrigin="anonymous"
       {...props}
     />
   );
