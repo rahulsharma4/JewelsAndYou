@@ -29,14 +29,19 @@ export const ImageWithFallback = ({ src, alt, className, ...props }) => {
   };
 
   return (
-    <img
-      src={imgSrc}
-      alt={alt}
-      className={className}
-      onError={handleError}
-      loading="lazy"
-      {...props}
-    />
+    <div style={{ position: 'relative', display: 'inline-block', width: '100%', height: '100%' }}>
+      <img
+        src={imgSrc}
+        alt={alt}
+        className={className}
+        onError={handleError}
+        loading="lazy"
+        {...props}
+      />
+      <div style={{ fontSize: '10px', color: 'red', position: 'absolute', bottom: 0, left: 0, background: 'rgba(255,255,255,0.8)', zIndex: 10 }}>
+        {imgSrc}
+      </div>
+    </div>
   );
 };
 
