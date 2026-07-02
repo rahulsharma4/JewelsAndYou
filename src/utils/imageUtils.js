@@ -27,6 +27,7 @@ export const ImageWithFallback = ({ src, alt, className, ...props }) => {
       setImgSrc('/placeholder.svg');
     }
   };
+  const initialUrl = getImageUrl(src);
 
   return (
     <div style={{ position: 'relative', display: 'inline-block', width: '100%', height: '100%' }}>
@@ -38,8 +39,8 @@ export const ImageWithFallback = ({ src, alt, className, ...props }) => {
         loading="lazy"
         {...props}
       />
-      <div style={{ fontSize: '10px', color: 'red', position: 'absolute', bottom: 0, left: 0, background: 'rgba(255,255,255,0.8)', zIndex: 10 }}>
-        {imgSrc}
+      <div style={{ fontSize: '10px', color: 'red', position: 'absolute', bottom: 0, left: 0, background: 'rgba(255,255,255,0.9)', zIndex: 10, wordBreak: 'break-all', lineHeight: '1.2' }}>
+        {hasError ? 'ERROR: ' + initialUrl : initialUrl}
       </div>
     </div>
   );
