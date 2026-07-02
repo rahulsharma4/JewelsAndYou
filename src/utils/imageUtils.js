@@ -9,6 +9,19 @@ import jevel7 from '../Assets/Jevel7.jpg';
 import jevel8 from '../Assets/Jevel8.jpg';
 import jevel9 from '../Assets/Jevel9.jpg';
 import jevel10 from '../Assets/Jevel10.jpg';
+import jevel11 from '../Assets/Jevel11.jpg';
+import jevel12 from '../Assets/Jevel12.jpg';
+import jevel13 from '../Assets/Jevel13.jpg';
+import jevel14 from '../Assets/Jevel14.jpg';
+import jevel15 from '../Assets/Jevel15.jpg';
+import jevel16 from '../Assets/Jevel16.jpg';
+import jevel17 from '../Assets/Jevel17.jpg';
+import jevel18 from '../Assets/Jevel18.jpg';
+import jevel19 from '../Assets/Jevel19.jpg';
+import jevel20 from '../Assets/Jevel20.jpg';
+import jevel21 from '../Assets/Jevel21.jpg';
+import jevel22 from '../Assets/Jevel22.jpg';
+import jevel23 from '../Assets/Jevel23.jpg';
 import logo from '../Assets/Logo.png';
 
 const assetMap = {
@@ -22,6 +35,19 @@ const assetMap = {
   'Jevel8.jpg': jevel8,
   'Jevel9.jpg': jevel9,
   'Jevel10.jpg': jevel10,
+  'Jevel11.jpg': jevel11,
+  'Jevel12.jpg': jevel12,
+  'Jevel13.jpg': jevel13,
+  'Jevel14.jpg': jevel14,
+  'Jevel15.jpg': jevel15,
+  'Jevel16.jpg': jevel16,
+  'Jevel17.jpg': jevel17,
+  'Jevel18.jpg': jevel18,
+  'Jevel19.jpg': jevel19,
+  'Jevel20.jpg': jevel20,
+  'Jevel21.jpg': jevel21,
+  'Jevel22.jpg': jevel22,
+  'Jevel23.jpg': jevel23,
   'Logo.png': logo
 };
 
