@@ -9,17 +9,16 @@ export const getImageUrl = (imagePath) => {
     return '/placeholder.svg'; // Default placeholder
   }
   
-  // Check if it's an uploaded image (has timestamp prefix)
-  if (/^\d+\.(jpg|jpeg|png|gif|svg|webp)$/i.test(imagePath)) {
-    return `${BASE_SERVER_URL}/uploads/${imagePath}`;
-  }
-  
   // Check if it's an asset image (starts with Jevel or Logo)
   if (/^(Jevel|Logo)/i.test(imagePath)) {
-    return `${BASE_SERVER_URL}/assets/${imagePath}`;
+    try {
+      return require(`../Assets/${imagePath}`);
+    } catch (e) {
+      console.warn("Asset not found:", imagePath);
+    }
   }
   
-  // For any other case, try uploads first, then assets
+  // For uploaded images and any other case, use /uploads
   return `${BASE_SERVER_URL}/uploads/${imagePath}`;
 };
 
@@ -58,11 +57,14 @@ export const getImageUrlWithFallback = (imagePath) => {
     return '/placeholder.svg';
   }
   
-  // If it's a timestamp-based filename, it's definitely an upload
-  if (/^\d+\.(jpg|jpeg|png|gif|svg|webp)$/i.test(imagePath)) {
-    return `${BASE_SERVER_URL}/uploads/${imagePath}`;
+  if (/^(Jevel|Logo)/i.test(imagePath)) {
+    try {
+      return require(`../Assets/${imagePath}`);
+    } catch (e) {
+      console.warn("Asset not found:", imagePath);
+    }
   }
   
-  // For other filenames, try uploads first, then assets
+  // For other filenames, use uploads
   return `${BASE_SERVER_URL}/uploads/${imagePath}`;
 };
