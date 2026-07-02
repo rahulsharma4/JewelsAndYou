@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../services/api";
-import { getImageUrl, ImageWithFallback } from "../utils/imageUtils";
+import { ImageWithFallback } from "../utils/imageUtils";
 
 const OrderTracking = () => {
   const { orderId } = useParams();
@@ -16,6 +16,7 @@ const OrderTracking = () => {
     if (orderId) {
       loadTrackingInfo();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId]);
 
   const loadTrackingInfo = async () => {

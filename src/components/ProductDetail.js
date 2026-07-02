@@ -25,6 +25,7 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
     if (product) {
       loadRelatedProducts();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product]);
 
   const loadRelatedProducts = async () => {

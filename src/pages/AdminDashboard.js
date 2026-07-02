@@ -16,6 +16,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     checkAdminAccess();
     loadDashboardData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkAdminAccess = async () => {

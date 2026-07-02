@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getImageUrl, ImageWithFallback } from '../utils/imageUtils';
+import { ImageWithFallback } from '../utils/imageUtils';
 
 const ProductCard = ({ product, onAddToCart, onToggleFavorite, isFavorite = false }) => {
   const navigate = useNavigate();

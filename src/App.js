@@ -67,6 +67,7 @@ import jevel22 from "./Assets/Jevel22.jpg";
 import jevel23 from "./Assets/Jevel23.jpg";
 
 // Product data
+// eslint-disable-next-line no-unused-vars
 const products = [
   { id: 1, name: "Diamond Ring", price: 1299.99, image: jevel1, category: "Rings", rating: 4.8, description: "Elegant diamond ring with 18k gold setting" },
   { id: 2, name: "Pearl Necklace", price: 899.99, image: jevel2, category: "Necklaces", rating: 4.6, description: "Freshwater pearl necklace with silver clasp" },

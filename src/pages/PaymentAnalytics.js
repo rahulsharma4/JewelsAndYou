@@ -12,6 +12,7 @@ const PaymentAnalytics = () => {
   useEffect(() => {
     checkAdminAccess();
     loadPaymentData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkAdminAccess = async () => {

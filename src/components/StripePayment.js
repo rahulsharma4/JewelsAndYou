@@ -24,6 +24,7 @@ const StripePaymentForm = ({ amount, orderId, items, onSuccess, onError }) => {
   useEffect(() => {
     // Create payment intent when component mounts
     createPaymentIntent();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const createPaymentIntent = async () => {

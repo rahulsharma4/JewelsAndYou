@@ -24,6 +24,7 @@ export const CartProvider = ({ children, user }) => {
       // Clear cart when user logs out
       setCart([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const loadCart = async () => {

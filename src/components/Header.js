@@ -4,8 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import logo from '../Assets/Logo.png';
 import SearchBar from './SearchBar';
 import { useCart } from '../contexts/CartContext';
-import api from '../services/api';
-import { getImageUrl, ImageWithFallback } from '../utils/imageUtils';
+import { ImageWithFallback } from '../utils/imageUtils';
 
 const Header = ({ cartItemCount, onCartClick, selectedCategory, onCategoryChange, user, onLogout }) => {
   const navigate = useNavigate();
