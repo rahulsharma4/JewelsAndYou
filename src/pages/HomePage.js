@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Gem, Truck, Lock, Undo2 } from "lucide-react";
-import { ImageWithFallback, getImageUrl } from "../utils/imageUtils";
-import LoadingSpinner, { CategorySkeleton, TestimonialSkeleton } from "../components/LoadingSpinner";
+import { ImageWithFallback } from "../utils/imageUtils";
+import { CategorySkeleton, TestimonialSkeleton } from "../components/LoadingSpinner";
 
 const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loading = false }) => {
   const navigate = useNavigate();

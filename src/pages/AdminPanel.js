@@ -25,6 +25,7 @@ const AdminPanel = () => {
   useEffect(() => {
     checkAdminAccess();
     loadProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkAdminAccess = async () => {

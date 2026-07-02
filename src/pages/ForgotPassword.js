@@ -17,7 +17,7 @@ const ForgotPassword = () => {
     setMessage("");
 
     try {
-      const response = await api.forgotPassword(email);
+      await api.forgotPassword(email);
       setMessage("Password reset email sent! Please check your inbox.");
     } catch (err) {
       setError(err.message || "Failed to send reset email");

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
@@ -7,7 +7,7 @@ import api from "../services/api";
 
 const CheckoutPayment = () => {
   const [paymentMethod, setPaymentMethod] = useState("stripe");
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { cart, getTotalPrice, clearCart } = useCart();

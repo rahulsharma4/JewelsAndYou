@@ -4,7 +4,7 @@ import api from "./services/api";
 import { CartProvider, useCart } from "./contexts/CartContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import ErrorBoundary from "./components/ErrorBoundary";
-import { getImageUrl, ImageWithFallback } from "./utils/imageUtils";
+import { ImageWithFallback } from "./utils/imageUtils";
 
 // Import components
 import Header from "./components/Header";
@@ -93,7 +93,7 @@ const products = [
   { id: 23, name: "Diamond Band", price: 1499.99, image: jevel23, category: "Rings", rating: 4.9, description: "Eternity diamond band ring" },
 ];
 
-const mockProducts = products;
+
 
 function AppContent({ user, setUser }) {
   const [cartOpen, setCartOpen] = useState(false);
@@ -126,6 +126,7 @@ function AppContent({ user, setUser }) {
   useEffect(() => {
     loadProducts();
     checkAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleAddToCart = async (product) => {

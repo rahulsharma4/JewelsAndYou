@@ -17,6 +17,7 @@ const SearchPage = ({ onAddToCart, onToggleFavorite, favorites = [] }) => {
     if (query) {
       performSearch();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, sortBy, category]);
 
   const performSearch = async () => {
