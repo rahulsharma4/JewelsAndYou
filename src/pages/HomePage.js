@@ -1,35 +1,121 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Gem, Truck, Lock, Undo2 } from "lucide-react";
-import { ImageWithFallback } from "../utils/imageUtils";
+import { Gem, Truck, Lock, Undo2, ChevronRight, Sparkles, Star, ArrowRight, Heart } from "lucide-react";
+import { getImageUrl, ImageWithFallback } from "../utils/imageUtils";
 import { CategorySkeleton, TestimonialSkeleton } from "../components/LoadingSpinner";
+import api from "../services/api";
+
+/* ───────── tiny reusable shimmer button ───────── */
+const ShimmerButton = ({ children, className = "", ...props }) => (
+  <motion.button
+    whileHover={{ scale: 1.04 }}
+    whileTap={{ scale: 0.97 }}
+    className={`relative overflow-hidden rounded-lg font-semibold transition-all ${className}`}
+    {...props}
+  >
+    <span className="relative z-10 flex items-center gap-2 justify-center">{children}</span>
+    <span className="absolute inset-0 -translate-x-full animate-[shimmer_2.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+  </motion.button>
+);
+
+/* ───────── section heading ───────── */
+const SectionHeading = ({ badge, title, subtitle }) => (
+  <div className="text-center mb-10">
+    {badge && (
+      <motion.span
+        initial={{ opacity: 0, y: 10 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="inline-flex items-center gap-1.5 rounded-full bg-brand-gold/15 text-brand-gold text-xs font-semibold px-3 py-1 mb-3 border border-brand-gold/20"
+      >
+        <Sparkles className="w-3 h-3" /> {badge}
+      </motion.span>
+    )}
+    <motion.h2
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: 0.05 }}
+      className="text-3xl md:text-4xl font-heading font-bold mb-2"
+    >
+      {title}
+    </motion.h2>
+    {subtitle && (
+      <motion.p
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ delay: 0.15 }}
+        className="text-brand-off/70 max-w-2xl mx-auto"
+      >
+        {subtitle}
+      </motion.p>
+    )}
+  </div>
+);
 
 const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loading = false }) => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [siteSettings, setSiteSettings] = useState(null);
+  const [heroIdx, setHeroIdx] = useState(0);
 
-  const featuredProducts = products.slice(0, 6);
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const data = await api.getSettings();
+        setSiteSettings(data);
+      } catch (error) {
+        console.error('Failed to load settings', error);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  /* rotate hero background colour when there are no images */
+  useEffect(() => {
+    const t = setInterval(() => setHeroIdx(i => (i + 1) % 3), 5000);
+    return () => clearInterval(t);
+  }, []);
+
+  const featuredProducts = products.slice(0, 8);
+  const newArrivals = [...products].reverse().slice(0, 4);
+  const spotlightProduct = products[0];
 
   const features = [
-    { icon: Gem, title: "Premium Quality", description: "Handcrafted jewelry using the finest materials and gemstones" },
-    { icon: Truck, title: "Free Shipping", description: "Complimentary shipping on all orders over $500" },
-    { icon: Lock, title: "Secure Payment", description: "100% secure payment processing and buyer protection" },
-    { icon: Undo2, title: "Easy Returns", description: "30-day return policy with free return shipping" },
+    { icon: Gem, title: "Premium Quality", description: "Handcrafted with the finest materials & gemstones" },
+    { icon: Truck, title: "Free Shipping", description: "Complimentary delivery on orders over ₹49,999" },
+    { icon: Lock, title: "Secure Payment", description: "100% encrypted checkout & buyer protection" },
+    { icon: Undo2, title: "Easy Returns", description: "30-day hassle-free return & exchange policy" },
   ];
 
   const categories = [
-    { name: "Rings", image: products.find(p => p.category === "Rings")?.image || "Jevel1.jpg", count: products.filter((p) => p.category === "Rings").length },
-    { name: "Necklaces", image: products.find(p => p.category === "Necklaces")?.image || "Jevel2.jpg", count: products.filter((p) => p.category === "Necklaces").length },
-    { name: "Earrings", image: products.find(p => p.category === "Earrings")?.image || "Jevel3.jpg", count: products.filter((p) => p.category === "Earrings").length },
-    { name: "Watches", image: products.find(p => p.category === "Watches")?.image || "Jevel4.jpg", count: products.filter((p) => p.category === "Watches").length },
+    { name: "Rings", emoji: "💍", count: products.filter(p => p.category === "Rings").length },
+    { name: "Necklaces", emoji: "📿", count: products.filter(p => p.category === "Necklaces").length },
+    { name: "Earrings", emoji: "✨", count: products.filter(p => p.category === "Earrings").length },
+    { name: "Watches", emoji: "⌚", count: products.filter(p => p.category === "Watches").length },
+    { name: "Bracelets", emoji: "🔗", count: products.filter(p => p.category === "Bracelets").length },
+    { name: "Pendants", emoji: "💎", count: products.filter(p => p.category === "Pendants").length },
   ];
 
   const testimonials = [
-    { name: "Sarah Johnson", rating: 5, comment: "The diamond ring I purchased exceeded my expectations. The quality is exceptional!", image: products[0]?.image || "Jevel5.jpg" },
-    { name: "Michael Chen", rating: 5, comment: "Amazing customer service and beautiful jewelry. Highly recommend!", image: products[1]?.image || "Jevel6.jpg" },
-    { name: "Emma Davis", rating: 5, comment: "Perfect gift for my anniversary. The craftsmanship is outstanding.", image: products[2]?.image || "Jevel7.jpg" },
+    { name: "Sarah Johnson", rating: 5, comment: "The diamond ring I purchased exceeded my expectations. Absolutely stunning craftsmanship!", avatar: "https://ui-avatars.com/api/?name=Sarah+Johnson&background=0D8ABC&color=fff&size=150" },
+    { name: "Michael Chen", rating: 5, comment: "Amazing customer service and beautiful jewelry. My wife was thrilled with the necklace!", avatar: "https://ui-avatars.com/api/?name=Michael+Chen&background=F59E0B&color=fff&size=150" },
+    { name: "Emma Davis", rating: 5, comment: "Perfect anniversary gift. The quality is outstanding and delivery was prompt.", avatar: "https://ui-avatars.com/api/?name=Emma+Davis&background=10B981&color=fff&size=150" },
+    { name: "Priya Sharma", rating: 5, comment: "I've ordered multiple pieces and every single one has been exquisite. Highly recommend!", avatar: "https://ui-avatars.com/api/?name=Priya+Sharma&background=8B5CF6&color=fff&size=150" },
+  ];
+
+  const marqueeItems = [
+    "✦ Handcrafted Jewelry",
+    "✦ GIA Certified Diamonds",
+    "✦ Free Insured Shipping",
+    "✦ Lifetime Warranty",
+    "✦ Ethical Sourcing",
+    "✦ 30-Day Returns",
+    "✦ Custom Designs",
+    "✦ Expert Craftsmanship",
   ];
 
   const handleNewsletterSubmit = (e) => {
@@ -45,72 +131,208 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
     navigate("/products", { state: { selectedCategory: categoryName } });
   };
 
-  return (
-    <div>
-      {/* Hero */}
-      <section className="relative min-h-[70vh] flex items-center text-brand-off">
-        <div className="absolute inset-0 bg-brand-teal" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.15),rgba(0,0,0,0))]" />
-        <motion.div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-          <motion.h1 className="font-heading text-4xl sm:text-5xl md:text-6xl font-extrabold mb-3" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }}>Exquisite Jewellery Collection</motion.h1>
-          <motion.h2 className="font-heading text-xl sm:text-2xl md:text-3xl mb-4 opacity-90" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}>Discover our handcrafted pieces of timeless beauty</motion.h2>
-          <motion.p className="max-w-2xl mx-auto opacity-90 mb-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3, duration: 0.5 }}>
-            From classic diamonds to contemporary designs, find your perfect piece that tells your unique story
-          </motion.p>
-          <motion.div className="flex flex-wrap justify-center gap-3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4, duration: 0.5 }}>
-            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }} onClick={() => navigate("/products")} className="rounded-md bg-brand-gold text-brand-tealDark px-6 py-3 font-semibold">
-              Shop Now
-            </motion.button>
-            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }} onClick={() => navigate("/about")} className="rounded-md border border-brand-off/80 px-6 py-3 font-semibold text-brand-off hover: bg-brand-tealDark/10">
-              Learn More
-            </motion.button>
-          </motion.div>
-        </motion.div>
-      </section>
+  const heroGradients = [
+    "from-brand-tealDark via-brand-teal to-brand-tealDark",
+    "from-brand-tealDark via-emerald-900 to-brand-tealDark",
+    "from-brand-tealDark via-slate-800 to-brand-tealDark",
+  ];
 
-      {/* Categories */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h2 className="text-3xl font-bold text-center mb-8">Shop by Category</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          {loading ? (
-            Array.from({ length: 4 }).map((_, index) => (
-              <CategorySkeleton key={index} />
-            ))
-          ) : (
-            categories.map((category) => (
-              <motion.button key={category.name} onClick={() => handleCategoryClick(category.name)} className="relative h-72 rounded-lg overflow-hidden shadow-sm group" whileHover={{ scale: 1.02 }} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }}>
-                <ImageWithFallback 
-                  src={category.image} 
-                  alt={category.name} 
-                  className="absolute inset-0 h-full w-full object-cover" 
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/10 opacity-0 group-hover:opacity-100 transition" />
-                <div className="absolute inset-0 flex items-center justify-center text-white">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold mb-1">{category.name}</div>
-                    <div className="text-sm opacity-90">{category.count} items</div>
+  const heroImage = siteSettings?.hero?.image
+    ? getImageUrl(siteSettings.hero.image)
+    : null;
+
+  return (
+    <div className="overflow-hidden">
+
+      {/* ══════════ HERO ══════════ */}
+      <section
+        className={`relative min-h-[85vh] flex items-center text-brand-off bg-gradient-to-br ${heroGradients[heroIdx]} transition-all duration-[2000ms]`}
+        style={heroImage ? { backgroundImage: `url(${heroImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
+      >
+        {heroImage && <div className="absolute inset-0 bg-black/50" />}
+        {!heroImage && <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(201,168,106,0.12),transparent_60%)]" />}
+
+        {/* floating sparkle dots */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(6)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-1 h-1 rounded-full bg-brand-gold/40"
+              style={{ top: `${15 + i * 14}%`, left: `${10 + i * 15}%` }}
+              animate={{ y: [0, -20, 0], opacity: [0.3, 0.8, 0.3] }}
+              transition={{ duration: 3 + i * 0.5, repeat: Infinity, delay: i * 0.3 }}
+            />
+          ))}
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }}>
+              <motion.span
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="inline-flex items-center gap-1.5 rounded-full bg-brand-gold/15 text-brand-gold text-xs font-semibold px-3 py-1 mb-4 border border-brand-gold/30 backdrop-blur-sm"
+              >
+                <Sparkles className="w-3 h-3" /> New Collection 2024
+              </motion.span>
+
+              <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight">
+                {siteSettings?.hero?.title || (
+                  <>Exquisite <span className="text-brand-gold">Jewellery</span> Collection</>
+                )}
+              </h1>
+
+              <p className="text-lg text-brand-off/80 mb-6 max-w-lg leading-relaxed">
+                {siteSettings?.hero?.description || "From classic diamonds to contemporary designs, discover handcrafted pieces that celebrate life's most precious moments."}
+              </p>
+
+              <div className="flex flex-wrap gap-3">
+                <ShimmerButton
+                  onClick={() => navigate("/products")}
+                  className="bg-brand-gold text-brand-tealDark px-7 py-3.5 text-base shadow-lg shadow-brand-gold/20"
+                >
+                  Shop Now <ArrowRight className="w-4 h-4" />
+                </ShimmerButton>
+                <motion.button
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => navigate("/about")}
+                  className="rounded-lg border border-brand-off/30 px-7 py-3.5 font-semibold text-brand-off hover:bg-white/5 backdrop-blur-sm transition"
+                >
+                  Our Story
+                </motion.button>
+              </div>
+
+              {/* trust stats */}
+              <div className="mt-8 flex gap-8">
+                {[
+                  { value: "500+", label: "Products" },
+                  { value: "10K+", label: "Happy Customers" },
+                  { value: "4.9★", label: "Avg. Rating" },
+                ].map((s, i) => (
+                  <motion.div
+                    key={s.label}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 + i * 0.1 }}
+                  >
+                    <div className="text-2xl font-bold text-brand-gold">{s.value}</div>
+                    <div className="text-xs text-brand-off/60">{s.label}</div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* right side decorative card */}
+            <motion.div
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+              className="hidden md:flex justify-center"
+            >
+              <div className="relative">
+                <div className="w-80 h-80 rounded-full bg-gradient-to-br from-brand-gold/20 to-brand-gold/5 border border-brand-gold/20 flex items-center justify-center backdrop-blur-sm">
+                  <div className="w-64 h-64 rounded-full bg-gradient-to-br from-brand-gold/10 to-transparent border border-brand-gold/10 flex items-center justify-center">
+                    <div className="text-center">
+                      <Gem className="w-16 h-16 text-brand-gold mx-auto mb-3" />
+                      <div className="font-heading text-2xl font-bold text-brand-off">JewelsAndYou</div>
+                      <div className="text-sm text-brand-off/60 mt-1">Since 2020</div>
+                    </div>
                   </div>
                 </div>
+                {/* orbiting dots */}
+                <motion.div
+                  className="absolute top-4 right-4 w-12 h-12 rounded-full bg-brand-gold/20 border border-brand-gold/30 flex items-center justify-center"
+                  animate={{ y: [0, -8, 0] }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                >
+                  <span className="text-lg">💍</span>
+                </motion.div>
+                <motion.div
+                  className="absolute bottom-8 left-0 w-10 h-10 rounded-full bg-brand-gold/20 border border-brand-gold/30 flex items-center justify-center"
+                  animate={{ y: [0, 8, 0] }}
+                  transition={{ duration: 3.5, repeat: Infinity }}
+                >
+                  <span className="text-lg">💎</span>
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════ TRUST MARQUEE ══════════ */}
+      <div className="bg-brand-tealDark border-y border-brand-gold/10 py-3 overflow-hidden">
+        <div className="flex animate-[marquee_30s_linear_infinite] whitespace-nowrap">
+          {[...marqueeItems, ...marqueeItems].map((item, i) => (
+            <span key={i} className="mx-6 text-sm text-brand-gold/70 font-medium tracking-wide">
+              {item}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* ══════════ CATEGORIES ══════════ */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <SectionHeading
+          badge="Collections"
+          title="Shop by Category"
+          subtitle="Browse our curated collections of handcrafted jewelry"
+        />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+          {loading ? (
+            Array.from({ length: 6 }).map((_, i) => <CategorySkeleton key={i} />)
+          ) : (
+            categories.map((cat, i) => (
+              <motion.button
+                key={cat.name}
+                onClick={() => handleCategoryClick(cat.name)}
+                className="group relative rounded-xl p-6 text-center bg-brand-tealDark border border-brand-gold/10 hover:border-brand-gold/40 transition-all duration-300"
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.06 }}
+                whileHover={{ y: -6, boxShadow: "0 12px 32px rgba(201,168,106,0.15)" }}
+              >
+                <div className="text-3xl mb-2">{cat.emoji}</div>
+                <div className="font-semibold text-sm mb-1">{cat.name}</div>
+                <div className="text-xs text-brand-off/50">
+                  {cat.count > 0 ? `${cat.count} items` : "Explore"}
+                </div>
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-brand-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
               </motion.button>
             ))
           )}
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-12 bg-brand-teal/5">
+      {/* ══════════ WHY CHOOSE US ══════════ */}
+      <section className="py-16 bg-gradient-to-b from-brand-teal/5 to-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-heading text-brand-off font-bold text-center mb-8">Why Choose JewelsAndYou?</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {features.map((f) => {
+          <SectionHeading
+            badge="Why Us"
+            title="Why Choose JewelsAndYou?"
+            subtitle="We bring you the finest jewelry experience"
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
+            {features.map((f, i) => {
               const Icon = f.icon;
               return (
-                <motion.div key={f.title} className="h-full text-center p-6 bg-brand-tealDark/90 backdrop-blur rounded-lg shadow-sm border border-brand-gold/20" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }} whileHover={{ y: -8 }}>
-                  <div className="flex justify-center mb-2">
-                    <Icon className="w-8 h-8 text-brand-gold" />
+                <motion.div
+                  key={f.title}
+                  className="group text-center p-6 bg-brand-tealDark/90 backdrop-blur rounded-xl border border-brand-gold/10 hover:border-brand-gold/30 transition-all"
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.08 }}
+                  whileHover={{ y: -8 }}
+                >
+                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-brand-gold/10 mb-4 group-hover:bg-brand-gold/20 transition-colors">
+                    <Icon className="w-7 h-7 text-brand-gold" />
                   </div>
-                    <div className="font-semibold text-brand-off mb-1">{f.title}</div>
-                    <div className="text-sm text-brand-off/80">{f.description}</div>
+                  <div className="font-semibold text-brand-off mb-1">{f.title}</div>
+                  <div className="text-sm text-brand-off/60 leading-relaxed">{f.description}</div>
                 </motion.div>
               );
             })}
@@ -118,119 +340,319 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
         </div>
       </section>
 
-      {/* Featured */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h2 className="text-3xl font-bold text-center mb-8">Featured Collections</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {loading ? (
-            Array.from({ length: 6 }).map((_, index) => (
-              <div key={index} className="h-full rounded-lg overflow-hidden shadow-sm bg-brand-tealDark animate-pulse">
-                <div className="h-64 w-full bg-brand-off/20" />
-                <div className="p-4">
-                  <div className="h-4 bg-brand-off/20 rounded mb-2" />
-                  <div className="h-3 bg-brand-off/20 rounded mb-2 w-3/4" />
-                  <div className="h-3 bg-brand-off/20 rounded mb-2 w-1/2" />
-                  <div className="h-6 bg-brand-off/20 rounded w-1/3" />
+      {/* ══════════ FEATURED PRODUCTS ══════════ */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <SectionHeading
+          badge="Bestsellers"
+          title="Featured Collections"
+          subtitle="Our most loved pieces, handpicked for you"
+        />
+
+        {loading ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="rounded-xl bg-brand-tealDark animate-pulse">
+                <div className="h-60 bg-brand-off/10 rounded-t-xl" />
+                <div className="p-4 space-y-2">
+                  <div className="h-4 bg-brand-off/10 rounded w-3/4" />
+                  <div className="h-3 bg-brand-off/10 rounded w-1/2" />
+                  <div className="h-5 bg-brand-off/10 rounded w-1/3" />
                 </div>
               </div>
-            ))
-          ) : (
-            featuredProducts.map((product) => (
-              <motion.div key={product._id || product.id} className="h-full rounded-lg overflow-hidden shadow-sm  bg-brand-tealDark cursor-pointer" onClick={() => navigate(`/product/${product._id || product.id}`)} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }} whileHover={{ y: -8, boxShadow: '0 10px 30px rgba(0,0,0,0.35)' }}>
-                <ImageWithFallback 
-                  src={product.image} 
-                  alt={product.name} 
-                  className="h-64 w-full object-cover" 
-                />
-                <div className="p-4">
-                  <div className="font-bold mb-1">{product.name}</div>
-                  <div className="text-sm text-slate-600 mb-2">{product.description}</div>
-                  <div className="flex items-center mb-2 text-yellow-500">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <span key={i}>{i + 1 <= Math.round(product.rating || 5) ? '★' : '☆'}</span>
-                    ))}
-                    <span className="ml-2 text-xs text-slate-600">({product.rating || 5})</span>
+            ))}
+          </div>
+        ) : featuredProducts.length === 0 ? (
+          <div className="text-center py-12 rounded-xl bg-brand-tealDark/50 border border-brand-gold/10">
+            <Gem className="w-12 h-12 text-brand-gold/40 mx-auto mb-3" />
+            <p className="text-brand-off/60">Products coming soon! Stay tuned for our collection.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {featuredProducts.map((product, i) => (
+              <motion.div
+                key={product._id || product.id}
+                className="group rounded-xl overflow-hidden bg-brand-tealDark border border-brand-gold/10 hover:border-brand-gold/30 cursor-pointer transition-all"
+                onClick={() => navigate(`/product/${product._id || product.id}`)}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.06 }}
+                whileHover={{ y: -6, boxShadow: "0 16px 40px rgba(0,0,0,0.3)" }}
+              >
+                <div className="relative h-60 overflow-hidden">
+                  <ImageWithFallback
+                    src={product.image}
+                    alt={product.name}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                  {/* quick actions on hover */}
+                  <div className="absolute bottom-3 left-3 right-3 flex gap-2 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onAddToCart(product); }}
+                      className="flex-1 bg-brand-gold text-brand-tealDark text-xs font-semibold py-2 rounded-lg backdrop-blur-sm hover:bg-brand-gold/90 transition"
+                    >
+                      Add to Cart
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onToggleFavorite(product._id || product.id); }}
+                      className="w-9 h-9 flex items-center justify-center bg-brand-tealDark/80 rounded-lg backdrop-blur-sm border border-brand-off/20 hover:bg-brand-tealDark transition"
+                    >
+                      <Heart className={`w-4 h-4 ${favorites.includes(product._id || product.id) ? 'fill-red-500 text-red-500' : 'text-brand-off'}`} />
+                    </button>
                   </div>
-                  <div className="text-lg font-bold text-brand-gold">₹{product.price.toLocaleString('en-IN')}</div>
+
+                  {/* category badge */}
+                  <span className="absolute top-3 left-3 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-brand-tealDark/80 text-brand-gold border border-brand-gold/20 backdrop-blur-sm">
+                    {product.category}
+                  </span>
+                </div>
+
+                <div className="p-4">
+                  <h3 className="font-semibold text-sm mb-1 truncate">{product.name}</h3>
+                  <div className="flex items-center gap-1 mb-2">
+                    <div className="flex text-yellow-500 text-xs">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <span key={i}>{i < Math.round(product.rating || 5) ? '★' : '☆'}</span>
+                      ))}
+                    </div>
+                    <span className="text-[10px] text-brand-off/50">({product.rating || 5})</span>
+                  </div>
+                  <div className="text-brand-gold font-bold">₹{product.price?.toLocaleString('en-IN')}</div>
                 </div>
               </motion.div>
-            ))
-          )}
-        </div>
-        <div className="text-center mt-6">
-          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }} onClick={() => navigate("/products")} className="rounded-md bg-brand-gold text-brand-tealDark px-6 py-3 font-semibold">
-            View All Products
-          </motion.button>
+            ))}
+          </div>
+        )}
+
+        <div className="text-center mt-8">
+          <ShimmerButton
+            onClick={() => navigate("/products")}
+            className="bg-brand-gold text-brand-tealDark px-8 py-3 shadow-lg shadow-brand-gold/10"
+          >
+            View All Products <ChevronRight className="w-4 h-4" />
+          </ShimmerButton>
         </div>
       </section>
 
-      {/* Newsletter */}
-      <section className="py-12 bg-brand-tealDark text-brand-off">
-        <div className="max-w-3xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-2">Stay Updated</h2>
-          <p className="text-center opacity-90 mb-6">Subscribe to our newsletter for exclusive offers and new arrivals</p>
-          <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
-            <input
-              type="email"
-              placeholder="Enter your email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="flex-1 rounded-md border border-white/50  bg-brand-tealDark/10 px-3 py-2 placeholder-white/80 focus:outline-none"
+      {/* ══════════ SPOTLIGHT / NEW ARRIVALS ══════════ */}
+      {spotlightProduct && (
+        <section className="py-16 bg-gradient-to-b from-brand-teal/5 to-transparent">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <SectionHeading
+              badge="New Arrivals"
+              title="Just Landed"
+              subtitle="The latest additions to our collection"
             />
-            <motion.button type="submit" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }} className="rounded-md bg-brand-gold text-brand-tealDark font-semibold px-6 py-2">
-              Subscribe
-            </motion.button>
-          </form>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h2 className="text-3xl font-bold text-center mb-8">What Our Customers Say</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {loading ? (
-            Array.from({ length: 3 }).map((_, index) => (
-              <TestimonialSkeleton key={index} />
-            ))
-          ) : (
-            testimonials.map((t) => (
-              <motion.div key={t.name} className="p-6  bg-brand-tealDark rounded-lg shadow-sm text-center" initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }} whileHover={{ y: -6 }}>
-                <ImageWithFallback 
-                  src={t.image} 
-                  alt={t.name} 
-                  className="w-20 h-20 rounded-full object-cover mx-auto mb-3" 
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <motion.div
+                className="relative rounded-2xl overflow-hidden h-96 cursor-pointer group"
+                onClick={() => navigate(`/product/${spotlightProduct._id || spotlightProduct.id}`)}
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <ImageWithFallback
+                  src={spotlightProduct.image}
+                  alt={spotlightProduct.name}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
-                <div className="text-yellow-500 mb-2">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <span key={i}>{i + 1 <= t.rating ? '★' : '☆'}</span>
-                  ))}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute bottom-6 left-6 right-6">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-brand-gold/90 text-brand-tealDark text-xs font-bold px-3 py-1 mb-2">
+                    <Star className="w-3 h-3" /> Featured
+                  </span>
+                  <h3 className="text-2xl font-heading font-bold text-white">{spotlightProduct.name}</h3>
+                  <p className="text-white/70 text-sm mt-1">{spotlightProduct.description}</p>
                 </div>
-                <p className="italic mb-2">"{t.comment}"</p>
-                <div className="font-semibold">{t.name}</div>
+              </motion.div>
+
+              <div className="space-y-4">
+                {newArrivals.slice(0, 3).map((product, i) => (
+                  <motion.div
+                    key={product._id || product.id}
+                    className="flex items-center gap-4 p-4 rounded-xl bg-brand-tealDark border border-brand-gold/10 hover:border-brand-gold/30 cursor-pointer transition-all"
+                    onClick={() => navigate(`/product/${product._id || product.id}`)}
+                    initial={{ opacity: 0, x: 30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                    whileHover={{ x: 4 }}
+                  >
+                    <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                      <ImageWithFallback src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-sm truncate">{product.name}</h4>
+                      <p className="text-xs text-brand-off/50 truncate">{product.description}</p>
+                      <div className="text-brand-gold font-bold text-sm mt-1">₹{product.price?.toLocaleString('en-IN')}</div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-brand-off/30 flex-shrink-0" />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ══════════ TESTIMONIALS ══════════ */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <SectionHeading
+          badge="Reviews"
+          title="What Our Customers Say"
+          subtitle="Real stories from happy customers around the world"
+        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
+          {loading ? (
+            Array.from({ length: 4 }).map((_, i) => <TestimonialSkeleton key={i} />)
+          ) : (
+            testimonials.map((t, i) => (
+              <motion.div
+                key={t.name}
+                className="p-6 bg-brand-tealDark rounded-xl border border-brand-gold/10 hover:border-brand-gold/25 transition-all"
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                whileHover={{ y: -4 }}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <img src={t.avatar} alt={t.name} className="w-11 h-11 rounded-full ring-2 ring-brand-gold/20" />
+                  <div>
+                    <div className="font-semibold text-sm">{t.name}</div>
+                    <div className="flex text-yellow-500 text-xs">
+                      {Array.from({ length: t.rating }).map((_, i) => <span key={i}>★</span>)}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-sm text-brand-off/70 italic leading-relaxed">"{t.comment}"</p>
               </motion.div>
             ))
           )}
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-12 bg-brand-teal/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-2">Ready to Find Your Perfect Piece?</h2>
-          <p className="opacity-80 mb-4">Explore our collection and discover jewelry that speaks to your soul</p>
-          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }} onClick={() => navigate("/products")} className="rounded-md bg-brand-gold text-brand-tealDark px-8 py-3 font-semibold">
-              Start Shopping
-          </motion.button>
+      {/* ══════════ INSTAGRAM / SOCIAL PROOF ══════════ */}
+      <section className="py-16 bg-gradient-to-b from-brand-teal/5 to-transparent">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <SectionHeading
+            badge="Social"
+            title="Follow Us @jewelsandyou"
+            subtitle="Join our community and get inspired"
+          />
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+            {[...products.slice(0, 6), ...Array(Math.max(0, 6 - products.length)).fill(null)].slice(0, 6).map((p, i) => (
+              <motion.div
+                key={i}
+                className="aspect-square rounded-lg overflow-hidden bg-brand-tealDark border border-brand-gold/10 group cursor-pointer relative"
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.05 }}
+                whileHover={{ scale: 1.05 }}
+              >
+                {p ? (
+                  <>
+                    <ImageWithFallback src={p.image} alt={p.name || "Jewelry"} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                    <div className="absolute inset-0 bg-brand-tealDark/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <Heart className="w-6 h-6 text-white" />
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-brand-tealDark">
+                    <Gem className="w-8 h-8 text-brand-gold/20" />
+                  </div>
+                )}
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Snackbar */}
-      {snackbarOpen && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-          <div className="px-4 py-3 rounded-md shadow-lg text-white bg-emerald-600">Thank you for subscribing to our newsletter!</div>
+      {/* ══════════ NEWSLETTER ══════════ */}
+      <section className="py-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            className="relative rounded-2xl p-8 md:p-12 bg-gradient-to-br from-brand-tealDark to-brand-teal border border-brand-gold/15 overflow-hidden"
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            {/* decorative */}
+            <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-brand-gold/5 -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-brand-gold/5 translate-y-1/2 -translate-x-1/2" />
+
+            <div className="relative z-10 text-center">
+              <motion.span
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                className="inline-flex items-center gap-1.5 rounded-full bg-brand-gold/15 text-brand-gold text-xs font-semibold px-3 py-1 mb-4 border border-brand-gold/20"
+              >
+                <Sparkles className="w-3 h-3" /> Exclusive Offers
+              </motion.span>
+              <h2 className="text-3xl md:text-4xl font-heading font-bold mb-2">Stay in the Sparkle</h2>
+              <p className="text-brand-off/70 mb-6 max-w-md mx-auto">Subscribe for exclusive offers, early access to new collections, and styling tips.</p>
+              <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
+                <input
+                  type="email"
+                  placeholder="Enter your email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="flex-1 rounded-lg border border-brand-off/20 bg-brand-tealDark/50 px-4 py-3 placeholder-brand-off/40 focus:outline-none focus:border-brand-gold/50 backdrop-blur-sm transition"
+                />
+                <ShimmerButton
+                  type="submit"
+                  className="bg-brand-gold text-brand-tealDark px-6 py-3"
+                >
+                  Subscribe
+                </ShimmerButton>
+              </form>
+            </div>
+          </motion.div>
         </div>
-      )}
+      </section>
+
+      {/* ══════════ CTA ══════════ */}
+      <section className="py-16 bg-gradient-to-b from-brand-teal/5 to-transparent">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-3xl md:text-4xl font-heading font-bold mb-3">Ready to Find Your Perfect Piece?</h2>
+            <p className="text-brand-off/70 mb-6 max-w-xl mx-auto">Explore our collection and discover jewelry that speaks to your soul</p>
+            <ShimmerButton
+              onClick={() => navigate("/products")}
+              className="bg-brand-gold text-brand-tealDark px-10 py-4 text-lg shadow-xl shadow-brand-gold/15"
+            >
+              Start Shopping <ArrowRight className="w-5 h-5" />
+            </ShimmerButton>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ══════════ SNACKBAR ══════════ */}
+      <AnimatePresence>
+        {snackbarOpen && (
+          <motion.div
+            initial={{ y: 40, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 40, opacity: 0 }}
+            className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-50"
+          >
+            <div className="px-5 py-3 rounded-xl shadow-2xl text-white bg-emerald-600 flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              Thank you for subscribing to our newsletter!
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

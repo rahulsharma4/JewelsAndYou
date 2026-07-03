@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ImageWithFallback } from '../utils/imageUtils';
+import { Heart, ShoppingBag, Eye } from 'lucide-react';
 
 const ProductCard = ({ product, onAddToCart, onToggleFavorite, isFavorite = false }) => {
   const navigate = useNavigate();
@@ -27,71 +28,75 @@ const ProductCard = ({ product, onAddToCart, onToggleFavorite, isFavorite = fals
   return (
     <div
       onClick={handleCardClick}
-      className="h-full flex flex-col rounded-lg overflow-hidden shadow-sm  bg-brand-tealDark cursor-pointer transition-transform duration-300 hover:-translate-y-2 hover:shadow-xl"
+      className="group h-full flex flex-col rounded-xl overflow-hidden bg-brand-tealDark border border-brand-gold/10 hover:border-brand-gold/30 cursor-pointer transition-all duration-300"
     >
-      <div className="relative h-72">
+      {/* Image Container */}
+      <div className="relative h-64 overflow-hidden">
         <ImageWithFallback
           src={product.image}
           alt={product.name}
-          className="absolute inset-0 h-full w-full object-cover"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
+
+        {/* Gradient overlay on hover */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
         {/* Favorite button */}
         <button
           onClick={handleToggleFavorite}
-          className="absolute top-2 right-2 z-10 inline-flex items-center justify-center rounded-full p-2  bg-brand-tealDark/90 hover: bg-brand-tealDark"
+          className="absolute top-3 right-3 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-brand-tealDark/80 backdrop-blur-sm border border-brand-off/10 hover:bg-brand-tealDark transition group/fav"
           aria-label="Toggle favorite"
         >
-          {isFavorite ? (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#e91e63" className="w-5 h-5">
-              <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.227 3 12.973 3 10.5 3 7.462 5.462 5 8.5 5a5.49 5.49 0 0 1 3.5 1.236A5.49 5.49 0 0 1 15.5 5C18.538 5 21 7.462 21 10.5c0 2.473-1.688 4.727-3.989 7.007a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.218l-.022.012-.007.003a.75.75 0 0 1-.666 0z" />
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-              <path fillRule="evenodd" d="M11.53 3.293a6.75 6.75 0 0 1 9.548 9.548l-7.075 7.076a2.25 2.25 0 0 1-3.183 0L3.745 12.84a6.75 6.75 0 1 1 9.548-9.548 6.704 6.704 0 0 1 2.344 1.79 6.705 6.705 0 0 1-4.108-1.79Z" clipRule="evenodd" />
-            </svg>
-          )}
+          <Heart
+            className={`w-4 h-4 transition-all ${
+              isFavorite
+                ? 'fill-red-500 text-red-500 scale-110'
+                : 'text-brand-off/70 group-hover/fav:text-red-400'
+            }`}
+          />
         </button>
 
         {/* Category badge */}
-        <span className="absolute top-2 left-2 z-10 inline-flex items-center rounded-md bg-yellow-300/90 text-slate-900 text-xs font-semibold px-2 py-1">
+        <span className="absolute top-3 left-3 z-10 text-[10px] font-semibold px-2.5 py-1 rounded-md bg-brand-tealDark/80 text-brand-gold border border-brand-gold/20 backdrop-blur-sm">
           {product.category}
         </span>
-      </div>
 
-      <div className="flex-1 p-4">
-        <h3 className="text-base font-bold mb-1 line-clamp-1">{product.name}</h3>
-        <p className="text-sm text-slate-600 mb-2 min-h-[40px] line-clamp-2">{product.description}</p>
-        <div className="flex items-center mb-2">
-          <div className="flex items-center">
-            {/* rating as stars */}
-            <div className="text-yellow-500 mr-1">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <span key={i}>{i + 1 <= Math.round(product.rating) ? '★' : '☆'}</span>
-              ))}
-            </div>
-            <span className="text-xs text-slate-600">({product.rating})</span>
-          </div>
-        </div>
-        <div className="text-lg font-bold text-brand-gold mb-2">
-          ₹{product.price.toLocaleString('en-IN')}
-        </div>
-      </div>
-
-      <div className="px-4 pb-4">
-        <div className="flex items-center justify-between">
-          <button
-            onClick={handleViewDetails}
-            className="inline-flex items-center justify-center rounded-md px-3 py-2 text-sm bg-brand-gold/15 text-brand-gold hover:bg-brand-gold/25"
-          >
-            View
-          </button>
+        {/* Hover action buttons */}
+        <div className="absolute bottom-3 left-3 right-3 flex gap-2 opacity-0 translate-y-3 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
           <button
             onClick={handleAddToCart}
-            className="inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-semibold bg-brand-gold text-brand-tealDark"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 bg-brand-gold text-brand-tealDark text-xs font-semibold py-2.5 rounded-lg hover:bg-brand-gold/90 transition"
           >
-            Add to Cart
+            <ShoppingBag className="w-3.5 h-3.5" /> Add to Cart
           </button>
+          <button
+            onClick={handleViewDetails}
+            className="w-10 h-10 flex items-center justify-center bg-brand-tealDark/80 backdrop-blur-sm rounded-lg border border-brand-off/20 hover:bg-brand-tealDark transition"
+            title="Quick View"
+          >
+            <Eye className="w-4 h-4 text-brand-off" />
+          </button>
+        </div>
+      </div>
+
+      {/* Product Info */}
+      <div className="flex-1 p-4 flex flex-col">
+        <h3 className="font-semibold text-sm mb-1 truncate">{product.name}</h3>
+        <p className="text-xs text-brand-off/50 mb-2 line-clamp-2 flex-1">{product.description}</p>
+
+        {/* Rating */}
+        <div className="flex items-center gap-1.5 mb-2">
+          <div className="flex text-yellow-500 text-xs">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <span key={i}>{i < Math.round(product.rating || 0) ? '★' : '☆'}</span>
+            ))}
+          </div>
+          <span className="text-[10px] text-brand-off/40">({product.rating || 0})</span>
+        </div>
+
+        {/* Price */}
+        <div className="text-brand-gold font-bold text-base">
+          ₹{product.price?.toLocaleString('en-IN')}
         </div>
       </div>
     </div>

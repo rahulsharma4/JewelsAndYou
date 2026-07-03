@@ -1,490 +1,522 @@
 import React, { useState, useMemo } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { ImageWithFallback } from "../utils/imageUtils";
-import LoadingSpinner, { ProductCardSkeleton, ProductListSkeleton } from "../components/LoadingSpinner";
-import { Gem, SlidersHorizontal, DollarSign, Layers, Star as StarIcon, Tag, LayoutGrid, List as ListIcon, ArrowUpDown } from "lucide-react";
-import { motion } from "framer-motion";
+import { ProductCardSkeleton, ProductListSkeleton } from "../components/LoadingSpinner";
+import {
+  Gem, SlidersHorizontal, Layers, Star as StarIcon, Tag,
+  LayoutGrid, List as ListIcon, ArrowUpDown, X, ChevronDown,
+  Search, Heart
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loading = false }) => {
-  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
-  const [viewMode, setViewMode] = useState("grid"); // 'grid' | 'list'
-
-  const ThemedSelect = ({ value, onChange, options, minWidth = 'min-w-[140px]' }) => {
-    const [open, setOpen] = useState(false);
-    const selected = options.find((o) => o.value === value);
-    return (
-      <div
-        className={`relative ${minWidth}`}
-        tabIndex={-1}
-        onBlur={(e) => {
-          if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false);
-        }}
+/* ─── Pill Select for Sort ─── */
+const SortSelect = ({ value, onChange, options }) => {
+  const [open, setOpen] = useState(false);
+  const selected = options.find(o => o.value === value);
+  return (
+    <div className="relative" onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false); }} tabIndex={-1}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="inline-flex items-center gap-2 rounded-lg border border-brand-off/20 bg-brand-tealDark px-3 py-2 text-sm text-brand-off/90 hover:border-brand-gold/30 transition"
       >
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          className="inline-flex w-full items-center justify-between rounded-md border border-brand-off/30 bg-transparent px-3 py-2 text-sm text-brand-off/90 hover:bg-brand-teal/20"
-        >
-          <span>{selected?.label}</span>
-          <svg className="w-4 h-4 text-brand-off/70" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-          </svg>
-        </button>
+        <ArrowUpDown className="w-3.5 h-3.5 text-brand-gold" />
+        <span>{selected?.label}</span>
+        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      <AnimatePresence>
         {open && (
-          <div className="absolute z-30 mt-1 w-full overflow-hidden rounded-md border border-brand-off/30 bg-brand-tealDark shadow-lg">
-            {options.map((opt) => (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            className="absolute right-0 z-30 mt-1 min-w-[180px] overflow-hidden rounded-xl border border-brand-off/20 bg-brand-tealDark shadow-xl"
+          >
+            {options.map(opt => (
               <button
                 key={opt.value}
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => {
-                  onChange(opt.value);
-                  setOpen(false);
-                }}
-                className={`block w-full px-3 py-2 text-left text-sm ${
-                  opt.value === value ? 'bg-brand-teal/40 text-brand-off' : 'text-brand-off/90 hover:bg-brand-teal/30'
+                onMouseDown={e => e.preventDefault()}
+                onClick={() => { onChange(opt.value); setOpen(false); }}
+                className={`block w-full px-4 py-2.5 text-left text-sm transition ${
+                  opt.value === value
+                    ? 'bg-brand-gold/15 text-brand-gold font-medium'
+                    : 'text-brand-off/80 hover:bg-brand-teal/20'
                 }`}
               >
                 {opt.label}
               </button>
             ))}
-          </div>
+          </motion.div>
         )}
-      </div>
-    );
-  };
+      </AnimatePresence>
+    </div>
+  );
+};
+
+const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loading = false }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [viewMode, setViewMode] = useState("grid");
 
   // Filter states
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const initialCategory = location.state?.selectedCategory || "All";
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [searchQuery, setSearchQuery] = useState("");
-  const [priceRange, setPriceRange] = useState([0, 2000]);
-  const [sortBy, setSortBy] = useState("name");
-  const [sortOrder, setSortOrder] = useState("asc");
+  const [priceRange, setPriceRange] = useState([0, 500000]);
+  const [sortBy, setSortBy] = useState("newest");
   const [selectedMaterials, setSelectedMaterials] = useState([]);
   const [selectedRatings, setSelectedRatings] = useState([]);
-  const [showOnSale, setShowOnSale] = useState(false);
 
   const categories = ["All", "Rings", "Necklaces", "Earrings", "Bracelets", "Pendants", "Watches"];
   const materials = ["Gold", "Silver", "Platinum", "Diamond", "Pearl", "Sapphire", "Emerald", "Ruby"];
-  const ratings = [5, 4, 3, 2, 1];
+
+  const maxPrice = useMemo(() => {
+    if (products.length === 0) return 500000;
+    return Math.max(...products.map(p => p.price), 500000);
+  }, [products]);
 
   const filteredAndSortedProducts = useMemo(() => {
-    let filtered = products;
+    let filtered = [...products];
 
     if (selectedCategory !== "All") {
-      filtered = filtered.filter((product) => product.category === selectedCategory);
+      filtered = filtered.filter(p => p.category === selectedCategory);
     }
-
     if (searchQuery) {
-      filtered = filtered.filter(
-        (product) =>
-          product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          product.description.toLowerCase().includes(searchQuery.toLowerCase())
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        (p.description && p.description.toLowerCase().includes(q))
       );
     }
-
-    filtered = filtered.filter((product) => product.price >= priceRange[0] && product.price <= priceRange[1]);
+    filtered = filtered.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
 
     if (selectedMaterials.length > 0) {
-      filtered = filtered.filter((product) =>
-        selectedMaterials.some(
-          (material) =>
-            product.description.toLowerCase().includes(material.toLowerCase()) ||
-            product.name.toLowerCase().includes(material.toLowerCase())
+      filtered = filtered.filter(p =>
+        selectedMaterials.some(m =>
+          (p.description && p.description.toLowerCase().includes(m.toLowerCase())) ||
+          p.name.toLowerCase().includes(m.toLowerCase())
         )
       );
     }
-
     if (selectedRatings.length > 0) {
-      filtered = filtered.filter((product) => selectedRatings.some((rating) => product.rating >= rating));
+      filtered = filtered.filter(p => selectedRatings.some(r => (p.rating || 0) >= r));
     }
 
-    if (showOnSale) {
-      filtered = filtered.filter((product) => product.id % 3 === 0);
+    // Sort
+    switch (sortBy) {
+      case "price-low": filtered.sort((a, b) => a.price - b.price); break;
+      case "price-high": filtered.sort((a, b) => b.price - a.price); break;
+      case "rating": filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0)); break;
+      case "name": filtered.sort((a, b) => a.name.localeCompare(b.name)); break;
+      case "newest":
+      default: filtered.reverse(); break;
     }
-
-    filtered.sort((a, b) => {
-      let aValue, bValue;
-      switch (sortBy) {
-        case "price":
-          aValue = a.price;
-          bValue = b.price;
-          break;
-        case "rating":
-          aValue = a.rating;
-          bValue = b.rating;
-          break;
-        case "name":
-        default:
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
-          break;
-      }
-      if (sortOrder === "asc") return aValue > bValue ? 1 : -1;
-        return aValue < bValue ? 1 : -1;
-    });
-
     return filtered;
-  }, [products, selectedCategory, searchQuery, priceRange, sortBy, sortOrder, selectedMaterials, selectedRatings, showOnSale]);
+  }, [products, selectedCategory, searchQuery, priceRange, sortBy, selectedMaterials, selectedRatings]);
 
   const handleClearFilters = () => {
     setSelectedCategory("All");
     setSearchQuery("");
-    setPriceRange([0, 2000]);
-    setSortBy("name");
-    setSortOrder("asc");
+    setPriceRange([0, maxPrice]);
+    setSortBy("newest");
     setSelectedMaterials([]);
     setSelectedRatings([]);
-    setShowOnSale(false);
   };
 
-  const handleMaterialChange = (material) => {
-    setSelectedMaterials((prev) => (prev.includes(material) ? prev.filter((m) => m !== material) : [...prev, material]));
-  };
+  const activeFilterCount = [
+    selectedCategory !== "All",
+    searchQuery,
+    selectedMaterials.length > 0,
+    selectedRatings.length > 0,
+    priceRange[0] > 0 || priceRange[1] < maxPrice,
+  ].filter(Boolean).length;
 
-  const handleRatingChange = (rating) => {
-    setSelectedRatings((prev) => (prev.includes(rating) ? prev.filter((r) => r !== rating) : [...prev, rating]));
-  };
+  const handleMaterialToggle = (m) => setSelectedMaterials(prev => prev.includes(m) ? prev.filter(x => x !== m) : [...prev, m]);
+  const handleRatingToggle = (r) => setSelectedRatings(prev => prev.includes(r) ? prev.filter(x => x !== r) : [...prev, r]);
 
-  const FilterSection = () => (
-    <div className="p-4 bg-brand-tealDark rounded-lg shadow-sm border border-brand-gold/20">
-      <div className="flex items-center justify-between mb-3">
-        <div className="text-lg font-bold flex items-center gap-2">
+  /* ─── Filter Sidebar Content ─── */
+  const FilterContent = ({ onClose }) => (
+    <div className="space-y-5">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 font-bold text-lg">
           <SlidersHorizontal className="w-5 h-5 text-brand-gold" />
-          <span>Filters</span>
+          Filters
         </div>
-        <button className="text-xs rounded-full border border-brand-off/30 px-2 py-1 hover:bg-brand-teal/20" onClick={handleClearFilters}>
-          Clear All
-        </button>
+        <div className="flex items-center gap-2">
+          {activeFilterCount > 0 && (
+            <button onClick={handleClearFilters} className="text-xs text-brand-gold hover:underline">
+              Clear All
+            </button>
+          )}
+          {onClose && (
+            <button onClick={onClose} className="p-1 rounded-lg hover:bg-brand-teal/20 md:hidden">
+              <X className="w-5 h-5" />
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="h-px bg-brand-off/20 mb-4" />
+      <div className="h-px bg-brand-off/10" />
 
       {/* Category */}
-      <details open className="mb-3">
-        <summary className="cursor-pointer text-sm font-semibold flex items-center gap-2 text-brand-off">
-          <Layers className="w-4 h-4 text-brand-gold" />
-            Category
-        </summary>
-        <div className="mt-2 flex flex-col gap-1">
-            {categories.map((category) => (
-            <label key={category} className="inline-flex items-center gap-2 text-sm text-brand-off/90">
-              <input
-                type="checkbox"
-                    checked={selectedCategory === category}
-                    onChange={() => setSelectedCategory(category)}
-                className="rounded border-brand-off/30 accent-brand-gold"
-              />
-              {category}
-            </label>
+      <div>
+        <div className="flex items-center gap-2 text-sm font-semibold mb-3">
+          <Layers className="w-4 h-4 text-brand-gold" /> Category
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                selectedCategory === cat
+                  ? 'bg-brand-gold text-brand-tealDark border-brand-gold shadow-sm'
+                  : 'border-brand-off/15 text-brand-off/70 hover:border-brand-gold/30 hover:text-brand-off'
+              }`}
+            >
+              {cat}
+            </button>
           ))}
         </div>
-      </details>
+      </div>
 
       {/* Price Range */}
-      <details open className="mb-3">
-        <summary className="cursor-pointer text-sm font-semibold flex items-center gap-2 text-brand-off">
-          <DollarSign className="w-4 h-4 text-brand-gold" />
-            Price Range
-        </summary>
-        <div className="mt-2">
+      <div>
+        <div className="flex items-center gap-2 text-sm font-semibold mb-3">
+          <Tag className="w-4 h-4 text-brand-gold" /> Price Range
+        </div>
+        <div className="space-y-3">
+          <input
+            type="range"
+            min={0}
+            max={maxPrice}
+            step={500}
+            value={priceRange[1]}
+            onChange={e => setPriceRange([priceRange[0], parseInt(e.target.value)])}
+            className="w-full accent-brand-gold h-1.5 rounded-full appearance-none bg-brand-off/10 cursor-pointer"
+          />
           <div className="flex items-center gap-2">
-            <input
-              type="range"
-              min="0"
-              max="2000"
-              step="50"
-              value={priceRange[0]}
-              onChange={(e) => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
-              className="w-full accent-brand-gold"
-            />
-            <input
-              type="range"
-              min="0"
-              max="2000"
-              step="50"
-              value={priceRange[1]}
-              onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 2000])}
-              className="w-full accent-brand-gold"
-            />
-          </div>
-          <div className="flex items-center gap-2 mt-2">
-            <input
-              type="number"
-              className="w-1/2 rounded border border-brand-off/30 bg-transparent px-2 py-1 text-sm text-brand-off"
+            <div className="flex-1 relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-off/40 text-xs">₹</span>
+              <input
+                type="number"
                 value={priceRange[0]}
-              onChange={(e) => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
-            />
-            <input
-              type="number"
-              className="w-1/2 rounded border border-brand-off/30 bg-transparent px-2 py-1 text-sm text-brand-off"
+                onChange={e => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
+                className="w-full rounded-lg border border-brand-off/15 bg-transparent pl-6 pr-2 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                placeholder="Min"
+              />
+            </div>
+            <span className="text-brand-off/30">—</span>
+            <div className="flex-1 relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-off/40 text-xs">₹</span>
+              <input
+                type="number"
                 value={priceRange[1]}
-              onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 2000])}
-            />
+                onChange={e => setPriceRange([priceRange[0], parseInt(e.target.value) || maxPrice])}
+                className="w-full rounded-lg border border-brand-off/15 bg-transparent pl-6 pr-2 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                placeholder="Max"
+              />
+            </div>
           </div>
         </div>
-      </details>
+      </div>
 
       {/* Material */}
-      <details open className="mb-3">
-        <summary className="cursor-pointer text-sm font-semibold flex items-center gap-2 text-brand-off">
-          <Tag className="w-4 h-4 text-brand-gold" />
-            Material
-        </summary>
-        <div className="mt-2 flex flex-col gap-1">
-            {materials.map((material) => (
-            <label key={material} className="inline-flex items-center gap-2 text-sm text-brand-off/90">
-              <input
-                type="checkbox"
-                    checked={selectedMaterials.includes(material)}
-                    onChange={() => handleMaterialChange(material)}
-                className="rounded border-brand-off/30 accent-brand-gold"
-              />
-              {material}
-            </label>
+      <div>
+        <div className="flex items-center gap-2 text-sm font-semibold mb-3">
+          <Gem className="w-4 h-4 text-brand-gold" /> Material
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {materials.map(m => (
+            <button
+              key={m}
+              onClick={() => handleMaterialToggle(m)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                selectedMaterials.includes(m)
+                  ? 'bg-brand-gold/15 text-brand-gold border-brand-gold/30'
+                  : 'border-brand-off/15 text-brand-off/60 hover:border-brand-gold/20'
+              }`}
+            >
+              {m}
+            </button>
           ))}
         </div>
-      </details>
+      </div>
 
       {/* Rating */}
-      <details open className="mb-3">
-        <summary className="cursor-pointer text-sm font-semibold flex items-center gap-2 text-brand-off">
-          <StarIcon className="w-4 h-4 text-brand-gold" />
-            Rating
-        </summary>
-        <div className="mt-2 flex flex-col gap-1">
-            {ratings.map((rating) => (
-            <label key={rating} className="inline-flex items-center gap-2 text-sm text-brand-off/90">
-              <input
-                type="checkbox"
-                    checked={selectedRatings.includes(rating)}
-                    onChange={() => handleRatingChange(rating)}
-                className="rounded border-brand-off/30 accent-brand-gold"
-              />
-              <span className="text-brand-gold">
+      <div>
+        <div className="flex items-center gap-2 text-sm font-semibold mb-3">
+          <StarIcon className="w-4 h-4 text-brand-gold" /> Rating
+        </div>
+        <div className="space-y-1.5">
+          {[5, 4, 3, 2, 1].map(r => (
+            <button
+              key={r}
+              onClick={() => handleRatingToggle(r)}
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                selectedRatings.includes(r)
+                  ? 'bg-brand-gold/10 border border-brand-gold/20'
+                  : 'hover:bg-brand-teal/10 border border-transparent'
+              }`}
+            >
+              <span className="flex text-yellow-500 text-xs">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <span key={i}>{i + 1 <= rating ? '★' : '☆'}</span>
+                  <span key={i}>{i < r ? '★' : '☆'}</span>
                 ))}
               </span>
-              <span className="text-xs text-brand-off/70">&nbsp;& up</span>
-            </label>
+              <span className="text-xs text-brand-off/50">& up</span>
+            </button>
           ))}
         </div>
-      </details>
-
-      {/* On Sale */}
-      <details open>
-        <summary className="cursor-pointer text-sm font-semibold flex items-center gap-2 text-brand-off">
-          <Tag className="w-4 h-4 text-brand-gold" />
-            Special Offers
-        </summary>
-        <label className="mt-2 inline-flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-                checked={showOnSale}
-                onChange={(e) => setShowOnSale(e.target.checked)}
-            className="rounded border-brand-off/30 accent-brand-gold"
-          />
-          On Sale
-        </label>
-      </details>
+      </div>
     </div>
   );
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      {/* Header */}
+      {/* ── Page Header ── */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Our Collection</h1>
-        <p className="text-brand-off/80">Discover our exquisite jewelry collection featuring timeless designs and premium materials</p>
-
-        {/* Search and sort */}
-        <div className="mt-4 flex flex-wrap gap-3 items-center">
-          <div className="flex-1 min-w-[200px]">
-            <div className="relative">
-              <input
-            placeholder="Search products..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-md border border-brand-off/30 bg-transparent px-3 py-2 pr-9 text-sm placeholder-brand-off/60"
-              />
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-brand-off/60">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path fillRule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 4.243 11.957l3.775 3.775a.75.75 0 1 0 1.06-1.06l-3.775-3.775A6.75 6.75 0 0 0 10.5 3.75Zm-5.25 6.75a5.25 5.25 0 1 1 10.5 0 5.25 5.25 0 0 1-10.5 0Z" clipRule="evenodd" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-          <ThemedSelect
-            value={sortBy}
-            onChange={(v) => setSortBy(v)}
-            options={[
-              { value: 'name', label: 'Name' },
-              { value: 'price', label: 'Price' },
-              { value: 'rating', label: 'Rating' },
-            ]}
-          />
-          <ThemedSelect
-            value={sortOrder}
-            onChange={(v) => setSortOrder(v)}
-            options={[
-              { value: 'asc', label: 'Ascending' },
-              { value: 'desc', label: 'Descending' },
-            ]}
-            minWidth="min-w-[160px]"
-          />
-          <span className="inline-flex items-center text-brand-off/70"><ArrowUpDown className="w-4 h-4" /></span>
-          </div>
-
-          <div className="ml-auto flex items-center gap-2">
-            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className={`inline-flex items-center gap-1 rounded-md border px-3 py-2 text-sm ${viewMode === 'grid' ? 'border-brand-gold text-brand-gold' : 'border-brand-off/30'}`}
-              onClick={() => setViewMode('grid')}
-              title="Grid view"
-            >
-              <LayoutGrid className="w-4 h-4" /> Grid
-            </motion.button>
-            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className={`inline-flex items-center gap-1 rounded-md border px-3 py-2 text-sm ${viewMode === 'list' ? 'border-brand-gold text-brand-gold' : 'border-brand-off/30'}`}
-              onClick={() => setViewMode('list')}
-              title="List view"
-            >
-              <ListIcon className="w-4 h-4" /> List
-            </motion.button>
-          </div>
-
-          <button
-            className="md:hidden inline-flex items-center gap-2 rounded-md border border-brand-off/30 px-3 py-2 text-sm"
-              onClick={() => setMobileFilterOpen(true)}
-            >
-              Filters
-          </button>
+        <div className="flex items-center gap-2 text-xs text-brand-off/50 mb-3">
+          <button onClick={() => navigate("/")} className="hover:text-brand-gold transition">Home</button>
+          <span>/</span>
+          <span className="text-brand-off/80">Products</span>
         </div>
 
-        {/* Active Filters */}
-        {(selectedCategory !== "All" || searchQuery || selectedMaterials.length > 0 || selectedRatings.length > 0 || showOnSale) && (
-          <div className="mt-3 flex flex-wrap gap-2">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-heading font-bold mb-1">Our Collection</h1>
+            <p className="text-brand-off/60 text-sm">
+              {loading ? 'Loading...' : `Showing ${filteredAndSortedProducts.length} of ${products.length} products`}
+            </p>
+          </div>
+
+          {/* Search + Sort + View */}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Search */}
+            <div className="relative flex-1 min-w-[180px] md:min-w-[220px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-off/40" />
+              <input
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full rounded-lg border border-brand-off/15 bg-brand-tealDark pl-9 pr-3 py-2 text-sm placeholder-brand-off/40 focus:outline-none focus:border-brand-gold/40 transition"
+              />
+            </div>
+
+            {/* Sort */}
+            <SortSelect
+              value={sortBy}
+              onChange={v => setSortBy(v)}
+              options={[
+                { value: 'newest', label: 'Newest' },
+                { value: 'price-low', label: 'Price: Low → High' },
+                { value: 'price-high', label: 'Price: High → Low' },
+                { value: 'rating', label: 'Top Rated' },
+                { value: 'name', label: 'Name A-Z' },
+              ]}
+            />
+
+            {/* View mode */}
+            <div className="hidden md:flex items-center rounded-lg border border-brand-off/15 overflow-hidden">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 transition ${viewMode === 'grid' ? 'bg-brand-gold/15 text-brand-gold' : 'text-brand-off/50 hover:text-brand-off'}`}
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 transition ${viewMode === 'list' ? 'bg-brand-gold/15 text-brand-gold' : 'text-brand-off/50 hover:text-brand-off'}`}
+              >
+                <ListIcon className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Mobile filter toggle */}
+            <button
+              onClick={() => setMobileFilterOpen(true)}
+              className="md:hidden inline-flex items-center gap-2 rounded-lg border border-brand-off/15 bg-brand-tealDark px-3 py-2 text-sm transition hover:border-brand-gold/30"
+            >
+              <SlidersHorizontal className="w-4 h-4 text-brand-gold" />
+              Filters
+              {activeFilterCount > 0 && (
+                <span className="w-5 h-5 rounded-full bg-brand-gold text-brand-tealDark text-[10px] font-bold flex items-center justify-center">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Active Filter Tags */}
+        {activeFilterCount > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-4 flex flex-wrap gap-2"
+          >
             {selectedCategory !== "All" && (
-              <button className="inline-flex items-center gap-1 rounded-full bg-brand-gold/15 text-brand-gold px-3 py-1 text-xs" onClick={() => setSelectedCategory("All")}>
-                Category: {selectedCategory}
-                <span className="ml-1">×</span>
+              <button onClick={() => setSelectedCategory("All")} className="inline-flex items-center gap-1 rounded-full bg-brand-gold/10 text-brand-gold px-3 py-1 text-xs border border-brand-gold/20 hover:bg-brand-gold/20 transition">
+                {selectedCategory} <X className="w-3 h-3" />
               </button>
             )}
             {searchQuery && (
-              <button className="inline-flex items-center gap-1 rounded-full bg-brand-gold/15 text-brand-gold px-3 py-1 text-xs" onClick={() => setSearchQuery("")}>
-                Search: {searchQuery}
-                <span className="ml-1">×</span>
+              <button onClick={() => setSearchQuery("")} className="inline-flex items-center gap-1 rounded-full bg-brand-gold/10 text-brand-gold px-3 py-1 text-xs border border-brand-gold/20 hover:bg-brand-gold/20 transition">
+                "{searchQuery}" <X className="w-3 h-3" />
               </button>
             )}
-            {selectedMaterials.map((material) => (
-              <button key={material} className="inline-flex items-center gap-1 rounded-full bg-brand-gold/15 text-brand-gold px-3 py-1 text-xs" onClick={() => handleMaterialChange(material)}>
-                Material: {material}
-                <span className="ml-1">×</span>
+            {selectedMaterials.map(m => (
+              <button key={m} onClick={() => handleMaterialToggle(m)} className="inline-flex items-center gap-1 rounded-full bg-brand-gold/10 text-brand-gold px-3 py-1 text-xs border border-brand-gold/20 hover:bg-brand-gold/20 transition">
+                {m} <X className="w-3 h-3" />
               </button>
             ))}
-            {selectedRatings.map((rating) => (
-              <button key={rating} className="inline-flex items-center gap-1 rounded-full bg-brand-gold/15 text-brand-gold px-3 py-1 text-xs" onClick={() => handleRatingChange(rating)}>
-                Rating: {rating}+
-                <span className="ml-1">×</span>
+            {selectedRatings.map(r => (
+              <button key={r} onClick={() => handleRatingToggle(r)} className="inline-flex items-center gap-1 rounded-full bg-brand-gold/10 text-brand-gold px-3 py-1 text-xs border border-brand-gold/20 hover:bg-brand-gold/20 transition">
+                {r}★ & up <X className="w-3 h-3" />
               </button>
             ))}
-            {showOnSale && (
-              <button className="inline-flex items-center gap-1 rounded-full bg-brand-gold/15 text-brand-gold px-3 py-1 text-xs" onClick={() => setShowOnSale(false)}>
-                On Sale
-                <span className="ml-1">×</span>
-              </button>
-            )}
-          </div>
+            <button onClick={handleClearFilters} className="inline-flex items-center gap-1 rounded-full text-brand-off/50 px-3 py-1 text-xs border border-brand-off/10 hover:border-brand-off/30 transition">
+              Clear All <X className="w-3 h-3" />
+            </button>
+          </motion.div>
         )}
       </div>
 
+      {/* ── Main Grid ── */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-        {/* Sidebar */}
+        {/* Desktop Sidebar */}
         <div className="hidden md:block md:col-span-3">
-          <div className="sticky top-20">
-            <FilterSection />
+          <div className="sticky top-20 rounded-xl bg-brand-tealDark p-5 border border-brand-gold/10">
+            <FilterContent />
           </div>
         </div>
 
         {/* Products */}
         <div className="md:col-span-9">
           {loading ? (
-            <div className="space-y-4">
-              <div className="text-sm text-brand-off/80 mb-2">
-                <LoadingSpinner size="sm" text="Loading products..." />
-              </div>
-              <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-3"}>
-                {Array.from({ length: 6 }).map((_, index) => (
-                  viewMode === 'grid' ? (
-                    <ProductCardSkeleton key={index} />
-                  ) : (
-                    <ProductListSkeleton key={index} />
-                  )
-                ))}
-              </div>
+            <div className={viewMode === 'grid' ? "grid grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-3"}>
+              {Array.from({ length: 6 }).map((_, i) =>
+                viewMode === 'grid' ? <ProductCardSkeleton key={i} /> : <ProductListSkeleton key={i} />
+              )}
             </div>
           ) : filteredAndSortedProducts.length === 0 ? (
-            <div className="p-6 text-center bg-brand-tealDark/90 backdrop-blur rounded-lg shadow-sm border border-brand-gold/20">
-              <div className="flex justify-center mb-2"><Gem className="w-12 h-12 text-brand-gold" /></div>
-              <div className="font-semibold mb-1">No products found</div>
-              <div className="text-sm text-brand-off/80 mb-3">Try adjusting your filters or search terms</div>
-              <button className="inline-flex items-center rounded-md border border-brand-off/30 px-3 py-2 text-sm" onClick={handleClearFilters}>
-                Clear All Filters
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="py-16 text-center rounded-2xl bg-brand-tealDark/50 border border-brand-gold/10"
+            >
+              <Gem className="w-16 h-16 text-brand-gold/30 mx-auto mb-4" />
+              <h3 className="text-xl font-bold mb-2">No Products Found</h3>
+              <p className="text-brand-off/50 text-sm mb-4 max-w-sm mx-auto">
+                We couldn't find any products matching your filters. Try adjusting your search or clearing the filters.
+              </p>
+              <button
+                onClick={handleClearFilters}
+                className="inline-flex items-center gap-2 rounded-lg bg-brand-gold text-brand-tealDark px-5 py-2.5 font-semibold text-sm hover:bg-brand-gold/90 transition"
+              >
+                <X className="w-4 h-4" /> Clear All Filters
               </button>
-            </div>
+            </motion.div>
           ) : (
-            <>
-              <div className="text-sm text-brand-off/80 mb-2">
-                Showing {filteredAndSortedProducts.length} of {products.length} products
-              </div>
-              <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-3"}>
-                {filteredAndSortedProducts.map((product) => (
-                  viewMode === 'grid' ? (
-                    <motion.div key={product._id || product.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }} whileHover={{ y: -8, boxShadow: '0 10px 30px rgba(0,0,0,0.35)' }}>
-                      <ProductCard
-                        product={product}
-                        onAddToCart={onAddToCart}
-                        onToggleFavorite={onToggleFavorite}
-                        isFavorite={favorites.includes(product._id || product.id)}
-                      />
-                    </motion.div>
-                  ) : (
-                    <motion.div key={product._id || product.id} className="flex items-center gap-4 p-4 bg-brand-tealDark rounded-lg shadow-sm border border-brand-gold/20" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }} whileHover={{ y: -6 }}>
-                      <ImageWithFallback src={product.image} alt={product.name} className="w-28 h-28 object-cover rounded" />
-                      <div className="flex-1">
-                        <div className="font-semibold mb-1">{product.name}</div>
-                        <div className="text-sm text-brand-off/80 mb-2 line-clamp-2">{product.description}</div>
-                        <div className="flex items-center gap-3">
-                          <div className="text-brand-gold font-bold">₹{product.price.toLocaleString('en-IN')}</div>
-                          <div className="text-brand-off/70 text-sm">Rating: {product.rating}</div>
-                        </div>
+            <div className={viewMode === 'grid' ? "grid grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-3"}>
+              {filteredAndSortedProducts.map((product, i) =>
+                viewMode === 'grid' ? (
+                  <motion.div
+                    key={product._id || product.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: Math.min(i * 0.04, 0.3) }}
+                    whileHover={{ y: -6, boxShadow: '0 12px 32px rgba(0,0,0,0.3)' }}
+                  >
+                    <ProductCard
+                      product={product}
+                      onAddToCart={onAddToCart}
+                      onToggleFavorite={onToggleFavorite}
+                      isFavorite={favorites.includes(product._id || product.id)}
+                    />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key={product._id || product.id}
+                    className="flex items-center gap-4 p-4 rounded-xl bg-brand-tealDark border border-brand-gold/10 hover:border-brand-gold/30 transition-all cursor-pointer"
+                    onClick={() => navigate(`/product/${product._id || product.id}`)}
+                    initial={{ opacity: 0, y: 12 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: Math.min(i * 0.04, 0.3) }}
+                    whileHover={{ x: 4 }}
+                  >
+                    <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+                      <ImageWithFallback src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold mb-1 truncate">{product.name}</div>
+                      <div className="text-sm text-brand-off/60 mb-1 line-clamp-1">{product.description}</div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-brand-gold font-bold">₹{product.price?.toLocaleString('en-IN')}</span>
+                        <span className="flex text-yellow-500 text-xs">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <span key={i}>{i < Math.round(product.rating || 0) ? '★' : '☆'}</span>
+                          ))}
+                        </span>
                       </div>
-                      <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }} className="rounded-md bg-brand-gold text-brand-tealDark px-3 py-2 text-sm" onClick={() => onAddToCart(product)}>Add to Cart</motion.button>
-                    </motion.div>
-                  )
-                ))}
-              </div>
-            </>
+                    </div>
+                    <div className="flex gap-2 flex-shrink-0">
+                      <button
+                        onClick={e => { e.stopPropagation(); onToggleFavorite(product._id || product.id); }}
+                        className="p-2 rounded-lg border border-brand-off/15 hover:border-brand-gold/30 transition"
+                      >
+                        <Heart className={`w-4 h-4 ${favorites.includes(product._id || product.id) ? 'fill-red-500 text-red-500' : 'text-brand-off/50'}`} />
+                      </button>
+                      <button
+                        onClick={e => { e.stopPropagation(); onAddToCart(product); }}
+                        className="px-4 py-2 rounded-lg bg-brand-gold text-brand-tealDark text-sm font-semibold hover:bg-brand-gold/90 transition"
+                      >
+                        Add to Cart
+                      </button>
+                    </div>
+                  </motion.div>
+                )
+              )}
+            </div>
           )}
         </div>
       </div>
 
-      {/* Mobile filter drawer */}
-      {mobileFilterOpen && (
-        <div className="fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setMobileFilterOpen(false)} />
-          <motion.div initial={{ x: '-100%', scale: 0.98, opacity: 0.9 }} animate={{ x: 0, scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 400, damping: 28 }} id="mobile-filter-panel" className="absolute left-0 top-0 h-full w-80 max-w-[85%] bg-brand-tealDark text-brand-off shadow-2xl p-4 overflow-y-auto border-r border-brand-gold/20">
-            <div className="flex items-center justify-between mb-3">
-              <div className="font-bold">Filters</div>
-              <button className="rounded-md p-2 hover:bg-brand-teal/20" onClick={() => setMobileFilterOpen(false)}>
-                ×
-              </button>
-            </div>
-          <FilterSection />
-          </motion.div>
-        </div>
-      )}
+      {/* ── Mobile Filter Drawer ── */}
+      <AnimatePresence>
+        {mobileFilterOpen && (
+          <div className="fixed inset-0 z-50">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setMobileFilterOpen(false)}
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="absolute bottom-0 left-0 right-0 max-h-[85vh] bg-brand-tealDark rounded-t-2xl p-5 overflow-y-auto border-t border-brand-gold/20"
+            >
+              <div className="w-10 h-1 rounded-full bg-brand-off/20 mx-auto mb-4" />
+              <FilterContent onClose={() => setMobileFilterOpen(false)} />
+              <div className="mt-6 sticky bottom-0 pt-4 bg-brand-tealDark border-t border-brand-off/10">
+                <button
+                  onClick={() => setMobileFilterOpen(false)}
+                  className="w-full py-3 rounded-xl bg-brand-gold text-brand-tealDark font-semibold text-sm"
+                >
+                  Show {filteredAndSortedProducts.length} Results
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -10,6 +10,7 @@ import { ImageWithFallback } from "./utils/imageUtils";
 import Header from "./components/Header";
 import ProductDetail from "./components/ProductDetail";
 import Footer from "./components/Footer";
+import BottomNav from "./components/BottomNav";
 
 // Import pages
 import HomePage from "./pages/HomePage";
@@ -39,60 +40,7 @@ import PaymentAnalytics from "./pages/PaymentAnalytics";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import OrderTracking from "./pages/OrderTracking";
-import ImageTest from "./pages/ImageTest";
 
-// Import jewelry images
-import jevel1 from "./Assets/Jevel1.jpg";
-import jevel2 from "./Assets/Jevel2.jpg";
-import jevel3 from "./Assets/Jevel3.jpg";
-import jevel4 from "./Assets/Jevel4.jpg";
-import jevel5 from "./Assets/Jevel5.jpg";
-import jevel6 from "./Assets/Jevel6.jpg";
-import jevel7 from "./Assets/Jevel7.jpg";
-import jevel8 from "./Assets/Jevel8.jpg";
-import jevel9 from "./Assets/Jevel9.jpg";
-import jevel10 from "./Assets/Jevel10.jpg";
-import jevel11 from "./Assets/Jevel11.jpg";
-import jevel12 from "./Assets/Jevel12.jpg";
-import jevel13 from "./Assets/Jevel13.jpg";
-import jevel14 from "./Assets/Jevel14.jpg";
-import jevel15 from "./Assets/Jevel15.jpg";
-import jevel16 from "./Assets/Jevel16.jpg";
-import jevel17 from "./Assets/Jevel17.jpg";
-import jevel18 from "./Assets/Jevel18.jpg";
-import jevel19 from "./Assets/Jevel19.jpg";
-import jevel20 from "./Assets/Jevel20.jpg";
-import jevel21 from "./Assets/Jevel21.jpg";
-import jevel22 from "./Assets/Jevel22.jpg";
-import jevel23 from "./Assets/Jevel23.jpg";
-
-// Product data
-// eslint-disable-next-line no-unused-vars
-const products = [
-  { id: 1, name: "Diamond Ring", price: 1299.99, image: jevel1, category: "Rings", rating: 4.8, description: "Elegant diamond ring with 18k gold setting" },
-  { id: 2, name: "Pearl Necklace", price: 899.99, image: jevel2, category: "Necklaces", rating: 4.6, description: "Freshwater pearl necklace with silver clasp" },
-  { id: 3, name: "Sapphire Earrings", price: 649.99, image: jevel3, category: "Earrings", rating: 4.7, description: "Blue sapphire stud earrings in white gold" },
-  { id: 4, name: "Gold Bracelet", price: 799.99, image: jevel4, category: "Bracelets", rating: 4.5, description: "18k gold bracelet with intricate design" },
-  { id: 5, name: "Emerald Pendant", price: 549.99, image: jevel5, category: "Pendants", rating: 4.9, description: "Natural emerald pendant on gold chain" },
-  { id: 6, name: "Ruby Ring", price: 999.99, image: jevel6, category: "Rings", rating: 4.7, description: "Stunning ruby ring with diamond accents" },
-  { id: 7, name: "Silver Chain", price: 299.99, image: jevel7, category: "Necklaces", rating: 4.4, description: "Sterling silver chain necklace" },
-  { id: 8, name: "Diamond Studs", price: 749.99, image: jevel8, category: "Earrings", rating: 4.8, description: "Classic diamond stud earrings" },
-  { id: 9, name: "Rose Gold Ring", price: 599.99, image: jevel9, category: "Rings", rating: 4.6, description: "Rose gold ring with rose quartz stone" },
-  { id: 10, name: "Pearl Earrings", price: 399.99, image: jevel10, category: "Earrings", rating: 4.5, description: "Elegant pearl drop earrings" },
-  { id: 11, name: "Gold Necklace", price: 899.99, image: jevel11, category: "Necklaces", rating: 4.7, description: "18k gold chain necklace" },
-  { id: 12, name: "Amethyst Ring", price: 449.99, image: jevel12, category: "Rings", rating: 4.4, description: "Purple amethyst ring in silver setting" },
-  { id: 13, name: "Diamond Pendant", price: 1299.99, image: jevel13, category: "Pendants", rating: 4.9, description: "Solitaire diamond pendant necklace" },
-  { id: 14, name: "Silver Bracelet", price: 349.99, image: jevel14, category: "Bracelets", rating: 4.3, description: "Sterling silver bangle bracelet" },
-  { id: 15, name: "Garnet Earrings", price: 279.99, image: jevel15, category: "Earrings", rating: 4.2, description: "Deep red garnet drop earrings" },
-  { id: 16, name: "White Gold Ring", price: 899.99, image: jevel16, category: "Rings", rating: 4.6, description: "White gold ring with white sapphire" },
-  { id: 17, name: "Crystal Necklace", price: 199.99, image: jevel17, category: "Necklaces", rating: 4.1, description: "Crystal pendant on silver chain" },
-  { id: 18, name: "Gold Hoops", price: 499.99, image: jevel18, category: "Earrings", rating: 4.5, description: "18k gold hoop earrings" },
-  { id: 19, name: "Opal Ring", price: 679.99, image: jevel19, category: "Rings", rating: 4.7, description: "Opal ring with diamond halo" },
-  { id: 20, name: "Silver Pendant", price: 249.99, image: jevel20, category: "Pendants", rating: 4.3, description: "Sterling silver geometric pendant" },
-  { id: 21, name: "Gold Bangle", price: 599.99, image: jevel21, category: "Bracelets", rating: 4.6, description: "18k gold bangle bracelet" },
-  { id: 22, name: "Topaz Earrings", price: 329.99, image: jevel22, category: "Earrings", rating: 4.4, description: "Blue topaz stud earrings" },
-  { id: 23, name: "Diamond Band", price: 1499.99, image: jevel23, category: "Rings", rating: 4.9, description: "Eternity diamond band ring" },
-];
 
 
 
@@ -173,7 +121,7 @@ function AppContent({ user, setUser }) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-brand-teal text-brand-off font-body">
+    <div className="min-h-screen flex flex-col bg-brand-teal text-brand-off font-body pb-16 md:pb-0">
         {/* Header */}
         <Header
           cartItemCount={getTotalItems()}
@@ -285,7 +233,7 @@ function AppContent({ user, setUser }) {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/order-tracking/:orderId" element={<OrderTracking />} />
-            <Route path="/image-test" element={<ImageTest />} />
+
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </div>
@@ -386,6 +334,7 @@ function AppContent({ user, setUser }) {
 
         {/* Footer */}
         <Footer />
+        <BottomNav user={user} onCartClick={() => setCartOpen(true)} />
       </div>
   );
 }

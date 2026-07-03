@@ -499,6 +499,27 @@ class ApiService {
     return response.json();
   }
 
+  // Site Settings
+  async getSettings() {
+    const response = await fetch(`${API_BASE_URL}/settings`);
+    if (!response.ok) return null;
+    return response.json();
+  }
+
+  async updateSettings(settingsFormData) {
+    const response = await fetch(`${API_BASE_URL}/settings`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${this.token}`,
+      },
+      body: settingsFormData,
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to update settings');
+    }
+    return response.json();
+  }
 }
 
 const apiService = new ApiService();

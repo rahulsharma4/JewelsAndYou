@@ -6,6 +6,10 @@ const BASE_SERVER_URL = API_BASE_URL.replace(/\/api\/?$/, '');
 export const getImageUrl = (imagePath) => {
   if (!imagePath) return '/placeholder.svg';
   
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://') || imagePath.startsWith('data:')) {
+    return imagePath;
+  }
+  
   // Clean up any double slashes in URL
   const cleanUrl = `${BASE_SERVER_URL}/uploads/${imagePath}`.replace(/([^:]\/)\/+/g, '$1');
   return cleanUrl;

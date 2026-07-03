@@ -186,9 +186,9 @@ const Header = ({ cartItemCount, onCartClick, selectedCategory, onCategoryChange
                   </div>
                 )}
                 
-                {/* Mobile menu button */}
+                {/* Mobile menu button - Hidden since we use BottomNav now */}
                 <button
-                  className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-brand-off hover:bg-brand-tealDark/10 focus:outline-none focus:ring-2 focus:ring-brand-gold/40"
+                  className="hidden items-center justify-center rounded-md p-2 text-brand-off hover:bg-brand-tealDark/10 focus:outline-none focus:ring-2 focus:ring-brand-gold/40"
                   onClick={() => setMobileMenuOpen(true)}
                   aria-label="Open menu"
                 >
@@ -197,10 +197,10 @@ const Header = ({ cartItemCount, onCartClick, selectedCategory, onCategoryChange
                   </svg>
                 </button>
 
-                {/* Cart button with badge */}
+                {/* Cart button with badge - Hidden on mobile, handled by BottomNav */}
                 <button
                   onClick={handleCartClick}
-                  className="relative inline-flex items-center justify-center rounded-full p-2 text-brand-off hover:bg-brand-tealDark/10 focus:outline-none focus:ring-2 focus:ring-brand-gold/40"
+                  className="hidden md:inline-flex relative items-center justify-center rounded-full p-2 text-brand-off hover:bg-brand-tealDark/10 focus:outline-none focus:ring-2 focus:ring-brand-gold/40"
                   aria-label="Open cart"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">

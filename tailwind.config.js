@@ -18,9 +18,21 @@ module.exports = {
       fontFamily: {
         heading: ["Playfair Display", "ui-serif", "Georgia", "Times New Roman", "serif"],
         body: ["Inter", "ui-sans-serif", "system-ui", "Segoe UI", "Roboto", "Arial", "sans-serif"]
-      }
+      },
+      keyframes: {
+        shimmer: {
+          '100%': { transform: 'translateX(100%)' },
+        },
+        marquee: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
+      },
+      animation: {
+        shimmer: 'shimmer 2.5s infinite',
+        marquee: 'marquee 30s linear infinite',
+      },
     },
   },
   plugins: [],
 }
-
