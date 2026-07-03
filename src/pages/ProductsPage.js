@@ -68,8 +68,16 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
   const [selectedMaterials, setSelectedMaterials] = useState([]);
   const [selectedRatings, setSelectedRatings] = useState([]);
 
-  const categories = ["All", "Rings", "Necklaces", "Earrings", "Bracelets", "Pendants", "Watches"];
-  const materials = ["Gold", "Silver", "Platinum", "Diamond", "Pearl", "Sapphire", "Emerald", "Ruby"];
+  const categories = useMemo(() => {
+    const cats = new Set(products.map(p => p.category).filter(Boolean));
+    // Sort categories alphabetically but keep 'All' at the front if we wanted. But the Set is fine.
+    return ["All", ...Array.from(cats).sort()];
+  }, [products]);
+
+  const materials = useMemo(() => {
+    const mats = new Set(products.map(p => p.material).filter(Boolean));
+    return Array.from(mats).sort();
+  }, [products]);
 
   const maxPrice = useMemo(() => {
     if (products.length === 0) return 500000;
@@ -94,6 +102,7 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
     if (selectedMaterials.length > 0) {
       filtered = filtered.filter(p =>
         selectedMaterials.some(m =>
+          (p.material && p.material.toLowerCase() === m.toLowerCase()) ||
           (p.description && p.description.toLowerCase().includes(m.toLowerCase())) ||
           p.name.toLowerCase().includes(m.toLowerCase())
         )

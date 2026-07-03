@@ -499,6 +499,28 @@ class ApiService {
     return response.json();
   }
 
+  async renameCategory(oldName, newName) {
+    const response = await fetch(`${API_BASE_URL}/admin/categories/rename`, {
+      method: 'PUT',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ oldName, newName })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Error renaming category');
+    return data;
+  }
+
+  async renameMaterial(oldName, newName) {
+    const response = await fetch(`${API_BASE_URL}/admin/materials/rename`, {
+      method: 'PUT',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ oldName, newName })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Error renaming material');
+    return data;
+  }
+
   // Site Settings
   async getSettings() {
     const response = await fetch(`${API_BASE_URL}/settings`);

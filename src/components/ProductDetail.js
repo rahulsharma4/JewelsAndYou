@@ -11,13 +11,14 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [selectedTab, setSelectedTab] = useState(0);
-  const [showAlert, setShowAlert] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "", images: [] });
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [metalRates, setMetalRates] = useState(null);
   const [product, setProduct] = useState(null);
   const [loadingProduct, setLoadingProduct] = useState(true);
+  const [selectedImageIdx, setSelectedImageIdx] = useState(0);
   
   // Use cart context
   const { addToCart } = useCart();
@@ -93,23 +94,36 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
     if (newQuantity >= 1) setQuantity(newQuantity);
   };
 
+  const showToast = (message, type = 'success', Icon = null) => {
+    setToastMessage({ message, type, Icon });
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
   const handleAddToCart = async () => {
     try {
       await addToCart(product, quantity);
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 3500);
+      showToast(`Success! ${quantity} × ${product.name} added to cart.`, 'success', ShoppingBag);
     } catch (error) {
       console.error('Error adding to cart:', error);
+      showToast(error.message || "Error adding to cart", 'error');
     }
   };
 
-  const handleToggleFavorite = () => onToggleFavorite(product._id || product.id);
+  const handleToggleFavorite = () => {
+    if (!user) {
+      showToast("Please login to add to wishlist.", "error");
+      setTimeout(() => navigate('/login'), 1500);
+      return;
+    }
+    onToggleFavorite(product._id || product.id);
+    showToast(!isFavorite ? "Added to wishlist!" : "Removed from wishlist!", "success", Heart);
+  };
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     if (!user) {
-      alert("Please login to submit a review.");
-      navigate('/login');
+      showToast("Please login to submit a review.", "error");
+      setTimeout(() => navigate('/login'), 1500);
       return;
     }
     setIsSubmittingReview(true);
@@ -117,13 +131,13 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
       const updatedProduct = await api.addProductReview(product._id || product.id, reviewForm);
       setProduct(updatedProduct);
       setReviewForm({ rating: 5, comment: "", images: [] });
-      alert("Review submitted successfully!");
+      showToast("Review submitted successfully!", "success");
       if (loadProducts) {
         loadProducts();
       }
     } catch (error) {
       console.error("Error submitting review:", error);
-      alert("Failed to submit review.");
+      showToast("Failed to submit review.", "error");
     } finally {
       setIsSubmittingReview(false);
     }
@@ -165,15 +179,17 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
       
       {/* Dynamic Toast Alert */}
       <AnimatePresence>
-        {showAlert && (
+        {toastMessage && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-emerald-600 text-white px-5 py-3 rounded-xl shadow-xl flex items-center gap-2 border border-white/10"
+            className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl shadow-xl flex items-center gap-2 border border-white/10 text-white ${
+              toastMessage.type === 'error' ? 'bg-rose-600' : 'bg-emerald-600'
+            }`}
           >
-            <ShoppingBag className="w-4 h-4" />
-            <span>Success! {quantity} × {product.name} added to cart.</span>
+            {toastMessage.Icon && <toastMessage.Icon className="w-4 h-4" />}
+            <span>{toastMessage.message}</span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -190,31 +206,62 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start mb-12">
         {/* Left Side: Premium Image Container */}
         <motion.div 
-          className="rounded-2xl overflow-hidden bg-brand-tealDark border border-brand-gold/10 relative group"
+          className="space-y-4"
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="relative aspect-[4/3] sm:aspect-square md:max-h-[500px] w-full overflow-hidden">
-            <ImageWithFallback
-              src={product.image}
-              alt={product.name}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-            {/* Category tag */}
-            <span className="absolute top-4 left-4 inline-flex items-center rounded-lg bg-brand-tealDark/80 text-brand-gold text-xs font-bold px-3 py-1 border border-brand-gold/20 backdrop-blur-sm">
-              {product.category}
-            </span>
-            
-            {/* Favorite button */}
-            <button
-              onClick={handleToggleFavorite}
-              className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-brand-tealDark/80 border border-brand-off/10 hover:bg-brand-tealDark transition"
-              aria-label="Toggle favorite"
-            >
-              <Heart className={`w-5 h-5 ${isFavorite ? "fill-red-500 text-red-500 scale-110" : "text-brand-off/70"}`} />
-            </button>
+          <div className="rounded-2xl overflow-hidden bg-brand-tealDark border border-brand-gold/10 relative group">
+            <div className="relative aspect-[4/3] sm:aspect-square md:max-h-[500px] w-full overflow-hidden bg-brand-teal/20">
+              {product.images && product.images.length > 0 ? (
+                <ImageWithFallback
+                  src={product.images[selectedImageIdx]}
+                  alt={product.name}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              ) : (
+                <ImageWithFallback
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              )}
+              {/* Category tag */}
+              <span className="absolute top-4 left-4 inline-flex items-center rounded-lg bg-brand-tealDark/80 text-brand-gold text-xs font-bold px-3 py-1 border border-brand-gold/20 backdrop-blur-sm">
+                {product.category}
+              </span>
+              
+              {/* Favorite button */}
+              <button
+                onClick={handleToggleFavorite}
+                className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-brand-tealDark/80 border border-brand-off/10 hover:bg-brand-tealDark transition"
+                aria-label="Toggle favorite"
+              >
+                <Heart className={`w-5 h-5 ${isFavorite ? "fill-red-500 text-red-500 scale-110" : "text-brand-off/70"}`} />
+              </button>
+            </div>
           </div>
+
+          {/* Thumbnails */}
+          {product.images && product.images.length > 1 && (
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-brand-gold/20 scrollbar-track-transparent">
+              {product.images.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedImageIdx(idx)}
+                  className={`relative w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${
+                    selectedImageIdx === idx ? 'border-brand-gold scale-105 shadow-lg' : 'border-transparent opacity-60 hover:opacity-100'
+                  }`}
+                >
+                  <ImageWithFallback
+                    src={img}
+                    alt={`${product.name} thumbnail ${idx + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
         </motion.div>
 
         {/* Right Side: Information Panel */}
@@ -417,6 +464,15 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
                     onChange={handleImageChange}
                     className="text-xs text-brand-off/60 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-brand-gold/15 file:text-brand-gold"
                   />
+                  {reviewForm.images && reviewForm.images.length > 0 && (
+                    <div className="flex gap-2 mt-3 flex-wrap">
+                      {reviewForm.images.map((file, idx) => (
+                        <div key={idx} className="relative w-16 h-16 rounded-md overflow-hidden border border-brand-gold/20">
+                          <img src={URL.createObjectURL(file)} alt={`preview-${idx}`} className="w-full h-full object-cover" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <button 

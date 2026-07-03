@@ -59,6 +59,16 @@ function AppContent({ user, setUser }) {
   const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
   const navigate = useNavigate();
 
+  // Auto-dismiss snackbar after 3 seconds
+  useEffect(() => {
+    if (snackbar.open) {
+      const timer = setTimeout(() => {
+        setSnackbar(prev => ({ ...prev, open: false }));
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [snackbar.open]);
+
   const loadProducts = async () => {
     try {
       setLoading(true);

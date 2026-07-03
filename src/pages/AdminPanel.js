@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { getImageUrl, ImageWithFallback } from "../utils/imageUtils";
 import {
   Gem, Settings, UploadCloud, Plus, Edit2, Trash2,
-  Download, TrendingUp, Scale
+  Download, TrendingUp, Scale, Tag
 } from "lucide-react";
 
 const AdminPanel = () => {
@@ -15,6 +15,12 @@ const AdminPanel = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [activeTab, setActiveTab] = useState('products');
   const [importing, setImporting] = useState(false);
+  const [isNewCategory, setIsNewCategory] = useState(false);
+  const [isNewMaterial, setIsNewMaterial] = useState(false);
+  
+  // Tag editing state
+  const [editingCategory, setEditingCategory] = useState({ oldName: '', newName: '' });
+  const [editingMaterial, setEditingMaterial] = useState({ oldName: '', newName: '' });
 
   // Form states
   const [formData, setFormData] = useState({
@@ -24,7 +30,7 @@ const AdminPanel = () => {
     category: "",
     stock: "",
     featured: false,
-    image: null,
+    images: [],
     priceType: "fixed",
     weight: "",
     metalType: "None",
@@ -112,6 +118,16 @@ const AdminPanel = () => {
     }
   }, [activeTab]);
 
+  const categories = useMemo(() => {
+    const cats = new Set(products.map(p => p.category).filter(Boolean));
+    return Array.from(cats).sort();
+  }, [products]);
+
+  const materials = useMemo(() => {
+    const mats = new Set(products.map(p => p.material).filter(Boolean));
+    return Array.from(mats).sort();
+  }, [products]);
+
   const handleExport = async () => {
     try {
       const blob = await api.exportProducts();
@@ -154,8 +170,8 @@ const AdminPanel = () => {
   };
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    setFormData(prev => ({ ...prev, image: file }));
+    const files = Array.from(e.target.files);
+    setFormData(prev => ({ ...prev, images: files }));
   };
 
   // Preview Price for Weight-Based Calculation
@@ -186,6 +202,7 @@ const AdminPanel = () => {
       formDataToSend.append('name', formData.name);
       formDataToSend.append('description', formData.description);
       formDataToSend.append('category', formData.category);
+      if (formData.material) formDataToSend.append('material', formData.material);
       formDataToSend.append('stock', formData.stock);
       formDataToSend.append('featured', formData.featured);
       formDataToSend.append('priceType', formData.priceType);
@@ -202,10 +219,13 @@ const AdminPanel = () => {
         formDataToSend.append('makingCharge', formData.makingCharge);
       }
       
-      if (formData.image && formData.image instanceof File) {
-        formDataToSend.append('image', formData.image);
-      } else if (editingProduct && editingProduct.image) {
-        formDataToSend.append('currentImage', editingProduct.image);
+      if (formData.images && formData.images.length > 0) {
+        formData.images.forEach(img => {
+          formDataToSend.append('images', img);
+        });
+      } else if (editingProduct) {
+        if (editingProduct.image) formDataToSend.append('currentImage', editingProduct.image);
+        if (editingProduct.images) formDataToSend.append('currentImages', JSON.stringify(editingProduct.images));
       }
 
       const url = `${editingProduct ? `/${editingProduct._id}` : ''}`;
@@ -232,12 +252,15 @@ const AdminPanel = () => {
       category: "",
       stock: "",
       featured: false,
-      image: null,
+      images: [],
       priceType: "fixed",
       weight: "",
       metalType: "None",
-      makingCharge: ""
+      makingCharge: "",
+      material: ""
     });
+    setIsNewCategory(false);
+    setIsNewMaterial(false);
   };
 
   const handleEdit = (product) => {
@@ -249,12 +272,27 @@ const AdminPanel = () => {
       category: product.category,
       stock: product.stock.toString(),
       featured: product.featured,
-      image: product.image,
+      images: [],
       priceType: product.priceType || "fixed",
       weight: product.weight ? product.weight.toString() : "",
       metalType: product.metalType || "None",
-      makingCharge: product.makingCharge ? product.makingCharge.toString() : ""
+      makingCharge: product.makingCharge ? product.makingCharge.toString() : "",
+      material: product.material || ""
     });
+    
+    // Check if category or material is new/custom
+    if (product.category && !categories.includes(product.category)) {
+      setIsNewCategory(true);
+    } else {
+      setIsNewCategory(false);
+    }
+    
+    if (product.material && !materials.includes(product.material)) {
+      setIsNewMaterial(true);
+    } else {
+      setIsNewMaterial(false);
+    }
+    
     setShowAddForm(true);
   };
 
@@ -291,6 +329,30 @@ const AdminPanel = () => {
       loadSettings();
     } catch (error) {
       alert('Error updating settings: ' + error.message);
+    }
+  };
+
+  const handleRenameCategory = async () => {
+    if (!editingCategory.newName.trim() || editingCategory.newName === editingCategory.oldName) return;
+    try {
+      await api.renameCategory(editingCategory.oldName, editingCategory.newName.trim());
+      alert('Category renamed successfully!');
+      setEditingCategory({ oldName: '', newName: '' });
+      loadProducts();
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  const handleRenameMaterial = async () => {
+    if (!editingMaterial.newName.trim() || editingMaterial.newName === editingMaterial.oldName) return;
+    try {
+      await api.renameMaterial(editingMaterial.oldName, editingMaterial.newName.trim());
+      alert('Material renamed successfully!');
+      setEditingMaterial({ oldName: '', newName: '' });
+      loadProducts();
+    } catch (error) {
+      alert(error.message);
     }
   };
 
@@ -333,6 +395,14 @@ const AdminPanel = () => {
               }`}
             >
               <Settings className="w-4 h-4" /> Store Settings
+            </button>
+            <button
+              onClick={() => setActiveTab('tags')}
+              className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition ${
+                activeTab === 'tags' ? 'bg-brand-gold text-brand-tealDark' : 'text-brand-off/70 hover:bg-brand-teal/20'
+              }`}
+            >
+              <Tag className="w-4 h-4" /> Tags & Categories
             </button>
           </div>
         </div>
@@ -406,22 +476,80 @@ const AdminPanel = () => {
 
                     {/* Category */}
                     <div>
-                      <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Category</label>
-                      <select
-                        name="category"
-                        value={formData.category}
-                        onChange={handleInputChange}
-                        className="w-full rounded-lg border border-brand-off/15 bg-brand-tealDark px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
-                        required
-                      >
-                        <option value="" disabled>Select Category</option>
-                        <option value="Rings">Rings</option>
-                        <option value="Necklaces">Necklaces</option>
-                        <option value="Earrings">Earrings</option>
-                        <option value="Bracelets">Bracelets</option>
-                        <option value="Pendants">Pendants</option>
-                        <option value="Watches">Watches</option>
-                      </select>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-xs font-semibold uppercase text-brand-off/60">Category</label>
+                        {isNewCategory && (
+                          <button type="button" onClick={() => { setIsNewCategory(false); setFormData(p => ({...p, category: ''})) }} className="text-[10px] text-brand-gold hover:underline">Select Existing</button>
+                        )}
+                      </div>
+                      {isNewCategory ? (
+                        <input
+                          type="text"
+                          name="category"
+                          value={formData.category}
+                          onChange={handleInputChange}
+                          className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                          placeholder="Type new category..."
+                        />
+                      ) : (
+                        <select
+                          value={formData.category}
+                          onChange={(e) => {
+                            if (e.target.value === 'ADD_NEW') {
+                              setIsNewCategory(true);
+                              setFormData(p => ({ ...p, category: '' }));
+                            } else {
+                              setFormData(p => ({ ...p, category: e.target.value }));
+                            }
+                          }}
+                          className="w-full rounded-lg border border-brand-off/15 bg-brand-tealDark px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                        >
+                          <option value="" disabled>Select Category...</option>
+                          {categories.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                          <option value="ADD_NEW" className="font-bold text-brand-gold bg-brand-teal/20">+ Add New Category</option>
+                        </select>
+                      )}
+                    </div>
+
+                    {/* Material */}
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-xs font-semibold uppercase text-brand-off/60">Material</label>
+                        {isNewMaterial && (
+                          <button type="button" onClick={() => { setIsNewMaterial(false); setFormData(p => ({...p, material: ''})) }} className="text-[10px] text-brand-gold hover:underline">Select Existing</button>
+                        )}
+                      </div>
+                      {isNewMaterial ? (
+                        <input
+                          type="text"
+                          name="material"
+                          value={formData.material}
+                          onChange={handleInputChange}
+                          className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                          placeholder="Type new material..."
+                        />
+                      ) : (
+                        <select
+                          value={formData.material}
+                          onChange={(e) => {
+                            if (e.target.value === 'ADD_NEW') {
+                              setIsNewMaterial(true);
+                              setFormData(p => ({ ...p, material: '' }));
+                            } else {
+                              setFormData(p => ({ ...p, material: e.target.value }));
+                            }
+                          }}
+                          className="w-full rounded-lg border border-brand-off/15 bg-brand-tealDark px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                        >
+                          <option value="">Select Material...</option>
+                          {materials.map(mat => (
+                            <option key={mat} value={mat}>{mat}</option>
+                          ))}
+                          <option value="ADD_NEW" className="font-bold text-brand-gold bg-brand-teal/20">+ Add New Material</option>
+                        </select>
+                      )}
                     </div>
 
                     {/* Stock */}
@@ -471,24 +599,7 @@ const AdminPanel = () => {
                       </div>
                     ) : (
                       <>
-                        {/* Metal Type */}
-                        <div>
-                          <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Metal Variant</label>
-                          <select
-                            name="metalType"
-                            value={formData.metalType}
-                            onChange={handleInputChange}
-                            className="w-full rounded-lg border border-brand-off/15 bg-brand-tealDark px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
-                            required={formData.priceType === 'weight-based'}
-                          >
-                            <option value="None" disabled>Select Metal</option>
-                            <option value="Gold 24K">Gold 24K</option>
-                            <option value="Gold 22K">Gold 22K</option>
-                            <option value="Gold 18K">Gold 18K</option>
-                            <option value="Silver">Silver</option>
-                            <option value="Platinum">Platinum</option>
-                          </select>
-                        </div>
+
 
                         {/* Weight */}
                         <div>
@@ -527,14 +638,7 @@ const AdminPanel = () => {
                       </>
                     )}
 
-                    {/* Calculated Price Display */}
-                    <div className="bg-brand-teal/20 rounded-xl p-3 border border-brand-gold/10 flex flex-col justify-center">
-                      <div className="text-xs text-brand-off/50">Estimated Value</div>
-                      <div className="text-lg font-bold text-brand-gold flex items-center gap-1 mt-0.5">
-                        ₹{calculatedPreviewPrice.toLocaleString('en-IN')}
-                        <TrendingUp className="w-4 h-4 text-brand-gold/60" />
-                      </div>
-                    </div>
+
 
                     {/* Description */}
                     <div className="md:col-span-3">
@@ -550,18 +654,36 @@ const AdminPanel = () => {
 
                     {/* Image selector */}
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Product Image File</label>
-                      <div className="flex items-center gap-4">
-                        {editingProduct && editingProduct.image && !formData.image && (
-                          <img 
-                            src={getImageUrl(editingProduct.image)} 
-                            alt="Current" 
-                            className="w-12 h-12 object-cover rounded-lg border border-brand-gold/25"
-                          />
-                        )}
+                      <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Product Images</label>
+                      <div className="flex flex-col gap-4">
+                        <div className="flex flex-wrap gap-2">
+                          {formData.images.length > 0 ? (
+                            formData.images.map((img, idx) => (
+                              <div key={idx} className="relative w-12 h-12 rounded-lg overflow-hidden border border-brand-gold/25">
+                                <img src={URL.createObjectURL(img)} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
+                              </div>
+                            ))
+                          ) : editingProduct && editingProduct.images && editingProduct.images.length > 0 ? (
+                            editingProduct.images.map((img, idx) => (
+                              <img 
+                                key={idx}
+                                src={getImageUrl(img)} 
+                                alt={`Current ${idx}`} 
+                                className="w-12 h-12 object-cover rounded-lg border border-brand-gold/25"
+                              />
+                            ))
+                          ) : editingProduct && editingProduct.image && !formData.images.length && (
+                            <img 
+                              src={getImageUrl(editingProduct.image)} 
+                              alt="Current" 
+                              className="w-12 h-12 object-cover rounded-lg border border-brand-gold/25"
+                            />
+                          )}
+                        </div>
                         <input
                           type="file"
                           accept="image/*"
+                          multiple
                           onChange={handleImageChange}
                           className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-gold/15 file:text-brand-gold hover:file:bg-brand-gold/20"
                         />
@@ -865,6 +987,86 @@ const AdminPanel = () => {
             </div>
           </motion.div>
         )}
+        {/* Tab 3: Tags & Categories */}
+        {activeTab === 'tags' && (
+          <div className="space-y-8">
+            <h2 className="text-xl font-bold font-heading">Manage Categories & Materials</h2>
+            <p className="text-brand-off/60 text-sm mb-6">Editing a name here will instantly update all products that currently use it.</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Categories */}
+              <div className="bg-brand-tealDark rounded-2xl p-6 border border-brand-gold/10">
+                <h3 className="text-lg font-bold font-heading mb-4 text-brand-gold">Categories</h3>
+                <div className="space-y-3">
+                  {categories.length === 0 ? <p className="text-brand-off/50 text-sm">No categories found.</p> : null}
+                  {categories.map(cat => (
+                    <div key={cat} className="flex items-center justify-between p-3 bg-brand-teal/30 rounded-lg border border-brand-off/5">
+                      {editingCategory.oldName === cat ? (
+                        <div className="flex gap-2 w-full">
+                          <input
+                            type="text"
+                            value={editingCategory.newName}
+                            onChange={(e) => setEditingCategory({ ...editingCategory, newName: e.target.value })}
+                            className="w-full rounded-lg border border-brand-off/15 bg-brand-tealDark px-3 py-1.5 text-sm focus:border-brand-gold/40 focus:outline-none"
+                          />
+                          <button onClick={handleRenameCategory} className="text-emerald-400 text-xs font-bold hover:underline">Save</button>
+                          <button onClick={() => setEditingCategory({ oldName: '', newName: '' })} className="text-brand-off/60 text-xs hover:underline">Cancel</button>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="font-medium text-sm">{cat}</span>
+                          <button 
+                            onClick={() => setEditingCategory({ oldName: cat, newName: cat })}
+                            className="text-brand-gold hover:text-brand-gold/70 transition p-1"
+                            title="Edit Category"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Materials */}
+              <div className="bg-brand-tealDark rounded-2xl p-6 border border-brand-gold/10">
+                <h3 className="text-lg font-bold font-heading mb-4 text-brand-gold">Materials</h3>
+                <div className="space-y-3">
+                  {materials.length === 0 ? <p className="text-brand-off/50 text-sm">No materials found.</p> : null}
+                  {materials.map(mat => (
+                    <div key={mat} className="flex items-center justify-between p-3 bg-brand-teal/30 rounded-lg border border-brand-off/5">
+                      {editingMaterial.oldName === mat ? (
+                        <div className="flex gap-2 w-full">
+                          <input
+                            type="text"
+                            value={editingMaterial.newName}
+                            onChange={(e) => setEditingMaterial({ ...editingMaterial, newName: e.target.value })}
+                            className="w-full rounded-lg border border-brand-off/15 bg-brand-tealDark px-3 py-1.5 text-sm focus:border-brand-gold/40 focus:outline-none"
+                          />
+                          <button onClick={handleRenameMaterial} className="text-emerald-400 text-xs font-bold hover:underline">Save</button>
+                          <button onClick={() => setEditingMaterial({ oldName: '', newName: '' })} className="text-brand-off/60 text-xs hover:underline">Cancel</button>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="font-medium text-sm">{mat}</span>
+                          <button 
+                            onClick={() => setEditingMaterial({ oldName: mat, newName: mat })}
+                            className="text-brand-gold hover:text-brand-gold/70 transition p-1"
+                            title="Edit Material"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );
