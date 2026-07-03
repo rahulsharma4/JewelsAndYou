@@ -22,22 +22,22 @@ const CheckoutReview = ({ onPlaceOrder, onBack, cart = [], shippingInfo = {}, pa
                   <div className="font-semibold">{item.name}</div>
                   <div className="text-sm text-brand-off/70">Qty: {item.quantity}</div>
                 </div>
-                <div className="text-brand-gold font-semibold">${(item.price * item.quantity).toLocaleString()}</div>
+                <div className="text-brand-gold font-semibold">₹{(item.price * item.quantity).toLocaleString('en-IN')}</div>
               </div>
             ))}
           </div>
           <div className="mt-4 pt-4 border-t border-brand-off/20">
             <div className="flex justify-between mb-2">
               <span>Subtotal:</span>
-              <span>${total.toLocaleString()}</span>
+              <span>₹{total.toLocaleString('en-IN')}</span>
             </div>
             <div className="flex justify-between mb-2">
               <span>Shipping:</span>
-              <span>${shippingCost.toLocaleString()}</span>
+              <span>₹{shippingCost.toLocaleString('en-IN')}</span>
             </div>
             <div className="flex justify-between text-lg font-bold">
               <span>Total:</span>
-              <span className="text-brand-gold">${finalTotal.toLocaleString()}</span>
+              <span className="text-brand-gold">₹{finalTotal.toLocaleString('en-IN')}</span>
             </div>
           </div>
         </motion.div>

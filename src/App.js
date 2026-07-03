@@ -11,6 +11,7 @@ import Header from "./components/Header";
 import ProductDetail from "./components/ProductDetail";
 import Footer from "./components/Footer";
 import BottomNav from "./components/BottomNav";
+import ScrollToTop from "./components/ScrollToTop";
 
 // Import pages
 import HomePage from "./pages/HomePage";
@@ -112,11 +113,23 @@ function AppContent({ user, setUser }) {
   };
 
   const toggleFavorite = async (productId) => {
+    if (!user) {
+      setSnackbar({ open: true, message: "Please login to add to wishlist!", severity: "error" });
+      navigate('/login');
+      return;
+    }
     try {
       await api.toggleFavorite(productId);
-      setFavorites((prev) => (prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]));
+      const isFav = favorites.includes(productId);
+      setFavorites((prev) => (isFav ? prev.filter((id) => id !== productId) : [...prev, productId]));
+      setSnackbar({ 
+        open: true, 
+        message: isFav ? "Removed from wishlist!" : "Added to wishlist!", 
+        severity: "success" 
+      });
     } catch (error) {
       console.error('Error toggling favorite:', error);
+      setSnackbar({ open: true, message: "Error updating wishlist.", severity: "error" });
     }
   };
 
@@ -171,6 +184,8 @@ function AppContent({ user, setUser }) {
                   onAddToCart={handleAddToCart}
                   onToggleFavorite={toggleFavorite}
                   favorites={favorites}
+                  user={user}
+                  loadProducts={loadProducts}
                 />
               }
             />
@@ -265,7 +280,7 @@ function AppContent({ user, setUser }) {
                             <div className="flex-1 min-w-0">
                               <div className="font-semibold truncate">{item.product.name}</div>
                               <div className="text-sm text-brand-gold">
-                                ${item.product.price.toLocaleString()}
+                                ₹{item.product.price.toLocaleString('en-IN')}
                               </div>
                               <div className="flex items-center mt-2">
                                 <button
@@ -302,7 +317,7 @@ function AppContent({ user, setUser }) {
                     <div className="mt-4 border-t border-brand-off/10 pt-4">
                       <div className="flex items-center justify-between font-bold mb-3">
                         <span>Total:</span>
-                        <span className="text-brand-gold">${getTotalPrice().toLocaleString()}</span>
+                        <span className="text-brand-gold">₹{getTotalPrice().toLocaleString('en-IN')}</span>
                       </div>
                       <button
                         onClick={handleCheckout}
@@ -346,6 +361,7 @@ function App() {
     <ErrorBoundary>
       <NotificationProvider>
         <Router>
+          <ScrollToTop />
           <CartProvider user={user}>
             <AppContent user={user} setUser={setUser} />
           </CartProvider>

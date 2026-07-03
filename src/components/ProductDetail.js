@@ -6,7 +6,7 @@ import { useCart } from "../contexts/CartContext";
 import { getImageUrl, ImageWithFallback } from "../utils/imageUtils";
 import api from "../services/api";
 
-const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = [] }) => {
+const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = [], user, loadProducts }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
@@ -16,11 +16,26 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "", images: [] });
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [metalRates, setMetalRates] = useState(null);
+  const [product, setProduct] = useState(null);
+  const [loadingProduct, setLoadingProduct] = useState(true);
   
   // Use cart context
   const { addToCart } = useCart();
 
-  const product = products.find((p) => p._id === id || p.id === parseInt(id));
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoadingProduct(true);
+        const data = await api.getProduct(id);
+        setProduct(data);
+      } catch (err) {
+        console.error("Error fetching product:", err);
+      } finally {
+        setLoadingProduct(false);
+      }
+    };
+    fetchProduct();
+  }, [id]);
 
   useEffect(() => {
     if (product) {
@@ -28,7 +43,7 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
       loadMetalRates();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [product]);
+  }, [product?._id]);
 
   const loadRelatedProducts = async () => {
     try {
@@ -49,6 +64,15 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
       console.error('Error loading settings/metal rates:', error);
     }
   };
+
+  if (loadingProduct) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-16 text-center text-brand-off/60 min-h-[60vh] flex flex-col justify-center items-center">
+        <div className="w-10 h-10 border-4 border-brand-gold border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-sm font-semibold">Loading product details...</p>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -83,11 +107,20 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
+    if (!user) {
+      alert("Please login to submit a review.");
+      navigate('/login');
+      return;
+    }
     setIsSubmittingReview(true);
     try {
-      await api.addProductReview(product._id || product.id, reviewForm);
+      const updatedProduct = await api.addProductReview(product._id || product.id, reviewForm);
+      setProduct(updatedProduct);
       setReviewForm({ rating: 5, comment: "", images: [] });
       alert("Review submitted successfully!");
+      if (loadProducts) {
+        loadProducts();
+      }
     } catch (error) {
       console.error("Error submitting review:", error);
       alert("Failed to submit review.");
@@ -345,54 +378,67 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
             className="mt-6 space-y-6"
           >
             {/* Review form */}
-            <form onSubmit={handleReviewSubmit} className="p-6 rounded-xl bg-brand-tealDark border border-brand-gold/10 space-y-4 max-w-xl">
-              <h3 className="font-heading font-semibold text-lg text-brand-gold">Share Your Experience</h3>
-              
-              <div>
-                <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Rating</label>
-                <div className="flex gap-1.5 text-2xl text-yellow-500">
-                  {[1, 2, 3, 4, 5].map(num => (
-                    <button 
-                      key={num} 
-                      type="button" 
-                      onClick={() => setReviewForm(prev => ({ ...prev, rating: num }))}
-                      className="hover:scale-115 transition"
-                    >
-                      {num <= reviewForm.rating ? '★' : '☆'}
-                    </button>
-                  ))}
+            {user ? (
+              <form onSubmit={handleReviewSubmit} className="p-6 rounded-xl bg-brand-tealDark border border-brand-gold/10 space-y-4 max-w-xl">
+                <h3 className="font-heading font-semibold text-lg text-brand-gold">Share Your Experience</h3>
+                
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Rating</label>
+                  <div className="flex gap-1.5 text-2xl text-yellow-500">
+                    {[1, 2, 3, 4, 5].map(num => (
+                      <button 
+                        key={num} 
+                        type="button" 
+                        onClick={() => setReviewForm(prev => ({ ...prev, rating: num }))}
+                        className="hover:scale-115 transition"
+                      >
+                        {num <= reviewForm.rating ? '★' : '☆'}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Detailed Feedback</label>
-                <textarea 
-                  className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none h-20 resize-none"
-                  value={reviewForm.comment}
-                  onChange={e => setReviewForm(prev => ({ ...prev, comment: e.target.value }))}
-                  required
-                />
-              </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Detailed Feedback</label>
+                  <textarea 
+                    className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none h-20 resize-none"
+                    value={reviewForm.comment}
+                    onChange={e => setReviewForm(prev => ({ ...prev, comment: e.target.value }))}
+                    required
+                  />
+                </div>
 
-              <div>
-                <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Upload Images</label>
-                <input 
-                  type="file" 
-                  multiple 
-                  accept="image/*" 
-                  onChange={handleImageChange}
-                  className="text-xs text-brand-off/60 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-brand-gold/15 file:text-brand-gold"
-                />
-              </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Upload Images</label>
+                  <input 
+                    type="file" 
+                    multiple 
+                    accept="image/*" 
+                    onChange={handleImageChange}
+                    className="text-xs text-brand-off/60 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-brand-gold/15 file:text-brand-gold"
+                  />
+                </div>
 
-              <button 
-                type="submit" 
-                disabled={isSubmittingReview}
-                className="bg-brand-gold text-brand-tealDark px-6 py-2 rounded-lg text-sm font-bold shadow hover:bg-brand-gold/90 transition disabled:opacity-50"
-              >
-                {isSubmittingReview ? "Submitting Review..." : "Submit Review"}
-              </button>
-            </form>
+                <button 
+                  type="submit" 
+                  disabled={isSubmittingReview}
+                  className="bg-brand-gold text-brand-tealDark px-6 py-2 rounded-lg text-sm font-bold shadow hover:bg-brand-gold/90 transition disabled:opacity-50"
+                >
+                  {isSubmittingReview ? "Submitting Review..." : "Submit Review"}
+                </button>
+              </form>
+            ) : (
+              <div className="p-6 rounded-xl bg-brand-tealDark border border-brand-gold/10 text-center max-w-xl space-y-3">
+                <p className="text-brand-off/60 text-sm">Please log in to share your experience with this masterpiece.</p>
+                <button 
+                  type="button"
+                  onClick={() => navigate('/login')}
+                  className="px-5 py-2 bg-brand-gold text-brand-tealDark font-bold text-xs rounded-lg shadow-lg hover:bg-brand-gold/90 transition"
+                >
+                  Log In
+                </button>
+              </div>
+            )}
 
             {/* List */}
             {productReviews.length === 0 ? (

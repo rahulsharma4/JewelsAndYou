@@ -387,7 +387,7 @@ const Header = ({ cartItemCount, onCartClick, selectedCategory, onCategoryChange
                         />
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold truncate">{item.product.name}</div>
-                          <div className="text-sm text-brand-gold">${item.product.price.toLocaleString()}</div>
+                          <div className="text-sm text-brand-gold">₹{item.product.price.toLocaleString('en-IN')}</div>
                           <div className="flex items-center mt-2">
                             <button
                               onClick={() => updateCartItem(item.product._id, item.quantity - 1)}
@@ -419,7 +419,7 @@ const Header = ({ cartItemCount, onCartClick, selectedCategory, onCategoryChange
                   <div className="mt-4 border-t border-brand-off/10 pt-4">
                     <div className="flex items-center justify-between font-bold mb-3">
                       <span>Total:</span>
-                      <span className="text-brand-gold">${getTotalPrice().toLocaleString()}</span>
+                      <span className="text-brand-gold">₹{getTotalPrice().toLocaleString('en-IN')}</span>
                     </div>
                     <button
                       onClick={handleCheckout}
