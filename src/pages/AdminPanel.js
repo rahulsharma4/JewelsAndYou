@@ -766,7 +766,7 @@ const AdminPanel = () => {
                           {p.priceType === 'weight-based' ? (
                             <span className="inline-flex items-center gap-1 text-brand-gold">
                               <Scale className="w-3.5 h-3.5" />
-                              {p.metalType} ({p.weight}g)
+                              {p.metalType && p.metalType !== 'None' ? `${p.metalType} ` : ''}({p.weight}g)
                             </span>
                           ) : (
                             <span className="text-brand-off/50">Fixed Price</span>
