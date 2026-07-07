@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
@@ -42,6 +42,19 @@ const CheckoutPayment = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { cart, getTotalPrice, clearCart } = useCart();
+  const token = localStorage.getItem('token');
+
+  useEffect(() => {
+    if (!token) {
+      navigate('/login?redirect=/checkout/address');
+    } else if (cart.length === 0) {
+      navigate('/cart');
+    } else if (!localStorage.getItem('shippingAddress')) {
+      navigate('/checkout/address');
+    } else if (!localStorage.getItem('shippingMethod')) {
+      navigate('/checkout/shipping');
+    }
+  }, [token, cart, navigate]);
   
   const totalAmount = getTotalPrice();
   const orderId = `order_${Date.now()}`;
@@ -49,7 +62,8 @@ const CheckoutPayment = () => {
     product: item.product._id || item.product.id,
     name: item.product.name,
     quantity: item.quantity,
-    price: item.product.price
+    price: item.product.price,
+    color: item.color || ''
   }));
 
   const handleStripeSuccess = async (paymentIntent) => {
@@ -93,6 +107,44 @@ const CheckoutPayment = () => {
     setError(errorMsg);
   };
 
+  const handleCodOrderSubmit = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const orderData = {
+        items: items,
+        shippingAddress: JSON.parse(localStorage.getItem('shippingAddress') || '{}'),
+        paymentMethod: 'cod',
+        paymentInfo: {
+          paymentIntentId: `cod_${Date.now()}`,
+          status: 'pending'
+        },
+        shippingMethod: JSON.parse(localStorage.getItem('shippingMethod') || '{}').method || 'standard',
+        subtotal: totalAmount,
+        total: totalAmount
+      };
+
+      const order = await api.createOrder(orderData);
+      
+      await clearCart();
+      localStorage.removeItem('shippingAddress');
+      localStorage.removeItem('shippingMethod');
+      
+      navigate('/checkout/success', { 
+        state: { 
+          orderId: order._id,
+          paymentIntentId: orderData.paymentInfo.paymentIntentId 
+        } 
+      });
+    } catch (err) {
+      setError('Order creation failed. Please contact support.');
+      console.error('Order creation error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-10 pb-24 md:pb-10">
       {/* Steps */}
@@ -134,21 +186,48 @@ const CheckoutPayment = () => {
 
         <div className="space-y-6">
           {/* Method choice */}
-          <div className="space-y-2">
+          <div className="space-y-3">
             <label className="block text-xs font-semibold uppercase text-brand-off/60">Choose Payment Method</label>
-            <div className="p-4 rounded-xl border border-brand-gold bg-brand-gold/5 flex items-center gap-3">
-              <input 
-                type="radio" 
-                name="method" 
-                value="stripe" 
-                checked={paymentMethod === "stripe"} 
-                onChange={(e) => setPaymentMethod(e.target.value)} 
-                className="accent-brand-gold w-4.5 h-4.5" 
-              />
-              <div>
-                <div className="text-sm font-bold">Credit/Debit Card</div>
-                <div className="text-xs text-brand-off/50 mt-0.5">Secure payment via international card networks</div>
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Stripe */}
+              <label className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${
+                paymentMethod === 'stripe' 
+                  ? 'border-brand-gold bg-brand-gold/5 text-brand-off'
+                  : 'border-brand-off/10 hover:border-brand-gold/30 text-brand-off/70'
+              }`}>
+                <input 
+                  type="radio" 
+                  name="method" 
+                  value="stripe" 
+                  checked={paymentMethod === "stripe"} 
+                  onChange={(e) => setPaymentMethod(e.target.value)} 
+                  className="accent-brand-gold w-4.5 h-4.5" 
+                />
+                <div>
+                  <div className="text-sm font-bold">Credit/Debit Card</div>
+                  <div className="text-xs text-brand-off/50 mt-0.5">Pay online via Stripe</div>
+                </div>
+              </label>
+
+              {/* Cash on Delivery / Test Order */}
+              <label className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${
+                paymentMethod === 'cod' 
+                  ? 'border-brand-gold bg-brand-gold/5 text-brand-off'
+                  : 'border-brand-off/10 hover:border-brand-gold/30 text-brand-off/70'
+              }`}>
+                <input 
+                  type="radio" 
+                  name="method" 
+                  value="cod" 
+                  checked={paymentMethod === "cod"} 
+                  onChange={(e) => setPaymentMethod(e.target.value)} 
+                  className="accent-brand-gold w-4.5 h-4.5" 
+                />
+                <div>
+                  <div className="text-sm font-bold">Cash on Delivery (COD)</div>
+                  <div className="text-xs text-brand-off/50 mt-0.5">Place a test/demo order instantly</div>
+                </div>
+              </label>
             </div>
           </div>
 
@@ -162,6 +241,23 @@ const CheckoutPayment = () => {
                 onSuccess={handleStripeSuccess}
                 onError={handleStripeError}
               />
+            </div>
+          )}
+
+          {/* COD Button Container */}
+          {paymentMethod === "cod" && (
+            <div className="bg-brand-teal/20 p-6 rounded-xl border border-brand-off/10 text-center space-y-4">
+              <p className="text-sm text-brand-off/70">
+                You have selected Cash on Delivery. This allows you to place a test order instantly without entering card details.
+              </p>
+              <motion.button
+                onClick={handleCodOrderSubmit}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full py-3 bg-brand-gold text-brand-tealDark rounded-lg font-bold text-sm shadow-lg shadow-brand-gold/10 hover:bg-brand-gold/90 transition"
+              >
+                Place Order (Cash on Delivery)
+              </motion.button>
             </div>
           )}
 

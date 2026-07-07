@@ -43,7 +43,7 @@ export const CartProvider = ({ children, user }) => {
     }
   };
 
-  const addToCart = async (product, quantity = 1) => {
+  const addToCart = async (product, quantity = 1, color = '') => {
     if (!user) {
       throw new Error('Please login to add items to cart');
     }
@@ -51,7 +51,7 @@ export const CartProvider = ({ children, user }) => {
     setLoading(true);
     setError(null);
     try {
-      await api.addToCart(product._id || product.id, quantity);
+      await api.addToCart(product._id || product.id, quantity, color);
       await loadCart(); // Reload cart to get updated data
       return true;
     } catch (error) {
@@ -63,7 +63,7 @@ export const CartProvider = ({ children, user }) => {
     }
   };
 
-  const updateCartItem = async (productId, quantity) => {
+  const updateCartItem = async (productId, quantity, color = '') => {
     if (!user) {
       throw new Error('Please login to update cart');
     }
@@ -72,9 +72,9 @@ export const CartProvider = ({ children, user }) => {
     setError(null);
     try {
       if (quantity <= 0) {
-        await api.removeFromCart(productId);
+        await api.removeFromCart(productId, color);
       } else {
-        await api.updateCartItem(productId, quantity);
+        await api.updateCartItem(productId, quantity, color);
       }
       await loadCart(); // Reload cart to get updated data
     } catch (error) {
@@ -86,7 +86,7 @@ export const CartProvider = ({ children, user }) => {
     }
   };
 
-  const removeFromCart = async (productId) => {
+  const removeFromCart = async (productId, color = '') => {
     if (!user) {
       throw new Error('Please login to remove from cart');
     }
@@ -94,7 +94,7 @@ export const CartProvider = ({ children, user }) => {
     setLoading(true);
     setError(null);
     try {
-      await api.removeFromCart(productId);
+      await api.removeFromCart(productId, color);
       await loadCart(); // Reload cart to get updated data
     } catch (error) {
       console.error('Error removing from cart:', error);

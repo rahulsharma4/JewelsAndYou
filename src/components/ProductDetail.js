@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Truck, Shield, RefreshCw, Heart, ShoppingBag, Plus, Minus, ArrowLeft, Scale, Gem } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -19,6 +19,27 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
   const [product, setProduct] = useState(null);
   const [loadingProduct, setLoadingProduct] = useState(true);
   const [selectedImageIdx, setSelectedImageIdx] = useState(0);
+  const [selectedImageColor, setSelectedImageColor] = useState('');
+
+  // Extract unique colors mapped to images
+  const uniqueImageColors = useMemo(() => {
+    if (!product || !product.imageColors || !product.images) return [];
+    const colors = product.images.map((_, idx) => 
+      product.imageColors[idx] ? product.imageColors[idx].trim() : ''
+    ).filter(Boolean);
+    return Array.from(new Set(colors));
+  }, [product]);
+
+  useEffect(() => {
+    if (product) {
+      setSelectedImageIdx(0);
+      if (product.imageColors && product.imageColors[0]) {
+        setSelectedImageColor(product.imageColors[0].trim());
+      } else {
+        setSelectedImageColor('');
+      }
+    }
+  }, [product]);
   
   // Use cart context
   const { addToCart } = useCart();
@@ -101,8 +122,8 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
 
   const handleAddToCart = async () => {
     try {
-      await addToCart(product, quantity);
-      showToast(`Success! ${quantity} × ${product.name} added to cart.`, 'success', ShoppingBag);
+      await addToCart(product, quantity, selectedImageColor);
+      showToast(`Success! ${quantity} × ${product.name} ${selectedImageColor ? `(${selectedImageColor})` : ''} added to cart.`, 'success', ShoppingBag);
     } catch (error) {
       console.error('Error adding to cart:', error);
       showToast(error.message || "Error adding to cart", 'error');
@@ -117,6 +138,15 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
     }
     onToggleFavorite(product._id || product.id);
     showToast(!isFavorite ? "Added to wishlist!" : "Removed from wishlist!", "success", Heart);
+  };
+
+  const handleThumbnailClick = (idx) => {
+    setSelectedImageIdx(idx);
+    if (product.imageColors && product.imageColors[idx]) {
+      setSelectedImageColor(product.imageColors[idx].trim());
+    } else {
+      setSelectedImageColor('');
+    }
   };
 
   const handleReviewSubmit = async (e) => {
@@ -162,8 +192,9 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
   })();
 
   const specifications = [
-    { label: "Material Type", value: product.priceType === 'weight-based' ? product.metalType : (product.specifications?.material || "Premium Alloy") },
+    { label: "Material Type", value: product.material || (product.priceType === 'weight-based' ? product.metalType : (product.specifications?.material || "Premium Alloy")) },
     { label: "Product Weight", value: product.priceType === 'weight-based' ? `${product.weight} grams` : (product.specifications?.weight || "Standard Weight") },
+    { label: "Color Option", value: product.color || "Standard" },
     { label: "Stone Type", value: product.specifications?.stoneType || (product.name.includes("Diamond") ? "Natural Diamond" : "Semi-Precious Stone") },
     { label: "Clarity Grade", value: product.specifications?.clarity || "VS1-VS2 Quality" },
     { label: "Color Grading", value: product.specifications?.color || "D-F Colorless" },
@@ -248,7 +279,7 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
               {product.images.map((img, idx) => (
                 <button
                   key={idx}
-                  onClick={() => setSelectedImageIdx(idx)}
+                  onClick={() => handleThumbnailClick(idx)}
                   className={`relative w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${
                     selectedImageIdx === idx ? 'border-brand-gold scale-105 shadow-lg' : 'border-transparent opacity-60 hover:opacity-100'
                   }`}
@@ -285,13 +316,29 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
               </div>
               <span className="text-xs text-brand-off/50">({product.rating.toFixed(1)} rating) • {productReviews.length} client reviews</span>
             </div>
+
+            <div className="flex flex-wrap gap-2 mt-3">
+              <span className="text-xs font-semibold px-2.5 py-1 rounded bg-brand-tealDark border border-brand-gold/15 text-brand-gold">
+                Category: {product.category}
+              </span>
+              {product.material && (
+                <span className="text-xs font-semibold px-2.5 py-1 rounded bg-brand-tealDark border border-brand-gold/15 text-brand-gold">
+                  Material: {product.material}
+                </span>
+              )}
+              {product.color && (
+                <span className="text-xs font-semibold px-2.5 py-1 rounded bg-brand-tealDark border border-brand-gold/15 text-brand-gold">
+                  Color: {product.color}
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="h-px bg-brand-gold/10" />
 
           {/* Pricing Box */}
           <div>
-            <div className="text-3xl font-bold text-brand-gold mb-2">₹{product.price.toLocaleString('en-IN')}</div>
+            <div className="text-3xl font-bold text-brand-gold mb-2">₹{(product.price * quantity).toLocaleString('en-IN')}</div>
             <p className="text-sm text-brand-off/70 leading-relaxed max-w-lg">{product.description}</p>
           </div>
 
@@ -325,10 +372,43 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
                 
                 <div className="flex justify-between text-sm font-bold text-brand-gold pt-1">
                   <span>Final Dynamic Sum</span>
-                  <span>₹{product.price.toLocaleString('en-IN')}</span>
+                  <span>₹{(product.price * quantity).toLocaleString('en-IN')}</span>
                 </div>
               </div>
             </motion.div>
+          )}
+
+          {/* Color Mapped Image Selector (Only if colors are mapped to images) */}
+          {uniqueImageColors.length > 0 && (
+            <div className="space-y-2.5">
+              <span className="text-xs font-semibold uppercase text-brand-off/60 block">Selected Option Color: <span className="text-brand-gold font-bold">{selectedImageColor || 'Default'}</span></span>
+              <div className="flex flex-wrap gap-2.5">
+                {uniqueImageColors.map((color) => {
+                  const isSelected = selectedImageColor === color;
+                  return (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => {
+                        setSelectedImageColor(color);
+                        // Find index of the first image that has this color
+                        const matchedIdx = product.imageColors.findIndex(c => c && c.trim() === color);
+                        if (matchedIdx !== -1) {
+                          setSelectedImageIdx(matchedIdx);
+                        }
+                      }}
+                      className={`px-3.5 py-1.5 rounded-lg border text-xs font-bold transition-all duration-200 ${
+                        isSelected 
+                          ? 'border-brand-gold bg-brand-gold/15 text-brand-gold shadow-lg shadow-brand-gold/5 scale-105' 
+                          : 'border-brand-off/15 hover:border-brand-gold/40 text-brand-off/70 bg-brand-tealDark/30 hover:text-brand-off'
+                      }`}
+                    >
+                      {color}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           )}
 
           {/* Purchase Actions */}
@@ -362,23 +442,7 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
             </div>
           </div>
 
-          <div className="h-px bg-brand-gold/10" />
 
-          {/* Trust assurances */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="flex items-center gap-2.5 p-3 rounded-lg bg-brand-tealDark/40 border border-brand-gold/5">
-              <Truck className="w-5 h-5 text-brand-gold flex-shrink-0" />
-              <div className="text-xs font-semibold">Free Insured Shipping</div>
-            </div>
-            <div className="flex items-center gap-2.5 p-3 rounded-lg bg-brand-tealDark/40 border border-brand-gold/5">
-              <Shield className="w-5 h-5 text-brand-gold flex-shrink-0" />
-              <div className="text-xs font-semibold">GIA Certified Jewels</div>
-            </div>
-            <div className="flex items-center gap-2.5 p-3 rounded-lg bg-brand-tealDark/40 border border-brand-gold/5">
-              <RefreshCw className="w-5 h-5 text-brand-gold flex-shrink-0" />
-              <div className="text-xs font-semibold">30-Day Easy Returns</div>
-            </div>
-          </div>
 
         </motion.div>
       </div>

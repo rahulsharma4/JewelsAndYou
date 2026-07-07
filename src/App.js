@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import api from "./services/api";
 import { CartProvider, useCart } from "./contexts/CartContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
@@ -58,6 +58,8 @@ function AppContent({ user, setUser }) {
 
   const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
   const navigate = useNavigate();
+  const location = useLocation();
+  const isAdminPage = location.pathname.startsWith('/admin');
 
   // Auto-dismiss snackbar after 3 seconds
   useEffect(() => {
@@ -146,18 +148,20 @@ function AppContent({ user, setUser }) {
   return (
     <div className="min-h-screen flex flex-col bg-brand-teal text-brand-off font-body pb-16 md:pb-0">
         {/* Header */}
-        <Header
-          cartItemCount={getTotalItems()}
-          onCartClick={() => setCartOpen(true)}
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-          user={user}
-          onLogout={() => {
-            api.logout();
-            setUser(null);
-            setFavorites([]);
-          }}
-        />
+        {!isAdminPage && (
+          <Header
+            cartItemCount={getTotalItems()}
+            onCartClick={() => setCartOpen(true)}
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+            user={user}
+            onLogout={() => {
+              api.logout();
+              setUser(null);
+              setFavorites([]);
+            }}
+          />
+        )}
 
         {/* Main Content */}
         <div className="flex-1">
@@ -358,8 +362,8 @@ function AppContent({ user, setUser }) {
         )}
 
         {/* Footer */}
-        <Footer />
-        <BottomNav user={user} onCartClick={() => setCartOpen(true)} />
+        {!isAdminPage && <Footer />}
+        {!isAdminPage && <BottomNav user={user} onCartClick={() => setCartOpen(true)} />}
       </div>
   );
 }

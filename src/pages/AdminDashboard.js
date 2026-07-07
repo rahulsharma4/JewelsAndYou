@@ -9,8 +9,11 @@ const AdminDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [users, setUsers] = useState([]);
   const [contacts, setContacts] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [stockUpdatingId, setStockUpdatingId] = useState(null);
+  const [localStockValues, setLocalStockValues] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,12 +36,13 @@ const AdminDashboard = () => {
 
   const loadDashboardData = async () => {
     try {
-      const [statsData, ordersData, usersData, advancedData, contactsData] = await Promise.all([
+      const [statsData, ordersData, usersData, advancedData, contactsData, productsData] = await Promise.all([
         api.getAdminStats(),
         api.getAdminOrders({ limit: 50 }),
         api.getAdminUsers({ limit: 50 }),
         api.getAdvancedAnalytics(),
-        api.getAdminContacts()
+        api.getAdminContacts(),
+        api.getAdminProducts({ limit: 100 })
       ]);
       
       setStats(statsData);
@@ -46,10 +50,30 @@ const AdminDashboard = () => {
       setUsers(usersData.users || []);
       setAdvancedStats(advancedData);
       setContacts(contactsData || []);
+      setProducts(productsData.products || []);
+
+      // Initialize local stock values
+      const stockVals = {};
+      (productsData.products || []).forEach(p => {
+        stockVals[p._id] = p.stock || 0;
+      });
+      setLocalStockValues(stockVals);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateStock = async (productId, newStock) => {
+    try {
+      setStockUpdatingId(productId);
+      await api.updateAdminProductStock(productId, newStock);
+      loadDashboardData();
+    } catch (error) {
+      console.error('Error updating stock:', error);
+    } finally {
+      setStockUpdatingId(null);
     }
   };
 
@@ -64,8 +88,6 @@ const AdminDashboard = () => {
 
   const updateUserStatus = async (userId, status) => {
     try {
-      await api.updateUserRole(userId, status); // Actually wait, the user status was a direct fetch.
-      // Let's keep it as is, or I can use the same direct fetch.
       await api.fetchWithAuth(`/admin/users/${userId}/status`, {
           method: 'PUT',
           body: { status }
@@ -163,7 +185,7 @@ const AdminDashboard = () => {
 
         {/* Tab Navigation */}
         <div className="flex gap-4 mb-8 overflow-x-auto pb-2">
-          {['overview', 'orders', 'users', 'messages', 'analytics'].map((tab) => (
+          {['overview', 'orders', 'users', 'messages', 'analytics', 'inventory'].map((tab) => (
             <motion.button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -531,6 +553,148 @@ const AdminDashboard = () => {
                 ) : (
                   <p className="text-brand-off/50">No sales in the last 7 days.</p>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Inventory Tab */}
+        {activeTab === 'inventory' && (
+          <div className="space-y-6">
+            <h2 className="text-xl font-bold mb-4">Inventory & Stock Alerts</h2>
+
+            {/* Catalog Inventory Summary */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <div className="bg-brand-tealDark p-5 rounded-lg border border-brand-gold/20 shadow-md text-center">
+                <div className="text-xs text-brand-off/60 uppercase tracking-wider mb-1">Total Pieces in Catalog</div>
+                <div className="text-3xl font-bold text-brand-gold">
+                  {products.reduce((acc, p) => acc + (p.stock || 0), 0)}
+                </div>
+              </div>
+              <div className="bg-brand-tealDark p-5 rounded-lg border border-brand-gold/20 shadow-md text-center">
+                <div className="text-xs text-brand-off/60 uppercase tracking-wider mb-1">Catalog Value Estimation</div>
+                <div className="text-3xl font-bold text-brand-gold">
+                  ₹{products.reduce((acc, p) => acc + ((p.price || 0) * (p.stock || 0)), 0).toLocaleString('en-IN')}
+                </div>
+              </div>
+              <div className="bg-brand-tealDark p-5 rounded-lg border border-brand-gold/20 shadow-md text-center">
+                <div className="text-xs text-brand-off/60 uppercase tracking-wider mb-1">Low Stock Products (&lt;= 10)</div>
+                <div className="text-3xl font-bold text-amber-500">
+                  {products.filter(p => (p.stock || 0) <= 10 && (p.stock || 0) > 0).length}
+                </div>
+              </div>
+              <div className="bg-brand-tealDark p-5 rounded-lg border border-brand-gold/20 shadow-md text-center">
+                <div className="text-xs text-brand-off/60 uppercase tracking-wider mb-1">Out of Stock Products</div>
+                <div className="text-3xl font-bold text-rose-500">
+                  {products.filter(p => (p.stock || 0) === 0).length}
+                </div>
+              </div>
+            </div>
+
+            {/* Gram-based Catalog Weight calculation */}
+            <div className="bg-brand-tealDark p-5 rounded-lg border border-brand-gold/20 shadow-md mb-8">
+              <h3 className="text-md font-bold mb-3 text-brand-gold uppercase tracking-wide">Dynamic Stock Metal Volume Analysis</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-brand-teal/20 p-4 rounded border border-brand-gold/10">
+                  <div className="text-sm font-semibold text-brand-off/80">Total Gold Stock Weight</div>
+                  <div className="text-2xl font-bold text-brand-gold mt-1">
+                    {products
+                      .filter(p => p.priceType === 'weight-based' && (p.metalType || '').toLowerCase() === 'gold')
+                      .reduce((acc, p) => acc + ((p.weight || 0) * (p.stock || 0)), 0)
+                      .toFixed(2)} g
+                  </div>
+                  <div className="text-xs text-brand-off/40 mt-1">Total weight across all Gold catalog items in stock</div>
+                </div>
+                <div className="bg-brand-teal/20 p-4 rounded border border-brand-gold/10">
+                  <div className="text-sm font-semibold text-brand-off/80">Total Silver Stock Weight</div>
+                  <div className="text-2xl font-bold text-brand-gold mt-1">
+                    {products
+                      .filter(p => p.priceType === 'weight-based' && (p.metalType || '').toLowerCase() === 'silver')
+                      .reduce((acc, p) => acc + ((p.weight || 0) * (p.stock || 0)), 0)
+                      .toFixed(2)} g
+                  </div>
+                  <div className="text-xs text-brand-off/40 mt-1">Total weight across all Silver catalog items in stock</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Inventory table */}
+            <div className="bg-brand-tealDark rounded-lg border border-brand-gold/20 p-6">
+              <h3 className="text-lg font-bold mb-4">Stock Alerts & Catalog List</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-brand-teal/30">
+                    <tr>
+                      <th className="p-3 text-xs uppercase tracking-wider">Product</th>
+                      <th className="p-3 text-xs uppercase tracking-wider">Category</th>
+                      <th className="p-3 text-xs uppercase tracking-wider">Pricing Type</th>
+                      <th className="p-3 text-xs uppercase tracking-wider">Metal Type / Weight</th>
+                      <th className="p-3 text-xs uppercase tracking-wider">Total Metal Weight</th>
+                      <th className="p-3 text-xs uppercase tracking-wider">Current Stock</th>
+                      <th className="p-3 text-xs uppercase tracking-wider text-right">Quick Stock Update</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-brand-off/10 text-sm">
+                    {products.map((p) => {
+                      const isLow = (p.stock || 0) <= 10;
+                      const isOut = (p.stock || 0) === 0;
+                      const totalWeight = p.priceType === 'weight-based' ? ((p.weight || 0) * (p.stock || 0)).toFixed(2) : null;
+                      
+                      return (
+                        <tr key={p._id} className={`hover:bg-brand-teal/10 ${isOut ? 'bg-rose-500/5' : isLow ? 'bg-amber-500/5' : ''}`}>
+                          <td className="p-3 font-semibold">
+                            <div className="flex flex-col">
+                              <span>{p.name}</span>
+                              {isOut ? (
+                                <span className="text-[10px] text-rose-400 font-bold uppercase mt-0.5">Out of Stock</span>
+                              ) : isLow ? (
+                                <span className="text-[10px] text-amber-400 font-bold uppercase mt-0.5">Low Stock</span>
+                              ) : null}
+                            </div>
+                          </td>
+                          <td className="p-3">{p.category}</td>
+                          <td className="p-3 capitalize">{p.priceType}</td>
+                          <td className="p-3">
+                            {p.priceType === 'weight-based' ? (
+                              <span className="capitalize">{p.metalType} • {p.weight}g</span>
+                            ) : (
+                              <span className="text-brand-off/40">—</span>
+                            )}
+                          </td>
+                          <td className="p-3 font-semibold text-brand-gold">
+                            {totalWeight ? `${totalWeight} g` : <span className="text-brand-off/40">—</span>}
+                          </td>
+                          <td className="p-3">
+                            <span className={`font-bold ${isOut ? 'text-rose-400' : isLow ? 'text-amber-400' : 'text-brand-off'}`}>
+                              {p.stock || 0}
+                            </span>
+                          </td>
+                          <td className="p-3 text-right">
+                            <div className="inline-flex items-center gap-2">
+                              <input
+                                type="number"
+                                min="0"
+                                value={localStockValues[p._id] !== undefined ? localStockValues[p._id] : (p.stock || 0)}
+                                onChange={(e) => setLocalStockValues({
+                                  ...localStockValues,
+                                  [p._id]: parseInt(e.target.value) || 0
+                                })}
+                                className="w-16 rounded bg-brand-teal px-2 py-1 text-center border border-brand-off/20 focus:border-brand-gold outline-none"
+                              />
+                              <button
+                                onClick={() => updateStock(p._id, localStockValues[p._id])}
+                                disabled={stockUpdatingId === p._id}
+                                className="px-3 py-1 bg-brand-gold text-brand-tealDark font-bold rounded text-xs hover:bg-brand-gold/80 transition"
+                              >
+                                {stockUpdatingId === p._id ? 'Updating...' : 'Update'}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>

@@ -17,6 +17,7 @@ const AdminPanel = () => {
   const [importing, setImporting] = useState(false);
   const [isNewCategory, setIsNewCategory] = useState(false);
   const [isNewMaterial, setIsNewMaterial] = useState(false);
+  const [isNewColor, setIsNewColor] = useState(false);
   
   // Tag editing state
   const [editingCategory, setEditingCategory] = useState({ oldName: '', newName: '' });
@@ -28,9 +29,12 @@ const AdminPanel = () => {
     price: "",
     description: "",
     category: "",
+    material: "",
+    color: "",
     stock: "",
     featured: false,
     images: [],
+    imageColors: [],
     priceType: "fixed",
     weight: "",
     metalType: "None",
@@ -128,6 +132,11 @@ const AdminPanel = () => {
     return Array.from(mats).sort();
   }, [products]);
 
+  const colors = useMemo(() => {
+    const cls = new Set(products.map(p => p.color).filter(Boolean));
+    return Array.from(cls).sort();
+  }, [products]);
+
   const handleExport = async () => {
     try {
       const blob = await api.exportProducts();
@@ -171,7 +180,11 @@ const AdminPanel = () => {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    setFormData(prev => ({ ...prev, images: files }));
+    setFormData(prev => ({ 
+      ...prev, 
+      images: files, 
+      imageColors: files.map((_, idx) => prev.imageColors[idx] || '')
+    }));
   };
 
   // Preview Price for Weight-Based Calculation
@@ -201,8 +214,9 @@ const AdminPanel = () => {
       const formDataToSend = new FormData();
       formDataToSend.append('name', formData.name);
       formDataToSend.append('description', formData.description);
-      formDataToSend.append('category', formData.category);
-      if (formData.material) formDataToSend.append('material', formData.material);
+      formDataToSend.append('category', isNewCategory ? formData.category : (formData.category || 'Uncategorized'));
+      formDataToSend.append('material', isNewMaterial ? formData.material : (formData.material || ''));
+      formDataToSend.append('color', isNewColor ? formData.color : (formData.color || ''));
       formDataToSend.append('stock', formData.stock);
       formDataToSend.append('featured', formData.featured);
       formDataToSend.append('priceType', formData.priceType);
@@ -228,6 +242,8 @@ const AdminPanel = () => {
         if (editingProduct.images) formDataToSend.append('currentImages', JSON.stringify(editingProduct.images));
       }
 
+      formDataToSend.append('imageColors', JSON.stringify(formData.imageColors || []));
+
       const url = `${editingProduct ? `/${editingProduct._id}` : ''}`;
       
       await api.fetchWithAuth(`/admin/products${url}`, {
@@ -244,7 +260,7 @@ const AdminPanel = () => {
     }
   };
 
-  const resetForm = () => {
+   const resetForm = () => {
     setFormData({
       name: "",
       price: "",
@@ -253,14 +269,19 @@ const AdminPanel = () => {
       stock: "",
       featured: false,
       images: [],
+      imageColors: [],
       priceType: "fixed",
       weight: "",
       metalType: "None",
       makingCharge: "",
-      material: ""
+      material: "",
+      color: ""
     });
+    setEditingProduct(null);
+    setShowAddForm(false);
     setIsNewCategory(false);
     setIsNewMaterial(false);
+    setIsNewColor(false);
   };
 
   const handleEdit = (product) => {
@@ -273,11 +294,13 @@ const AdminPanel = () => {
       stock: product.stock.toString(),
       featured: product.featured,
       images: [],
+      imageColors: product.imageColors || [],
       priceType: product.priceType || "fixed",
       weight: product.weight ? product.weight.toString() : "",
       metalType: product.metalType || "None",
       makingCharge: product.makingCharge ? product.makingCharge.toString() : "",
-      material: product.material || ""
+      material: product.material || "",
+      color: product.color || ""
     });
     
     // Check if category or material is new/custom
@@ -291,6 +314,12 @@ const AdminPanel = () => {
       setIsNewMaterial(true);
     } else {
       setIsNewMaterial(false);
+    }
+    
+    if (product.color && !colors.includes(product.color)) {
+      setIsNewColor(true);
+    } else {
+      setIsNewColor(false);
     }
     
     setShowAddForm(true);
@@ -403,6 +432,12 @@ const AdminPanel = () => {
               }`}
             >
               <Tag className="w-4 h-4" /> Tags & Categories
+            </button>
+            <button
+              onClick={() => navigate('/admin/dashboard')}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition text-brand-off/70 hover:bg-brand-teal/20"
+            >
+              <TrendingUp className="w-4 h-4" /> Inventory Dashboard
             </button>
           </div>
         </div>
@@ -518,7 +553,13 @@ const AdminPanel = () => {
                       <div className="flex items-center justify-between mb-2">
                         <label className="block text-xs font-semibold uppercase text-brand-off/60">Material</label>
                         {isNewMaterial && (
-                          <button type="button" onClick={() => { setIsNewMaterial(false); setFormData(p => ({...p, material: ''})) }} className="text-[10px] text-brand-gold hover:underline">Select Existing</button>
+                          <button 
+                            type="button" 
+                            onClick={() => { setIsNewMaterial(false); setFormData(p => ({...p, material: ''})) }}
+                            className="text-[10px] text-brand-gold hover:underline"
+                          >
+                            Select Existing
+                          </button>
                         )}
                       </div>
                       {isNewMaterial ? (
@@ -531,26 +572,77 @@ const AdminPanel = () => {
                           placeholder="Type new material..."
                         />
                       ) : (
-                        <select
-                          value={formData.material}
-                          onChange={(e) => {
-                            if (e.target.value === 'ADD_NEW') {
-                              setIsNewMaterial(true);
-                              setFormData(p => ({ ...p, material: '' }));
-                            } else {
-                              setFormData(p => ({ ...p, material: e.target.value }));
-                            }
-                          }}
-                          className="w-full rounded-lg border border-brand-off/15 bg-brand-tealDark px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
-                        >
-                          <option value="">Select Material...</option>
-                          {materials.map(mat => (
-                            <option key={mat} value={mat}>{mat}</option>
-                          ))}
-                          <option value="ADD_NEW" className="font-bold text-brand-gold bg-brand-teal/20">+ Add New Material</option>
-                        </select>
+                        <div className="flex flex-col">
+                          <select
+                            value={materials.includes(formData.material) ? formData.material : ''}
+                            onChange={(e) => {
+                              if (e.target.value === 'ADD_NEW') {
+                                setIsNewMaterial(true);
+                                setFormData({ ...formData, material: '' });
+                              } else {
+                                setFormData({ ...formData, material: e.target.value });
+                              }
+                            }}
+                            className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                          >
+                            <option value="">Select Material...</option>
+                            {materials.map(mat => (
+                              <option key={mat} value={mat}>{mat}</option>
+                            ))}
+                            <option value="ADD_NEW" className="font-bold text-brand-gold bg-brand-tealDark">+ Add New Material...</option>
+                          </select>
+                        </div>
                       )}
                     </div>
+                  
+                  {/* Color Selection (Dynamic Dropdown) */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-xs font-semibold uppercase text-brand-off/60">Color</label>
+                      {isNewColor && (
+                        <button 
+                          type="button" 
+                          onClick={() => { setIsNewColor(false); setFormData(p => ({...p, color: ''})) }}
+                          className="text-[10px] text-brand-gold hover:underline"
+                        >
+                          Select Existing
+                        </button>
+                      )}
+                    </div>
+                    {isNewColor ? (
+                      <div className="flex flex-col">
+                        <input
+                          type="text"
+                          value={formData.color}
+                          onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                          placeholder="Type new color..."
+                          className="w-full rounded-lg border border-brand-gold/40 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/70 focus:outline-none placeholder-brand-off/30"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex flex-col">
+                        <select
+                          value={colors.includes(formData.color) ? formData.color : ''}
+                          onChange={(e) => {
+                            if (e.target.value === 'ADD_NEW') {
+                              setIsNewColor(true);
+                              setFormData({ ...formData, color: '' });
+                            } else {
+                              setFormData({ ...formData, color: e.target.value });
+                            }
+                          }}
+                          className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                        >
+                          <option value="">Select Color...</option>
+                          {colors.map(c => (
+                            <option key={c} value={c}>{c}</option>
+                          ))}
+                          <option value="ADD_NEW" className="font-bold text-brand-gold bg-brand-tealDark">+ Add New Color...</option>
+                        </select>
+                      </div>
+                    )}
+                  </div>
+
 
                     {/* Stock */}
                     <div>
@@ -655,29 +747,69 @@ const AdminPanel = () => {
                     {/* Image selector */}
                     <div className="md:col-span-2">
                       <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Product Images</label>
-                      <div className="flex flex-col gap-4">
-                        <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-col">
+                        <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
                           {formData.images.length > 0 ? (
                             formData.images.map((img, idx) => (
-                              <div key={idx} className="relative w-12 h-12 rounded-lg overflow-hidden border border-brand-gold/25">
-                                <img src={URL.createObjectURL(img)} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
+                              <div key={idx} className="flex items-center gap-3 bg-brand-teal/20 p-2 rounded-lg border border-brand-off/10">
+                                <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-brand-gold/25 flex-shrink-0">
+                                  <img src={URL.createObjectURL(img)} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
+                                </div>
+                                <div className="flex-1">
+                                  <input 
+                                    type="text" 
+                                    placeholder="Associate Color (e.g. Gold, Silver) - Optional"
+                                    value={formData.imageColors[idx] || ''}
+                                    onChange={(e) => {
+                                      const newColors = [...formData.imageColors];
+                                      newColors[idx] = e.target.value;
+                                      setFormData(prev => ({ ...prev, imageColors: newColors }));
+                                    }}
+                                    className="w-full px-2.5 py-1 text-xs rounded border border-brand-off/15 bg-brand-tealDark/50 text-brand-off focus:outline-none focus:border-brand-gold/30"
+                                  />
+                                </div>
                               </div>
                             ))
                           ) : editingProduct && editingProduct.images && editingProduct.images.length > 0 ? (
                             editingProduct.images.map((img, idx) => (
-                              <img 
-                                key={idx}
-                                src={getImageUrl(img)} 
-                                alt={`Current ${idx}`} 
-                                className="w-12 h-12 object-cover rounded-lg border border-brand-gold/25"
-                              />
+                              <div key={idx} className="flex items-center gap-3 bg-brand-teal/20 p-2 rounded-lg border border-brand-off/10">
+                                <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-brand-gold/25 flex-shrink-0">
+                                  <img src={getImageUrl(img)} alt={`Current ${idx}`} className="w-full h-full object-cover" />
+                                </div>
+                                <div className="flex-1">
+                                  <input 
+                                    type="text" 
+                                    placeholder="Associate Color (e.g. Gold, Silver) - Optional"
+                                    value={formData.imageColors[idx] || ''}
+                                    onChange={(e) => {
+                                      const newColors = [...formData.imageColors];
+                                      newColors[idx] = e.target.value;
+                                      setFormData(prev => ({ ...prev, imageColors: newColors }));
+                                    }}
+                                    className="w-full px-2.5 py-1 text-xs rounded border border-brand-off/15 bg-brand-tealDark/50 text-brand-off focus:outline-none focus:border-brand-gold/30"
+                                  />
+                                </div>
+                              </div>
                             ))
                           ) : editingProduct && editingProduct.image && !formData.images.length && (
-                            <img 
-                              src={getImageUrl(editingProduct.image)} 
-                              alt="Current" 
-                              className="w-12 h-12 object-cover rounded-lg border border-brand-gold/25"
-                            />
+                            <div className="flex items-center gap-3 bg-brand-teal/20 p-2 rounded-lg border border-brand-off/10">
+                              <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-brand-gold/25 flex-shrink-0">
+                                <img src={getImageUrl(editingProduct.image)} alt="Current" className="w-full h-full object-cover" />
+                              </div>
+                              <div className="flex-1">
+                                <input 
+                                  type="text" 
+                                  placeholder="Associate Color (e.g. Gold, Silver) - Optional"
+                                  value={formData.imageColors[0] || ''}
+                                  onChange={(e) => {
+                                    const newColors = [...formData.imageColors];
+                                    newColors[0] = e.target.value;
+                                    setFormData(prev => ({ ...prev, imageColors: newColors }));
+                                  }}
+                                  className="w-full px-2.5 py-1 text-xs rounded border border-brand-off/15 bg-brand-tealDark/50 text-brand-off focus:outline-none focus:border-brand-gold/30"
+                                />
+                              </div>
+                            </div>
                           )}
                         </div>
                         <input
@@ -755,7 +887,7 @@ const AdminPanel = () => {
                       >
                         <td className="p-4">
                           <ImageWithFallback
-                            src={p.image}
+                            src={p.image || (p.images && p.images.length > 0 ? p.images[0] : null)}
                             alt={p.name}
                             className="w-12 h-12 object-cover rounded-lg border border-brand-gold/10"
                           />
@@ -812,84 +944,7 @@ const AdminPanel = () => {
             animate={{ opacity: 1, y: 0 }}
             className="grid grid-cols-1 lg:grid-cols-3 gap-6"
           >
-            {/* Rates config */}
-            <div className="bg-brand-tealDark p-6 rounded-2xl border border-brand-gold/10 h-fit space-y-4">
-              <h3 className="text-lg font-bold font-heading text-brand-gold border-b border-brand-gold/10 pb-2 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5" /> Live Metal Rates (per gram)
-              </h3>
-              
-              <div className="space-y-4">
-                {/* Gold 24K */}
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Gold 24K Rate (₹)</label>
-                  <input
-                    type="number"
-                    value={siteSettings.metalRates.gold24k}
-                    onChange={e => setSiteSettings(prev => ({
-                      ...prev,
-                      metalRates: { ...prev.metalRates, gold24k: Number(e.target.value) }
-                    }))}
-                    className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
-                  />
-                </div>
-
-                {/* Gold 22K */}
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Gold 22K Rate (₹)</label>
-                  <input
-                    type="number"
-                    value={siteSettings.metalRates.gold22k}
-                    onChange={e => setSiteSettings(prev => ({
-                      ...prev,
-                      metalRates: { ...prev.metalRates, gold22k: Number(e.target.value) }
-                    }))}
-                    className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
-                  />
-                </div>
-
-                {/* Gold 18K */}
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Gold 18K Rate (₹)</label>
-                  <input
-                    type="number"
-                    value={siteSettings.metalRates.gold18k}
-                    onChange={e => setSiteSettings(prev => ({
-                      ...prev,
-                      metalRates: { ...prev.metalRates, gold18k: Number(e.target.value) }
-                    }))}
-                    className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
-                  />
-                </div>
-
-                {/* Silver */}
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Silver Rate (₹)</label>
-                  <input
-                    type="number"
-                    value={siteSettings.metalRates.silver}
-                    onChange={e => setSiteSettings(prev => ({
-                      ...prev,
-                      metalRates: { ...prev.metalRates, silver: Number(e.target.value) }
-                    }))}
-                    className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
-                  />
-                </div>
-
-                {/* Platinum */}
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Platinum Rate (₹)</label>
-                  <input
-                    type="number"
-                    value={siteSettings.metalRates.platinum}
-                    onChange={e => setSiteSettings(prev => ({
-                      ...prev,
-                      metalRates: { ...prev.metalRates, platinum: Number(e.target.value) }
-                    }))}
-                    className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
-                  />
-                </div>
-              </div>
-            </div>
+            {/* Rates config removed per user request */}
 
             {/* Banner details config */}
             <div className="bg-brand-tealDark p-6 rounded-2xl border border-brand-gold/10 lg:col-span-2 space-y-5">

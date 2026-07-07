@@ -208,11 +208,11 @@ class ApiService {
     return response.json();
   }
 
-  async addToCart(productId, quantity = 1) {
+  async addToCart(productId, quantity = 1, color = '') {
     const response = await fetch(`${API_BASE_URL}/cart/add`, {
       method: 'POST',
       headers: this.getHeaders(),
-      body: JSON.stringify({ productId, quantity }),
+      body: JSON.stringify({ productId, quantity, color }),
     });
     
     if (!response.ok) {
@@ -223,11 +223,11 @@ class ApiService {
     return response.json();
   }
 
-  async updateCartItem(productId, quantity) {
+  async updateCartItem(productId, quantity, color = '') {
     const response = await fetch(`${API_BASE_URL}/cart/update/${productId}`, {
       method: 'PUT',
       headers: this.getHeaders(),
-      body: JSON.stringify({ quantity }),
+      body: JSON.stringify({ quantity, color }),
     });
     
     if (!response.ok) {
@@ -238,8 +238,9 @@ class ApiService {
     return response.json();
   }
 
-  async removeFromCart(productId) {
-    const response = await fetch(`${API_BASE_URL}/cart/remove/${productId}`, {
+  async removeFromCart(productId, color = '') {
+    const colorQuery = color ? `?color=${encodeURIComponent(color)}` : '';
+    const response = await fetch(`${API_BASE_URL}/cart/remove/${productId}${colorQuery}`, {
       method: 'DELETE',
       headers: this.getHeaders(),
     });
@@ -389,6 +390,15 @@ class ApiService {
     const queryString = new URLSearchParams(params).toString();
     const response = await fetch(`${API_BASE_URL}/admin/products?${queryString}`, {
       headers: this.getHeaders(),
+    });
+    return response.json();
+  }
+
+  async updateAdminProductStock(productId, stock) {
+    const response = await fetch(`${API_BASE_URL}/admin/products/${productId}/stock`, {
+      method: 'PATCH',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ stock }),
     });
     return response.json();
   }

@@ -3,11 +3,22 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
 import { ShoppingBag, Trash2, ArrowRight, ShieldCheck, Truck, Plus, Minus, Gem } from "lucide-react";
+import { ImageWithFallback } from "../utils/imageUtils";
 
 const CartPage = () => {
   const navigate = useNavigate();
   const { cart, loading, updateCartItem, removeFromCart, getTotalPrice } = useCart();
   const total = getTotalPrice();
+
+  const getCartItemImage = (item) => {
+    if (item.color && item.product.images && item.product.imageColors) {
+      const idx = item.product.imageColors.findIndex(c => c && c.trim().toLowerCase() === item.color.toLowerCase());
+      if (idx !== -1 && item.product.images[idx]) {
+        return item.product.images[idx];
+      }
+    }
+    return item.product.image || (item.product.images && item.product.images.length > 0 ? item.product.images[0] : null);
+  };
 
   // Free shipping progress tracker details
   const freeShippingThreshold = 49999;
@@ -86,7 +97,7 @@ const CartPage = () => {
               <AnimatePresence>
                 {cart.map((item) => (
                   <motion.div 
-                    key={item.product._id || item.product.id}
+                    key={`${item.product._id || item.product.id}-${item.color || ''}`}
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, x: -50 }}
@@ -94,8 +105,8 @@ const CartPage = () => {
                   >
                     {/* Thumbnail */}
                     <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-brand-teal">
-                      <img 
-                        src={item.product.image} 
+                      <ImageWithFallback 
+                        src={getCartItemImage(item)} 
                         alt={item.product.name} 
                         className="w-full h-full object-cover" 
                       />
@@ -104,16 +115,23 @@ const CartPage = () => {
                     {/* Details */}
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-sm truncate text-brand-off group-hover:text-brand-gold transition duration-200">{item.product.name}</h3>
-                      <span className="text-[10px] text-brand-gold/70 font-semibold px-2 py-0.5 rounded bg-brand-gold/10 border border-brand-gold/20 inline-block mt-1">
-                        {item.product.category}
-                      </span>
+                      <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                        <span className="text-[10px] text-brand-gold/70 font-semibold px-2 py-0.5 rounded bg-brand-gold/10 border border-brand-gold/20 inline-block">
+                          {item.product.category}
+                        </span>
+                        {item.color && (
+                          <span className="text-[10px] text-sky-300 font-semibold px-2 py-0.5 rounded bg-sky-300/10 border border-sky-300/20 inline-block">
+                            Color: {item.color}
+                          </span>
+                        )}
+                      </div>
                       {item.product.priceType === 'weight-based' && (
                         <div className="text-[10px] text-brand-off/40 mt-1">
                           Metal: {item.product.metalType} • Weight: {item.product.weight}g
                         </div>
                       )}
                       <div className="text-sm font-bold text-brand-gold mt-2">
-                        ₹{item.product.price?.toLocaleString('en-IN')}
+                        ₹{(item.product.price * item.quantity).toLocaleString('en-IN')}
                       </div>
                     </div>
 
@@ -122,14 +140,14 @@ const CartPage = () => {
                       {/* Quantity */}
                       <div className="flex items-center rounded-lg border border-brand-off/15 bg-brand-teal/20 overflow-hidden">
                         <button 
-                          onClick={() => updateCartItem(item.product._id || item.product.id, item.quantity - 1)}
+                          onClick={() => updateCartItem(item.product._id || item.product.id, item.quantity - 1, item.color)}
                           className="p-2 hover:bg-brand-teal/30 text-brand-off/60 hover:text-brand-off transition"
                         >
                           <Minus className="w-3.5 h-3.5" />
                         </button>
                         <span className="w-8 text-center text-xs font-semibold">{item.quantity}</span>
                         <button 
-                          onClick={() => updateCartItem(item.product._id || item.product.id, item.quantity + 1)}
+                          onClick={() => updateCartItem(item.product._id || item.product.id, item.quantity + 1, item.color)}
                           className="p-2 hover:bg-brand-teal/30 text-brand-off/60 hover:text-brand-off transition"
                         >
                           <Plus className="w-3.5 h-3.5" />
@@ -138,7 +156,7 @@ const CartPage = () => {
 
                       {/* Remove */}
                       <button 
-                        onClick={() => removeFromCart(item.product._id || item.product.id)}
+                        onClick={() => removeFromCart(item.product._id || item.product.id, item.color)}
                         className="p-2 text-brand-off/40 hover:text-red-400 border border-brand-off/10 rounded-lg hover:border-red-400/20 transition"
                         title="Remove from bag"
                       >

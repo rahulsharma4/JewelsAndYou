@@ -1,20 +1,39 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Facebook, Twitter, Instagram, Youtube, Linkedin, MapPin, Phone, Mail, Clock } from "lucide-react";
+import api from "../services/api";
 
 const Footer = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [dynamicCategories, setDynamicCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const data = await api.getCategories();
+        if (Array.isArray(data)) {
+          setDynamicCategories(data.filter(cat => 
+            typeof cat === 'string' && 
+            cat.trim() !== '' && 
+            /[a-zA-Z0-9]/.test(cat)
+          ));
+        }
+      } catch (err) {
+        console.error('Error fetching categories in footer:', err);
+      }
+    };
+    fetchCats();
+  }, []);
 
   const footerSections = [
     { title: "Shop", links: [
       { name: "All Products", path: "/products" },
-      { name: "Rings", path: "/products" },
-      { name: "Necklaces", path: "/products" },
-      { name: "Earrings", path: "/products" },
-      { name: "Watches", path: "/products" },
-      { name: "New Arrivals", path: "/products" },
+      ...dynamicCategories.map(cat => ({
+        name: cat,
+        path: `/category/${encodeURIComponent(cat)}`
+      }))
     ]},
     { title: "Customer Service", links: [
       { name: "Contact Us", path: "/contact" },
@@ -36,11 +55,11 @@ const Footer = () => {
   ];
 
   const socialLinks = [
-    { label: "Facebook", icon: Facebook },
-    { label: "Twitter", icon: Twitter },
-    { label: "Instagram", icon: Instagram },
-    { label: "YouTube", icon: Youtube },
-    { label: "LinkedIn", icon: Linkedin },
+    { label: "Facebook", icon: Facebook, url: "https://facebook.com/jewelsandyou" },
+    { label: "Twitter", icon: Twitter, url: "https://twitter.com/jewelsandyou" },
+    { label: "Instagram", icon: Instagram, url: "https://instagram.com/jewelsandyou" },
+    { label: "YouTube", icon: Youtube, url: "https://youtube.com/@jewelsandyou" },
+    { label: "LinkedIn", icon: Linkedin, url: "https://linkedin.com/company/jewelsandyou" },
   ];
 
   const handleNewsletterSubmit = (e) => {
@@ -72,14 +91,21 @@ const Footer = () => {
               <div className="flex items-center gap-2"><Clock className="w-4 h-4  " /><span>Mon-Fri: 9AM-6PM, Sat: 10AM-4PM</span></div>
             </div>
 
-            <div className="mt-4 flex gap-2">
+            <div className="mt-4 flex gap-2 flex-wrap">
               {socialLinks.map((s) => {
                 const Icon = s.icon;
                 return (
-                  <button key={s.label} className="w-9 h-9 inline-flex items-center justify-center rounded border border-white/20 hover:bg-yellow-400 hover:text-black transition" aria-label={s.label}>
+                  <a
+                    key={s.label}
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 inline-flex items-center justify-center rounded border border-white/20 hover:bg-brand-gold hover:text-brand-tealDark hover:border-brand-gold transition-all duration-200"
+                    aria-label={s.label}
+                  >
                     <Icon className="w-4 h-4" />
-                  </button>
-                )
+                  </a>
+                );
               })}
             </div>
           </div>

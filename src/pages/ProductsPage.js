@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { ImageWithFallback } from "../utils/imageUtils";
@@ -63,9 +63,10 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
   const initialCategory = location.state?.selectedCategory || "All";
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [searchQuery, setSearchQuery] = useState("");
-  const [priceRange, setPriceRange] = useState([0, 500000]);
+  const [priceRange, setPriceRange] = useState([0, 100000]);
   const [sortBy, setSortBy] = useState("newest");
   const [selectedMaterials, setSelectedMaterials] = useState([]);
+  const [selectedColors, setSelectedColors] = useState([]);
   const [selectedRatings, setSelectedRatings] = useState([]);
 
   const categories = useMemo(() => {
@@ -79,10 +80,20 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
     return Array.from(mats).sort();
   }, [products]);
 
-  const maxPrice = useMemo(() => {
-    if (products.length === 0) return 500000;
-    return Math.max(...products.map(p => p.price), 500000);
+  const colors = useMemo(() => {
+    const cls = new Set(products.map(p => p.color).filter(Boolean));
+    return Array.from(cls).sort();
   }, [products]);
+
+  const maxPrice = useMemo(() => {
+    if (products.length === 0) return 100000;
+    const maxVal = Math.max(...products.map(p => p.price || 0));
+    return maxVal > 0 ? Math.ceil(maxVal / 5000) * 5000 : 100000;
+  }, [products]);
+
+  useEffect(() => {
+    setPriceRange(prev => [prev[0], maxPrice]);
+  }, [maxPrice]);
 
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = [...products];
@@ -108,6 +119,14 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
         )
       );
     }
+    
+    if (selectedColors.length > 0) {
+      filtered = filtered.filter(p =>
+        selectedColors.some(c =>
+          p.color && p.color.toLowerCase() === c.toLowerCase()
+        )
+      );
+    }
     if (selectedRatings.length > 0) {
       filtered = filtered.filter(p => selectedRatings.some(r => (p.rating || 0) >= r));
     }
@@ -122,7 +141,7 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
       default: filtered.reverse(); break;
     }
     return filtered;
-  }, [products, selectedCategory, searchQuery, priceRange, sortBy, selectedMaterials, selectedRatings]);
+  }, [products, selectedCategory, searchQuery, priceRange, sortBy, selectedMaterials, selectedColors, selectedRatings]);
 
   const handleClearFilters = () => {
     setSelectedCategory("All");
@@ -130,6 +149,7 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
     setPriceRange([0, maxPrice]);
     setSortBy("newest");
     setSelectedMaterials([]);
+    setSelectedColors([]);
     setSelectedRatings([]);
   };
 
@@ -137,11 +157,13 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
     selectedCategory !== "All",
     searchQuery,
     selectedMaterials.length > 0,
+    selectedColors.length > 0,
     selectedRatings.length > 0,
     priceRange[0] > 0 || priceRange[1] < maxPrice,
   ].filter(Boolean).length;
 
   const handleMaterialToggle = (m) => setSelectedMaterials(prev => prev.includes(m) ? prev.filter(x => x !== m) : [...prev, m]);
+  const handleColorToggle = (c) => setSelectedColors(prev => prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c]);
   const handleRatingToggle = (r) => setSelectedRatings(prev => prev.includes(r) ? prev.filter(x => x !== r) : [...prev, r]);
 
   /* ─── Filter Sidebar Content ─── */
@@ -195,23 +217,55 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
         <div className="flex items-center gap-2 text-sm font-semibold mb-3">
           <Tag className="w-4 h-4 text-brand-gold" /> Price Range
         </div>
-        <div className="space-y-3">
-          <input
-            type="range"
-            min={0}
-            max={maxPrice}
-            step={500}
-            value={priceRange[1]}
-            onChange={e => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-            className="w-full accent-brand-gold h-1.5 rounded-full appearance-none bg-brand-off/10 cursor-pointer"
-          />
-          <div className="flex items-center gap-2">
+        <div className="space-y-4 px-1">
+          {/* Custom styled dual range slider */}
+          <div className="pt-2 pb-4">
+            <div className="dual-range-slider-container">
+              <div 
+                className="dual-range-slider-track"
+                style={{
+                  left: `${(priceRange[0] / maxPrice) * 100}%`,
+                  width: `${((priceRange[1] - priceRange[0]) / maxPrice) * 100}%`
+                }}
+              />
+              <input
+                type="range"
+                min={0}
+                max={maxPrice}
+                step={500}
+                value={priceRange[0]}
+                onChange={e => {
+                  const val = Math.min(parseInt(e.target.value), priceRange[1] - 500);
+                  setPriceRange([val, priceRange[1]]);
+                }}
+                className="dual-range-slider-input"
+              />
+              <input
+                type="range"
+                min={0}
+                max={maxPrice}
+                step={500}
+                value={priceRange[1]}
+                onChange={e => {
+                  const val = Math.max(parseInt(e.target.value), priceRange[0] + 500);
+                  setPriceRange([priceRange[0], val]);
+                }}
+                className="dual-range-slider-input"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 pt-2">
             <div className="flex-1 relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-off/40 text-xs">₹</span>
               <input
                 type="number"
                 value={priceRange[0]}
-                onChange={e => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
+                onChange={e => {
+                  let val = parseInt(e.target.value) || 0;
+                  if (val > priceRange[1]) val = priceRange[1];
+                  setPriceRange([val, priceRange[1]]);
+                }}
                 className="w-full rounded-lg border border-brand-off/15 bg-transparent pl-6 pr-2 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
                 placeholder="Min"
               />
@@ -222,7 +276,12 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
               <input
                 type="number"
                 value={priceRange[1]}
-                onChange={e => setPriceRange([priceRange[0], parseInt(e.target.value) || maxPrice])}
+                onChange={e => {
+                  let val = parseInt(e.target.value) || maxPrice;
+                  if (val < priceRange[0]) val = priceRange[0];
+                  if (val > maxPrice) val = maxPrice;
+                  setPriceRange([priceRange[0], val]);
+                }}
                 className="w-full rounded-lg border border-brand-off/15 bg-transparent pl-6 pr-2 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
                 placeholder="Max"
               />
@@ -232,26 +291,52 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
       </div>
 
       {/* Material */}
-      <div>
-        <div className="flex items-center gap-2 text-sm font-semibold mb-3">
-          <Gem className="w-4 h-4 text-brand-gold" /> Material
+      {materials.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 text-sm font-semibold mb-3">
+            <Gem className="w-4 h-4 text-brand-gold" /> Material
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {materials.map(m => (
+              <button
+                key={m}
+                onClick={() => handleMaterialToggle(m)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                  selectedMaterials.includes(m)
+                    ? 'bg-brand-gold/15 text-brand-gold border-brand-gold/30'
+                    : 'border-brand-off/15 text-brand-off/60 hover:border-brand-gold/20'
+                }`}
+              >
+                {m}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {materials.map(m => (
-            <button
-              key={m}
-              onClick={() => handleMaterialToggle(m)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                selectedMaterials.includes(m)
-                  ? 'bg-brand-gold/15 text-brand-gold border-brand-gold/30'
-                  : 'border-brand-off/15 text-brand-off/60 hover:border-brand-gold/20'
-              }`}
-            >
-              {m}
-            </button>
-          ))}
+      )}
+
+      {/* Color */}
+      {colors.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 text-sm font-semibold mb-3">
+            <LayoutGrid className="w-4 h-4 text-brand-gold" /> Color
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {colors.map(c => (
+              <button
+                key={c}
+                onClick={() => handleColorToggle(c)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                  selectedColors.includes(c)
+                    ? 'bg-brand-gold/15 text-brand-gold border-brand-gold/30'
+                    : 'border-brand-off/15 text-brand-off/60 hover:border-brand-gold/20'
+                }`}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Rating */}
       <div>

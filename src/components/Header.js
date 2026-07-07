@@ -1,22 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import logo from '../Assets/Logo.png';
 import SearchBar from './SearchBar';
 import { useCart } from '../contexts/CartContext';
 import { ImageWithFallback } from '../utils/imageUtils';
+import api from '../services/api';
 
 const Header = ({ cartItemCount, onCartClick, selectedCategory, onCategoryChange, user, onLogout }) => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
-  const [cartOpen, setCartOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [categories, setCategories] = useState(['All', 'Rings', 'Necklaces', 'Earrings', 'Bracelets', 'Pendants']);
+  const categoryRef = useRef(null);
+  const userRef = useRef(null);
+
+  useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const list = await api.getCategories();
+        if (Array.isArray(list)) {
+          const cleanList = list.filter(cat => 
+            typeof cat === 'string' && 
+            cat.trim() !== '' && 
+            /[a-zA-Z0-9]/.test(cat)
+          );
+          if (cleanList.length > 0) {
+            setCategories(['All', ...cleanList]);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching dynamic categories in Header:', err);
+      }
+    };
+    fetchCats();
+
+    const handleClickOutside = (event) => {
+      if (categoryRef.current && !categoryRef.current.contains(event.target)) {
+        setCategoryMenuOpen(false);
+      }
+      if (userRef.current && !userRef.current.contains(event.target)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Use cart context
-  const { cart, updateCartItem, removeFromCart, getTotalPrice, getTotalItems } = useCart();
-
-  const categories = ['All', 'Rings', 'Necklaces', 'Earrings', 'Bracelets', 'Pendants'];
+  const { getTotalItems } = useCart();
 
   const handleCategorySelect = (category) => {
     onCategoryChange(category);
@@ -25,13 +58,7 @@ const Header = ({ cartItemCount, onCartClick, selectedCategory, onCategoryChange
   };
 
   const handleCartClick = () => {
-    setCartOpen(true);
     onCartClick?.();
-  };
-
-  const handleCheckout = () => {
-    setCartOpen(false);
-    navigate('/checkout/address');
   };
 
   return (
@@ -85,7 +112,7 @@ const Header = ({ cartItemCount, onCartClick, selectedCategory, onCategoryChange
                 </button>
 
                 {/* Categories dropdown */}
-                <div className="relative">
+                <div className="relative" ref={categoryRef}>
                   <button
                     onClick={() => setCategoryMenuOpen((v) => !v)}
                     className={`px-3 py-2 rounded-md text-sm font-medium transition ${
@@ -122,7 +149,7 @@ const Header = ({ cartItemCount, onCartClick, selectedCategory, onCategoryChange
                 
                 {/* User Menu */}
                 {user ? (
-                  <div className="relative">
+                  <div className="relative" ref={userRef}>
                     <button
                       onClick={() => setUserMenuOpen(!userMenuOpen)}
                       className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-brand-off/90 hover:bg-brand-tealDark/10 hover:text-brand-off transition"
@@ -341,99 +368,7 @@ const Header = ({ cartItemCount, onCartClick, selectedCategory, onCategoryChange
         )}
       </header>
 
-      {/* Cart Drawer */}
-      {cartOpen && (
-        <div className="fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setCartOpen(false)} />
-          <motion.div 
-            initial={{ x: '100%', opacity: 0 }} 
-            animate={{ x: 0, opacity: 1 }} 
-            transition={{ duration: 0.35, ease: 'easeOut' }} 
-            className="absolute right-0 top-0 h-full w-full max-w-sm bg-brand-tealDark text-brand-off shadow-2xl border-l border-brand-gold/20"
-          >
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-bold">Shopping Cart ({getTotalItems()} items)</h2>
-                <button 
-                  onClick={() => setCartOpen(false)} 
-                  className="text-2xl leading-none hover:text-brand-gold transition"
-                >
-                  ×
-                </button>
-              </div>
 
-              {cart.length === 0 ? (
-                <div className="text-center py-8">
-                  <svg className="w-16 h-16 mx-auto text-brand-off/30 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
-                  </svg>
-                  <p className="text-brand-off/80">Your cart is empty</p>
-                  <button
-                    onClick={() => { setCartOpen(false); navigate('/products'); }}
-                    className="mt-4 px-4 py-2 bg-brand-gold text-brand-tealDark rounded-lg font-semibold hover:bg-brand-gold/90 transition"
-                  >
-                    Continue Shopping
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {cart.map((item) => (
-                      <div key={item.product._id} className="flex items-center gap-4 p-3 bg-brand-teal/10 rounded-lg">
-                        <ImageWithFallback
-                          src={item.product.image}
-                          alt={item.product.name}
-                          className="w-16 h-16 object-cover rounded"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold truncate">{item.product.name}</div>
-                          <div className="text-sm text-brand-gold">₹{item.product.price.toLocaleString('en-IN')}</div>
-                          <div className="flex items-center mt-2">
-                            <button
-                              onClick={() => updateCartItem(item.product._id, item.quantity - 1)}
-                              className="px-2 py-1 rounded border border-brand-off/30 hover:bg-brand-teal/20 transition"
-                            >
-                              -
-                            </button>
-                            <span className="mx-3">{item.quantity}</span>
-                            <button
-                              onClick={() => updateCartItem(item.product._id, item.quantity + 1)}
-                              className="px-2 py-1 rounded border border-brand-off/30 hover:bg-brand-teal/20 transition"
-                            >
-                              +
-                            </button>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => removeFromCart(item.product._id)}
-                          className="text-rose-400 hover:text-rose-300 transition"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                            <path fillRule="evenodd" d="M16.5 4.478V5.25h3.375a.75.75 0 0 1 0 1.5h-.546l-1.2 12.01A2.25 2.25 0 0 1 15.888 21H8.112a2.25 2.25 0 0 1-2.241-2.24L4.67 6.75h-.546a.75.75 0 0 1 0-1.5H7.5v-.772A2.478 2.478 0 0 1 9.978 1.5h4.044A2.478 2.478 0 0 1 16.5 4.478ZM9 9.75a.75.75 0 0 1 1.5 0v7.5a.75.75 0 0 1-1.5 0v-7.5Zm4.5 0a.75.75 0 0 1 1.5 0v7.5a.75.75 0 0 1-1.5 0v-7.5Z" clipRule="evenodd" />
-                          </svg>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-4 border-t border-brand-off/10 pt-4">
-                    <div className="flex items-center justify-between font-bold mb-3">
-                      <span>Total:</span>
-                      <span className="text-brand-gold">₹{getTotalPrice().toLocaleString('en-IN')}</span>
-                    </div>
-                    <button
-                      onClick={handleCheckout}
-                      className="w-full py-3 rounded-md font-semibold text-brand-tealDark bg-brand-gold hover:bg-brand-gold/90 transition"
-                    >
-                      Checkout
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </motion.div>
-        </div>
-      )}
     </>
   );
 };

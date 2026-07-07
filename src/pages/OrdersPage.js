@@ -123,6 +123,11 @@ const OrdersPage = () => {
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div className="w-2.5 h-2.5 rounded-full bg-brand-gold/20 flex-shrink-0" />
                       <span className="truncate text-brand-off/80 font-medium">{item.product?.name || 'Jewelry Piece'}</span>
+                      {item.color && (
+                        <span className="text-[10px] text-sky-300 font-semibold px-2 py-0.5 rounded bg-sky-300/10 border border-sky-300/20 inline-block ml-1">
+                          {item.color}
+                        </span>
+                      )}
                       <span className="text-xs text-brand-off/40 font-semibold px-2 py-0.5 rounded bg-brand-teal/20">x{item.quantity}</span>
                     </div>
                     <span className="text-brand-gold font-bold ml-4">₹{item.price ? (item.price * item.quantity).toLocaleString('en-IN') : '0'}</span>

@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { MapPin, ArrowRight, ShieldCheck } from "lucide-react";
+import { useCart } from "../contexts/CartContext";
 
 const CheckoutSteps = ({ currentStep }) => {
   const steps = [
@@ -35,6 +36,17 @@ const CheckoutSteps = ({ currentStep }) => {
 
 const CheckoutAddress = () => {
   const navigate = useNavigate();
+  const { cart } = useCart();
+  const token = localStorage.getItem('token');
+
+  useEffect(() => {
+    if (!token) {
+      navigate('/login?redirect=/checkout/address');
+    } else if (cart.length === 0) {
+      navigate('/cart');
+    }
+  }, [token, cart, navigate]);
+
   const savedAddress = JSON.parse(localStorage.getItem('shippingAddress') || '{}');
   
   const [form, setForm] = useState({

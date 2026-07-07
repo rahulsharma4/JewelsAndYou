@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Gem, Truck, Lock, Undo2, ChevronRight, Sparkles, Star, ArrowRight, Heart } from "lucide-react";
+import { Gem, Shield, Truck, Undo2, ArrowRight, Heart, Sparkles, ChevronRight, Lock, Play, Instagram, Facebook, Youtube, Star } from "lucide-react";
 import { getImageUrl, ImageWithFallback } from "../utils/imageUtils";
 import { CategorySkeleton, TestimonialSkeleton } from "../components/LoadingSpinner";
 import api from "../services/api";
@@ -91,14 +91,23 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
     { icon: Undo2, title: "Easy Returns", description: "30-day hassle-free return & exchange policy" },
   ];
 
-  const categories = [
-    { name: "Rings", emoji: "💍", count: products.filter(p => p.category === "Rings").length },
-    { name: "Necklaces", emoji: "📿", count: products.filter(p => p.category === "Necklaces").length },
-    { name: "Earrings", emoji: "✨", count: products.filter(p => p.category === "Earrings").length },
-    { name: "Watches", emoji: "⌚", count: products.filter(p => p.category === "Watches").length },
-    { name: "Bracelets", emoji: "🔗", count: products.filter(p => p.category === "Bracelets").length },
-    { name: "Pendants", emoji: "💎", count: products.filter(p => p.category === "Pendants").length },
-  ];
+  const dynamicCategories = Array.from(
+    new Set(
+      products
+        .map(p => p.category)
+        .filter(cat => typeof cat === 'string' && cat.trim() !== '' && /[a-zA-Z0-9]/.test(cat))
+    )
+  ).sort();
+
+  const categoryCards = dynamicCategories.map(cat => {
+    const catProducts = products.filter(p => p.category === cat);
+    const repProduct = catProducts.find(p => p.image) || catProducts[0];
+    return {
+      name: cat,
+      count: catProducts.length,
+      image: repProduct?.image || null
+    };
+  });
 
   const testimonials = [
     { name: "Sarah Johnson", rating: 5, comment: "The diamond ring I purchased exceeded my expectations. Absolutely stunning craftsmanship!", avatar: "https://ui-avatars.com/api/?name=Sarah+Johnson&background=0D8ABC&color=fff&size=150" },
@@ -280,27 +289,39 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
           title="Shop by Category"
           subtitle="Browse our curated collections of handcrafted jewelry"
         />
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {loading ? (
             Array.from({ length: 6 }).map((_, i) => <CategorySkeleton key={i} />)
           ) : (
-            categories.map((cat, i) => (
+            categoryCards.map((cat, i) => (
               <motion.button
                 key={cat.name}
                 onClick={() => handleCategoryClick(cat.name)}
-                className="group relative rounded-xl p-6 text-center bg-brand-tealDark border border-brand-gold/10 hover:border-brand-gold/40 transition-all duration-300"
+                className="group relative rounded-xl overflow-hidden text-center bg-brand-tealDark border border-brand-gold/10 hover:border-brand-gold/40 transition-all duration-300 h-32 sm:h-40"
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.06 }}
                 whileHover={{ y: -6, boxShadow: "0 12px 32px rgba(201,168,106,0.15)" }}
               >
-                <div className="text-3xl mb-2">{cat.emoji}</div>
-                <div className="font-semibold text-sm mb-1">{cat.name}</div>
-                <div className="text-xs text-brand-off/50">
-                  {cat.count > 0 ? `${cat.count} items` : "Explore"}
+                {cat.image ? (
+                  <ImageWithFallback
+                    src={cat.image}
+                    alt={cat.name}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-brand-tealDark/50 flex items-center justify-center">
+                    <Gem className="w-8 h-8 text-brand-gold/30" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10 group-hover:from-black/90 transition-all" />
+                <div className="absolute inset-0 flex flex-col items-center justify-end p-4 pb-5">
+                  <div className="font-heading font-bold text-lg text-brand-off tracking-wide mb-0.5">{cat.name}</div>
+                  <div className="text-[10px] uppercase tracking-widest text-brand-gold font-semibold">
+                    {cat.count > 0 ? `${cat.count} items` : "Explore"}
+                  </div>
                 </div>
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-brand-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
               </motion.button>
             ))
           )}
@@ -544,30 +565,49 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
             subtitle="Join our community and get inspired"
           />
           <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-            {[...products.slice(0, 6), ...Array(Math.max(0, 6 - products.length)).fill(null)].slice(0, 6).map((p, i) => (
-              <motion.div
+            {[...products.slice(0, 6), ...Array(Math.max(0, 6 - products.length)).fill(null)].slice(0, 6).map((p, i) => {
+              const socials = [
+                { icon: Instagram, url: "https://instagram.com", color: "hover:text-pink-500" },
+                { icon: Facebook, url: "https://facebook.com", color: "hover:text-blue-500" },
+                { icon: Youtube, url: "https://youtube.com", color: "hover:text-red-500" },
+                { icon: Instagram, url: "https://instagram.com", color: "hover:text-pink-500" },
+                { icon: Facebook, url: "https://facebook.com", color: "hover:text-blue-500" },
+                { icon: Youtube, url: "https://youtube.com", color: "hover:text-red-500" },
+              ];
+              const SocialIcon = socials[i].icon;
+              return (
+              <motion.a
+                href={socials[i].url}
+                target="_blank"
+                rel="noopener noreferrer"
                 key={i}
-                className="aspect-square rounded-lg overflow-hidden bg-brand-tealDark border border-brand-gold/10 group cursor-pointer relative"
+                className="aspect-square rounded-lg overflow-hidden bg-brand-tealDark border border-brand-gold/10 group cursor-pointer relative block"
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
                 whileHover={{ scale: 1.05 }}
               >
-                {p ? (
+                {p && p.image ? (
                   <>
                     <ImageWithFallback src={p.image} alt={p.name || "Jewelry"} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                    <div className="absolute inset-0 bg-brand-tealDark/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Heart className="w-6 h-6 text-white" />
+                    <div className="absolute inset-0 bg-brand-tealDark/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                      <SocialIcon className={`w-8 h-8 text-white transition-colors duration-300 ${socials[i].color}`} />
+                      <span className="text-white text-xs font-semibold tracking-wider uppercase">Follow Us</span>
                     </div>
                   </>
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-brand-tealDark">
+                  <div className="w-full h-full flex items-center justify-center bg-brand-tealDark group-hover:bg-brand-tealDark/80 transition-colors relative">
                     <Gem className="w-8 h-8 text-brand-gold/20" />
+                    <div className="absolute inset-0 bg-brand-tealDark/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                      <SocialIcon className={`w-8 h-8 text-white transition-colors duration-300 ${socials[i].color}`} />
+                      <span className="text-white text-xs font-semibold tracking-wider uppercase">Follow Us</span>
+                    </div>
                   </div>
                 )}
-              </motion.div>
-            ))}
+              </motion.a>
+              );
+            })}
           </div>
         </div>
       </section>

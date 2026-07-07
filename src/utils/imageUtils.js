@@ -4,7 +4,7 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api
 const BASE_SERVER_URL = API_BASE_URL.replace(/\/api\/?$/, '');
 
 export const getImageUrl = (imagePath) => {
-  if (!imagePath) return '/placeholder.svg';
+  if (!imagePath || imagePath === 'placeholder.jpg') return '/placeholder.svg';
   
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://') || imagePath.startsWith('data:')) {
     return imagePath;

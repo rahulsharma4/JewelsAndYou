@@ -33,7 +33,7 @@ const ProductCard = ({ product, onAddToCart, onToggleFavorite, isFavorite = fals
       {/* Image Container */}
       <div className="relative h-64 overflow-hidden">
         <ImageWithFallback
-          src={product.image}
+          src={product.image || (product.images && product.images.length > 0 ? product.images[0] : null)}
           alt={product.name}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
         />

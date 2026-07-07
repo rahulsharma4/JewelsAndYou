@@ -1,15 +1,31 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { motion } from "framer-motion";
+import api from "../services/api";
 
-const CategoryPage = ({ products, onAddToCart, onToggleFavorite, favorites = [] }) => {
+const CategoryPage = ({ onAddToCart, onToggleFavorite, favorites = [] }) => {
   const { name } = useParams();
   const navigate = useNavigate();
   const decoded = decodeURIComponent(name || "");
   const normalized = decoded.trim();
+  const [categoryProducts, setCategoryProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = products.filter((p) => (p.category || "").toLowerCase() === normalized.toLowerCase());
+  useEffect(() => {
+    const fetchCategoryProducts = async () => {
+      try {
+        setLoading(true);
+        const data = await api.getProducts({ category: normalized, limit: 100 });
+        setCategoryProducts(data.products || []);
+      } catch (err) {
+        console.error("Error loading products for category:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategoryProducts();
+  }, [normalized]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -31,19 +47,23 @@ const CategoryPage = ({ products, onAddToCart, onToggleFavorite, favorites = [] 
       </section>
 
       {/* Results */}
-      {filtered.length === 0 ? (
+      {loading ? (
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-gold"></div>
+        </div>
+      ) : categoryProducts.length === 0 ? (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-brand-off/80 bg-brand-tealDark rounded-lg p-8">
           No products found in this category.
         </motion.div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((product) => (
-            <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }} whileHover={{ y: -8, boxShadow: '0 10px 30px rgba(0,0,0,0.35)' }}>
+          {categoryProducts.map((product) => (
+            <motion.div key={product._id || product.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }} whileHover={{ y: -8, boxShadow: '0 10px 30px rgba(0,0,0,0.35)' }}>
               <ProductCard
                 product={product}
                 onAddToCart={onAddToCart}
                 onToggleFavorite={onToggleFavorite}
-                isFavorite={favorites.includes(product.id)}
+                isFavorite={favorites.includes(product._id || product.id)}
               />
             </motion.div>
           ))}
@@ -54,5 +74,3 @@ const CategoryPage = ({ products, onAddToCart, onToggleFavorite, favorites = [] 
 };
 
 export default CategoryPage;
-
-
