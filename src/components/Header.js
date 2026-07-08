@@ -12,7 +12,7 @@ const Header = ({ cartItemCount, onCartClick, selectedCategory, onCategoryChange
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [categories, setCategories] = useState(['All', 'Rings', 'Necklaces', 'Earrings', 'Bracelets', 'Pendants']);
+  const [categories, setCategories] = useState(['All']);
   const categoryRef = useRef(null);
   const userRef = useRef(null);
 
@@ -26,9 +26,7 @@ const Header = ({ cartItemCount, onCartClick, selectedCategory, onCategoryChange
             cat.trim() !== '' && 
             /[a-zA-Z0-9]/.test(cat)
           );
-          if (cleanList.length > 0) {
-            setCategories(['All', ...cleanList]);
-          }
+          setCategories(['All', ...cleanList]);
         }
       } catch (err) {
         console.error('Error fetching dynamic categories in Header:', err);

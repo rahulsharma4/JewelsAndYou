@@ -9,6 +9,7 @@ import {
   Search, Heart
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import api from "../services/api";
 
 /* ─── Pill Select for Sort ─── */
 const SortSelect = ({ value, onChange, options }) => {
@@ -69,11 +70,26 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
   const [selectedColors, setSelectedColors] = useState([]);
   const [selectedRatings, setSelectedRatings] = useState([]);
 
+  const [apiCategories, setApiCategories] = useState([]);
+  const [inputMin, setInputMin] = useState("0");
+  const [inputMax, setInputMax] = useState("100000");
+
+  useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const list = await api.getCategories();
+        if (Array.isArray(list)) {
+          const clean = list.filter(cat => typeof cat === 'string' && cat.trim() !== '');
+          setApiCategories(clean);
+        }
+      } catch (e) {}
+    };
+    fetchCats();
+  }, []);
+
   const categories = useMemo(() => {
-    const cats = new Set(products.map(p => p.category).filter(Boolean));
-    // Sort categories alphabetically but keep 'All' at the front if we wanted. But the Set is fine.
-    return ["All", ...Array.from(cats).sort()];
-  }, [products]);
+    return ["All", ...apiCategories];
+  }, [apiCategories]);
 
   const materials = useMemo(() => {
     const mats = new Set(products.map(p => p.material).filter(Boolean));
@@ -93,7 +109,13 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
 
   useEffect(() => {
     setPriceRange(prev => [prev[0], maxPrice]);
+    setInputMax(maxPrice.toString());
   }, [maxPrice]);
+
+  useEffect(() => {
+    setInputMin(priceRange[0].toString());
+    setInputMax(priceRange[1].toString());
+  }, [priceRange]);
 
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = [...products];
@@ -218,11 +240,11 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
           <Tag className="w-4 h-4 text-brand-gold" /> Price Range
         </div>
         <div className="space-y-4 px-1">
-          {/* Custom styled dual range slider */}
-          <div className="pt-2 pb-4">
-            <div className="dual-range-slider-container">
+          {/* Clean Custom Dual Range Slider */}
+          <div className="pt-2 pb-4 px-1">
+            <div className="relative w-full h-1.5 bg-brand-off/10 rounded-full mt-2">
               <div 
-                className="dual-range-slider-track"
+                className="absolute h-full bg-brand-gold rounded-full"
                 style={{
                   left: `${(priceRange[0] / maxPrice) * 100}%`,
                   width: `${((priceRange[1] - priceRange[0]) / maxPrice) * 100}%`
@@ -232,25 +254,25 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
                 type="range"
                 min={0}
                 max={maxPrice}
-                step={500}
+                step={1}
                 value={priceRange[0]}
                 onChange={e => {
-                  const val = Math.min(parseInt(e.target.value), priceRange[1] - 500);
+                  const val = Math.min(parseInt(e.target.value), priceRange[1]);
                   setPriceRange([val, priceRange[1]]);
                 }}
-                className="dual-range-slider-input"
+                className="custom-range-slider"
               />
               <input
                 type="range"
                 min={0}
                 max={maxPrice}
-                step={500}
+                step={1}
                 value={priceRange[1]}
                 onChange={e => {
-                  const val = Math.max(parseInt(e.target.value), priceRange[0] + 500);
+                  const val = Math.max(parseInt(e.target.value), priceRange[0]);
                   setPriceRange([priceRange[0], val]);
                 }}
-                className="dual-range-slider-input"
+                className="custom-range-slider"
               />
             </div>
           </div>
@@ -260,12 +282,16 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-off/40 text-xs">₹</span>
               <input
                 type="number"
-                value={priceRange[0]}
-                onChange={e => {
-                  let val = parseInt(e.target.value) || 0;
+                value={inputMin}
+                onChange={e => setInputMin(e.target.value)}
+                onBlur={() => {
+                  let val = parseInt(inputMin);
+                  if (isNaN(val) || val < 0) val = 0;
                   if (val > priceRange[1]) val = priceRange[1];
                   setPriceRange([val, priceRange[1]]);
+                  setInputMin(val.toString());
                 }}
+                onKeyDown={e => e.key === 'Enter' && e.target.blur()}
                 className="w-full rounded-lg border border-brand-off/15 bg-transparent pl-6 pr-2 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
                 placeholder="Min"
               />
@@ -275,13 +301,16 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-off/40 text-xs">₹</span>
               <input
                 type="number"
-                value={priceRange[1]}
-                onChange={e => {
-                  let val = parseInt(e.target.value) || maxPrice;
+                value={inputMax}
+                onChange={e => setInputMax(e.target.value)}
+                onBlur={() => {
+                  let val = parseInt(inputMax);
+                  if (isNaN(val) || val > maxPrice) val = maxPrice;
                   if (val < priceRange[0]) val = priceRange[0];
-                  if (val > maxPrice) val = maxPrice;
                   setPriceRange([priceRange[0], val]);
+                  setInputMax(val.toString());
                 }}
+                onKeyDown={e => e.key === 'Enter' && e.target.blur()}
                 className="w-full rounded-lg border border-brand-off/15 bg-transparent pl-6 pr-2 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
                 placeholder="Max"
               />
@@ -482,7 +511,7 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
         {/* Desktop Sidebar */}
         <div className="hidden md:block md:col-span-3">
           <div className="sticky top-20 rounded-xl bg-brand-tealDark p-5 border border-brand-gold/10">
-            <FilterContent />
+            {FilterContent({})}
           </div>
         </div>
 
@@ -598,7 +627,7 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
               className="absolute bottom-0 left-0 right-0 max-h-[85vh] bg-brand-tealDark rounded-t-2xl p-5 overflow-y-auto border-t border-brand-gold/20"
             >
               <div className="w-10 h-1 rounded-full bg-brand-off/20 mx-auto mb-4" />
-              <FilterContent onClose={() => setMobileFilterOpen(false)} />
+              {FilterContent({ onClose: () => setMobileFilterOpen(false) })}
               <div className="mt-6 sticky bottom-0 pt-4 bg-brand-tealDark border-t border-brand-off/10">
                 <button
                   onClick={() => setMobileFilterOpen(false)}
