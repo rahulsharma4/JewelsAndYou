@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Truck, Shield, RefreshCw, Heart, ShoppingBag, Plus, Minus, ArrowLeft, Scale, Gem } from "lucide-react";
+import { Heart, ShoppingBag, Plus, Minus, ArrowLeft, Scale, Gem } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
 import { getImageUrl, ImageWithFallback } from "../utils/imageUtils";

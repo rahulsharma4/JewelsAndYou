@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import api from "./services/api";
 import { CartProvider, useCart } from "./contexts/CartContext";
@@ -14,33 +14,34 @@ import BottomNav from "./components/BottomNav";
 import ScrollToTop from "./components/ScrollToTop";
 
 // Import pages
-import HomePage from "./pages/HomePage";
-import ProductsPage from "./pages/ProductsPage";
-import AboutPage from "./pages/AboutPage";
-import ContactPage from "./pages/ContactPage";
-import CategoryPage from "./pages/CategoryPage";
-import AuthLogin from "./pages/AuthLogin";
-import AuthRegister from "./pages/AuthRegister";
-import ProfilePage from "./pages/ProfilePage";
-import CartPage from "./pages/CartPage";
-import CheckoutAddress from "./pages/CheckoutAddress";
-import CheckoutShipping from "./pages/CheckoutShipping";
-import CheckoutPayment from "./pages/CheckoutPayment";
-import CheckoutReview from "./pages/CheckoutReview";
-import CheckoutSuccess from "./pages/CheckoutSuccess";
-import OrdersPage from "./pages/OrdersPage";
-import WishlistPage from "./pages/WishlistPage";
-import SearchPage from "./pages/SearchPage";
-import NotFoundPage from "./pages/NotFoundPage";
-import ReturnsShippingPage from "./pages/ReturnsShippingPage";
-import TermsPage from "./pages/TermsPage";
-import PrivacyPage from "./pages/PrivacyPage";
-import AdminPanel from "./pages/AdminPanel";
-import AdminDashboard from "./pages/AdminDashboard";
-import PaymentAnalytics from "./pages/PaymentAnalytics";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import OrderTracking from "./pages/OrderTracking";
+// Import pages lazily
+const HomePage = lazy(() => import("./pages/HomePage"));
+const ProductsPage = lazy(() => import("./pages/ProductsPage"));
+const AboutPage = lazy(() => import("./pages/AboutPage"));
+const ContactPage = lazy(() => import("./pages/ContactPage"));
+const CategoryPage = lazy(() => import("./pages/CategoryPage"));
+const AuthLogin = lazy(() => import("./pages/AuthLogin"));
+const AuthRegister = lazy(() => import("./pages/AuthRegister"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+const CartPage = lazy(() => import("./pages/CartPage"));
+const CheckoutAddress = lazy(() => import("./pages/CheckoutAddress"));
+const CheckoutShipping = lazy(() => import("./pages/CheckoutShipping"));
+const CheckoutPayment = lazy(() => import("./pages/CheckoutPayment"));
+const CheckoutReview = lazy(() => import("./pages/CheckoutReview"));
+const CheckoutSuccess = lazy(() => import("./pages/CheckoutSuccess"));
+const OrdersPage = lazy(() => import("./pages/OrdersPage"));
+const WishlistPage = lazy(() => import("./pages/WishlistPage"));
+const SearchPage = lazy(() => import("./pages/SearchPage"));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
+const ReturnsShippingPage = lazy(() => import("./pages/ReturnsShippingPage"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
+const AdminPanel = lazy(() => import("./pages/AdminPanel"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const PaymentAnalytics = lazy(() => import("./pages/PaymentAnalytics"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const OrderTracking = lazy(() => import("./pages/OrderTracking"));
 
 
 
@@ -77,6 +78,15 @@ function AppContent({ user, setUser }) {
       console.log('🔒 Admin Lockdown: Redirecting admin from public route to dashboard');
       navigate('/admin/dashboard', { replace: true });
     }
+    // Normal User Route Lockdown
+    if (user && user.role !== 'admin' && isAdminPage) {
+      console.log('🔒 User Lockdown: Redirecting normal user away from admin route');
+      navigate('/', { replace: true });
+    }
+    // Logged Out User Lockdown for Admin pages
+    // We only enforce this after we are sure auth checking is complete (user is still null)
+    // Actually, we'll let the component's internal checkAuth handle the logged-out state 
+    // to avoid race conditions during initial load, since API token might be in storage.
   }, [user, isAdminPage, location.pathname, navigate]);
 
   const loadProducts = async () => {
@@ -100,6 +110,11 @@ function AppContent({ user, setUser }) {
   }, []);
 
   const handleAddToCart = async (product) => {
+    if (!user) {
+      setSnackbar({ open: true, message: "Please login to add items to cart", severity: "error" });
+      navigate('/login');
+      return;
+    }
     try {
       await addToCart(product, 1);
       setSnackbar({ open: true, message: `${product.name} added to cart!`, severity: "success" });
@@ -173,106 +188,112 @@ function AppContent({ user, setUser }) {
 
         {/* Main Content */}
         <div className="flex-1">
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <HomePage
-                  products={products}
-                  onAddToCart={handleAddToCart}
-                  onToggleFavorite={toggleFavorite}
-                  favorites={favorites}
-                  loading={loading}
-                />
-              }
-            />
-            <Route
-              path="/products"
-              element={
-                <ProductsPage
-                  products={products}
-                  onAddToCart={handleAddToCart}
-                  onToggleFavorite={toggleFavorite}
-                  favorites={favorites}
-                  loading={loading}
-                />
-              }
-            />
-            <Route
-              path="/product/:id"
-              element={
-                <ProductDetail
-                  products={products}
-                  onAddToCart={handleAddToCart}
-                  onToggleFavorite={toggleFavorite}
-                  favorites={favorites}
-                  user={user}
-                  loadProducts={loadProducts}
-                />
-              }
-            />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route
-              path="/category/:name"
-              element={
-                <CategoryPage
-                  products={products}
-                  onAddToCart={handleAddToCart}
-                  onToggleFavorite={toggleFavorite}
-                  favorites={favorites}
-                />
-              }
-            />
-            <Route path="/login" element={<AuthLogin onLogin={(user) => {
-              console.log('🔑 App: User login callback received:', user);
-              setUser(user);
-            }} />} />
-            <Route path="/register" element={<AuthRegister onLogin={(user) => {
-              console.log('🔑 App: User registration callback received:', user);
-              setUser(user);
-            }} />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/checkout/address" element={<CheckoutAddress />} />
-            <Route path="/checkout/shipping" element={<CheckoutShipping />} />
-            <Route path="/checkout/payment" element={<CheckoutPayment />} />
-            <Route path="/checkout/review" element={<CheckoutReview />} />
-            <Route path="/checkout/success" element={<CheckoutSuccess />} />
-            <Route path="/orders" element={<OrdersPage />} />
-            <Route
-              path="/wishlist"
-              element={
-                <WishlistPage
-                  products={products}
-                  favorites={favorites}
-                  onAddToCart={handleAddToCart}
-                  onToggleFavorite={toggleFavorite}
-                />
-              }
-            />
-            <Route
-              path="/search"
-              element={
-                <SearchPage
-                  onAddToCart={handleAddToCart}
-                  onToggleFavorite={toggleFavorite}
-                  favorites={favorites}
-                />
-              }
-            />
-            <Route path="/returns-shipping" element={<ReturnsShippingPage />} />
-            <Route path="/terms" element={<TermsPage />} />
-            <Route path="/privacy" element={<PrivacyPage />} />
-            <Route path="/admin" element={<AdminPanel />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/payments" element={<PaymentAnalytics />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/order-tracking/:orderId" element={<OrderTracking />} />
-
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
+          <Suspense fallback={
+            <div className="min-h-[60vh] flex items-center justify-center">
+              <div className="w-12 h-12 border-4 border-brand-gold/20 border-t-brand-gold rounded-full animate-spin"></div>
+            </div>
+          }>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <HomePage
+                    products={products}
+                    onAddToCart={handleAddToCart}
+                    onToggleFavorite={toggleFavorite}
+                    favorites={favorites}
+                    loading={loading}
+                  />
+                }
+              />
+              <Route
+                path="/products"
+                element={
+                  <ProductsPage
+                    products={products}
+                    onAddToCart={handleAddToCart}
+                    onToggleFavorite={toggleFavorite}
+                    favorites={favorites}
+                    loading={loading}
+                  />
+                }
+              />
+              <Route
+                path="/product/:id"
+                element={
+                  <ProductDetail
+                    products={products}
+                    onAddToCart={handleAddToCart}
+                    onToggleFavorite={toggleFavorite}
+                    favorites={favorites}
+                    user={user}
+                    loadProducts={loadProducts}
+                  />
+                }
+              />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route
+                path="/category/:name"
+                element={
+                  <CategoryPage
+                    products={products}
+                    onAddToCart={handleAddToCart}
+                    onToggleFavorite={toggleFavorite}
+                    favorites={favorites}
+                  />
+                }
+              />
+              <Route path="/login" element={<AuthLogin onLogin={(user) => {
+                console.log('🔑 App: User login callback received:', user);
+                setUser(user);
+              }} />} />
+              <Route path="/register" element={<AuthRegister onLogin={(user) => {
+                console.log('🔑 App: User registration callback received:', user);
+                setUser(user);
+              }} />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/checkout/address" element={<CheckoutAddress />} />
+              <Route path="/checkout/shipping" element={<CheckoutShipping />} />
+              <Route path="/checkout/payment" element={<CheckoutPayment />} />
+              <Route path="/checkout/review" element={<CheckoutReview />} />
+              <Route path="/checkout/success" element={<CheckoutSuccess />} />
+              <Route path="/orders" element={<OrdersPage />} />
+              <Route path="/order/tracking/:orderId" element={<OrderTracking />} />
+              <Route
+                path="/wishlist"
+                element={
+                  <WishlistPage
+                    products={products}
+                    favorites={favorites}
+                    onAddToCart={handleAddToCart}
+                    onToggleFavorite={toggleFavorite}
+                  />
+                }
+              />
+              <Route
+                path="/search"
+                element={
+                  <SearchPage
+                    products={products}
+                    onAddToCart={handleAddToCart}
+                    onToggleFavorite={toggleFavorite}
+                    favorites={favorites}
+                  />
+                }
+              />
+              <Route path="/returns-shipping" element={<ReturnsShippingPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/admin" element={<AdminPanel />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/payments" element={<PaymentAnalytics />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password/:token" element={<ResetPassword />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Suspense>
         </div>
 
         {/* Shopping Cart Drawer */}

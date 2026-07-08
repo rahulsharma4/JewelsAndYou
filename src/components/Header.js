@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import logo from '../Assets/Logo.png';
 import SearchBar from './SearchBar';
 import { useCart } from '../contexts/CartContext';
-import { ImageWithFallback } from '../utils/imageUtils';
 import api from '../services/api';
 
 const Header = ({ cartItemCount, onCartClick, selectedCategory, onCategoryChange, user, onLogout }) => {

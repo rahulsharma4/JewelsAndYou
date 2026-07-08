@@ -66,7 +66,7 @@ const Footer = () => {
     e.preventDefault();
     if (email) {
       try {
-        const res = await api.subscribeNewsletter(email);
+        await api.subscribeNewsletter(email);
         setSnackbarOpen(true);
         // We can use a proper global notification here if needed, 
         // but since setSnackbarOpen exists locally, we just use it.

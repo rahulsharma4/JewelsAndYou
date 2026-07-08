@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Gem, Shield, Truck, Undo2, ArrowRight, Heart, Sparkles, ChevronRight, Lock, Play, Instagram, Facebook, Youtube, Star } from "lucide-react";
+import { Gem, Truck, Undo2, ArrowRight, Heart, Sparkles, ChevronRight, Lock, Instagram, Facebook, Youtube, Star } from "lucide-react";
 import { getImageUrl, ImageWithFallback } from "../utils/imageUtils";
 import { CategorySkeleton, TestimonialSkeleton } from "../components/LoadingSpinner";
 import api from "../services/api";
