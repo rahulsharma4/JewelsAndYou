@@ -189,6 +189,11 @@ const AdminPanel = () => {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
+    if (files.length > 15) {
+      alert("You can only upload a maximum of 15 images per product.");
+      e.target.value = ""; // Clear the selection
+      return;
+    }
     setFormData(prev => ({ 
       ...prev, 
       images: files, 
