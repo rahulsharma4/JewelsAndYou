@@ -71,6 +71,14 @@ function AppContent({ user, setUser }) {
     }
   }, [snackbar.open]);
 
+  // Admin Route Lockdown
+  useEffect(() => {
+    if (user?.role === 'admin' && !isAdminPage && location.pathname !== '/login') {
+      console.log('🔒 Admin Lockdown: Redirecting admin from public route to dashboard');
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [user, isAdminPage, location.pathname, navigate]);
+
   const loadProducts = async () => {
     try {
       setLoading(true);

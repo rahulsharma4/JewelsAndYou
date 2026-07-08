@@ -9,6 +9,7 @@ const AdminDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [users, setUsers] = useState([]);
   const [contacts, setContacts] = useState([]);
+  const [newsletters, setNewsletters] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
@@ -36,13 +37,14 @@ const AdminDashboard = () => {
 
   const loadDashboardData = async () => {
     try {
-      const [statsData, ordersData, usersData, advancedData, contactsData, productsData] = await Promise.all([
+      const [statsData, ordersData, usersData, advancedData, contactsData, productsData, newslettersData] = await Promise.all([
         api.getAdminStats(),
         api.getAdminOrders({ limit: 50 }),
         api.getAdminUsers({ limit: 50 }),
         api.getAdvancedAnalytics(),
         api.getAdminContacts(),
-        api.getAdminProducts({ limit: 100 })
+        api.getAdminProducts({ limit: 100 }),
+        api.getAdminNewsletters()
       ]);
       
       setStats(statsData);
@@ -51,6 +53,7 @@ const AdminDashboard = () => {
       setAdvancedStats(advancedData);
       setContacts(contactsData || []);
       setProducts(productsData.products || []);
+      setNewsletters(newslettersData || []);
 
       // Initialize local stock values
       const stockVals = {};
@@ -173,19 +176,22 @@ const AdminDashboard = () => {
               Manage Products
             </motion.button>
             <motion.button
-              onClick={() => navigate('/')}
+              onClick={() => {
+                api.logout();
+                navigate('/login');
+              }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
-              className="px-4 py-2 border border-brand-off/30 rounded-lg"
+              className="px-4 py-2 border border-brand-off/30 rounded-lg text-rose-400 hover:border-rose-400/50 hover:bg-rose-400/10 transition-colors"
             >
-              Back to Store
+              Logout
             </motion.button>
           </div>
         </div>
 
         {/* Tab Navigation */}
         <div className="flex gap-4 mb-8 overflow-x-auto pb-2">
-          {['overview', 'orders', 'users', 'messages', 'analytics', 'inventory'].map((tab) => (
+          {['overview', 'orders', 'users', 'messages', 'newsletters', 'analytics', 'inventory'].map((tab) => (
             <motion.button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -696,6 +702,52 @@ const AdminDashboard = () => {
                   </tbody>
                 </table>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Newsletters Tab */}
+        {activeTab === 'newsletters' && (
+          <div className="space-y-6">
+            <h2 className="text-xl font-bold mb-4">Newsletter Subscribers</h2>
+            <div className="bg-brand-tealDark rounded-lg border border-brand-gold/20 p-6 shadow-lg">
+              {newsletters.length === 0 ? (
+                <div className="text-center py-10 text-brand-off/60">
+                  <p>No subscribers yet.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead className="bg-brand-teal/30">
+                      <tr>
+                        <th className="p-4 font-semibold text-brand-off/80 uppercase tracking-wider text-xs border-b border-brand-gold/10 rounded-tl-lg">Email Address</th>
+                        <th className="p-4 font-semibold text-brand-off/80 uppercase tracking-wider text-xs border-b border-brand-gold/10">Status</th>
+                        <th className="p-4 font-semibold text-brand-off/80 uppercase tracking-wider text-xs border-b border-brand-gold/10 rounded-tr-lg">Subscribed On</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-brand-off/10">
+                      {newsletters.map((sub, idx) => (
+                        <tr key={sub._id} className="hover:bg-brand-teal/20 transition-colors">
+                          <td className="p-4 font-medium">{sub.email}</td>
+                          <td className="p-4">
+                            <span className={`inline-flex px-2 py-1 text-xs font-bold rounded-full ${
+                              sub.status === 'subscribed' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-brand-off/10 text-brand-off/60'
+                            }`}>
+                              {sub.status || 'subscribed'}
+                            </span>
+                          </td>
+                          <td className="p-4 text-sm text-brand-off/70">
+                            {new Date(sub.createdAt).toLocaleDateString('en-US', {
+                              year: 'numeric', month: 'short', day: 'numeric',
+                              hour: '2-digit', minute: '2-digit'
+                            })}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -143,6 +143,21 @@ class ApiService {
     return response.json();
   }
 
+  // Newsletter API
+  async subscribeNewsletter(email) {
+    const response = await fetch(`${API_BASE_URL}/newsletter/subscribe`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ email }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Subscription failed');
+    }
+    return response.json();
+  }
+
   // Products API
   async getProducts(params = {}) {
     const queryString = new URLSearchParams(params).toString();
@@ -394,6 +409,19 @@ class ApiService {
     return response.json();
   }
 
+  async toggleProductFeatured(productId, featured) {
+    const response = await fetch(`${API_BASE_URL}/admin/products/${productId}/featured`, {
+      method: 'PUT',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ featured }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to toggle featured status');
+    }
+    return response.json();
+  }
+
   async updateAdminProductStock(productId, stock) {
     const response = await fetch(`${API_BASE_URL}/admin/products/${productId}/stock`, {
       method: 'PATCH',
@@ -549,6 +577,17 @@ class ApiService {
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || 'Failed to update settings');
+    }
+    return response.json();
+  }
+
+  async getAdminNewsletters() {
+    const response = await fetch(`${API_BASE_URL}/admin/newsletters`, {
+      headers: this.getHeaders(),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch newsletters');
     }
     return response.json();
   }

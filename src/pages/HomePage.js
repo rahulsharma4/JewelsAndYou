@@ -127,12 +127,17 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
     "✦ Expert Craftsmanship",
   ];
 
-  const handleNewsletterSubmit = (e) => {
+  const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
     if (email) {
-      setSnackbarOpen(true);
-      setTimeout(() => setSnackbarOpen(false), 3000);
-      setEmail("");
+      try {
+        await api.subscribeNewsletter(email);
+        setSnackbarOpen(true);
+        setTimeout(() => setSnackbarOpen(false), 3000);
+        setEmail("");
+      } catch (err) {
+        alert(err.message || 'Failed to subscribe.');
+      }
     }
   };
 

@@ -62,12 +62,19 @@ const Footer = () => {
     { label: "LinkedIn", icon: Linkedin, url: "https://linkedin.com/company/jewelsandyou" },
   ];
 
-  const handleNewsletterSubmit = (e) => {
+  const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
     if (email) {
-      setSnackbarOpen(true);
-      setTimeout(() => setSnackbarOpen(false), 3000);
-      setEmail("");
+      try {
+        const res = await api.subscribeNewsletter(email);
+        setSnackbarOpen(true);
+        // We can use a proper global notification here if needed, 
+        // but since setSnackbarOpen exists locally, we just use it.
+        setTimeout(() => setSnackbarOpen(false), 3000);
+        setEmail("");
+      } catch (err) {
+        alert(err.message || 'Failed to subscribe.');
+      }
     }
   };
 

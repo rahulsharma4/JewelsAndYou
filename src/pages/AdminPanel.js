@@ -5,7 +5,7 @@ import api from "../services/api";
 import { getImageUrl, ImageWithFallback } from "../utils/imageUtils";
 import {
   Gem, Settings, UploadCloud, Plus, Edit2, Trash2,
-  Download, TrendingUp, Scale, Tag
+  Download, TrendingUp, Scale, Tag, Star
 } from "lucide-react";
 
 const AdminPanel = () => {
@@ -149,6 +149,15 @@ const AdminPanel = () => {
       a.remove();
     } catch (error) {
       console.error("Export failed:", error);
+    }
+  };
+
+  const handleToggleFeatured = async (product) => {
+    try {
+      await api.toggleProductFeatured(product._id, !product.featured);
+      loadProducts();
+    } catch (error) {
+      console.error("Failed to toggle featured status:", error);
     }
   };
 
@@ -438,6 +447,15 @@ const AdminPanel = () => {
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition text-brand-off/70 hover:bg-brand-teal/20"
             >
               <TrendingUp className="w-4 h-4" /> Inventory Dashboard
+            </button>
+            <button
+              onClick={() => {
+                api.logout();
+                navigate('/login');
+              }}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition text-rose-400 hover:bg-rose-400/10 border border-transparent hover:border-rose-400/30"
+            >
+              Logout
             </button>
           </div>
         </div>
@@ -912,6 +930,17 @@ const AdminPanel = () => {
                         </td>
                         <td className="p-4 text-right">
                           <div className="inline-flex gap-2">
+                            <button
+                              onClick={() => handleToggleFeatured(p)}
+                              className={`p-1.5 rounded-lg border transition ${
+                                p.featured 
+                                  ? 'bg-amber-500/10 border-amber-500/30 text-amber-500 hover:bg-amber-500/20' 
+                                  : 'border-brand-off/15 hover:border-amber-500/40 text-brand-off/50 hover:text-amber-500'
+                              }`}
+                              title={p.featured ? "Unfeature Product" : "Feature Product"}
+                            >
+                              <Star className="w-4 h-4" fill={p.featured ? "currentColor" : "none"} />
+                            </button>
                             <button
                               onClick={() => handleEdit(p)}
                               className="p-1.5 rounded-lg border border-brand-off/15 hover:border-brand-gold/40 text-brand-off/80 hover:text-brand-gold transition"

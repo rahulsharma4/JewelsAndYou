@@ -25,7 +25,11 @@ const AuthLogin = ({ onLogin }) => {
       if (response.token) {
         console.log('✅ Login successful, setting user:', response.user);
         onLogin?.(response.user);
-        navigate('/');
+        if (response.user?.role === 'admin') {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/');
+        }
       } else {
         console.log('❌ Login failed:', response.message);
         setError(response.message || "Login failed");
