@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Tailwind CSS directives above. Existing custom styles remain below. */
-
 /* Global theme */
 html, body, #root {
   height: 100%;
@@ -22,177 +20,49 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar optimized for luxury theme */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
+  background: #FDFBF7;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(45deg, #0f2a2c, #1f3d3f);
+  background: #CB843C; /* brand-gold */
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(45deg, #1f3d3f, #0f2a2c);
+  background: #D19455;
 }
 
-/* Smooth animations */
+/* Smooth globally applied transitions */
 * {
-  transition: all 0.3s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
 }
 
-/* Custom button hover effects */
-.MuiButton-root {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-.MuiButton-root:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-}
-
-/* Card hover animations */
-.MuiCard-root {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-/* Loading animation */
+/* Loading animations */
 @keyframes shimmer {
-  0% {
-    background-position: -468px 0;
-  }
-  100% {
-    background-position: 468px 0;
-  }
+  0% { background-position: -468px 0; }
+  100% { background-position: 468px 0; }
 }
 
 .shimmer {
-  animation: shimmer 1.5s ease-in-out infinite;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  animation: shimmer 2s ease-in-out infinite;
+  background: linear-gradient(90deg, #F5F2EC 25%, #EBE5D9 50%, #F5F2EC 75%);
   background-size: 1000px 100%;
 }
 
-/* Floating animation for special elements */
-@keyframes float {
-  0% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-  100% {
-    transform: translateY(0px);
-  }
-}
-
-.float-animation {
-  animation: float 3s ease-in-out infinite;
-}
-
-/* Pulse animation for call-to-action elements */
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.pulse-animation {
-  animation: pulse 2s ease-in-out infinite;
-}
-
-/* Responsive design improvements */
-@media (max-width: 600px) {
-  .MuiContainer-root {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-  }
-}
-
-/* Custom focus styles for accessibility */
-.MuiButton-root:focus,
-.MuiIconButton-root:focus {
-  outline: 2px solid #0f2a2c;
-  outline-offset: 2px;
-}
-
-/* Enhanced card shadows */
-.MuiCard-root {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
-}
-
-.MuiCard-root:hover {
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
-}
-
-/* Gradient text effect */
-.gradient-text {
-  background: linear-gradient(45deg, #0f2a2c, #1f3d3f);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Custom badge styling */
-.MuiBadge-badge {
-  background: linear-gradient(45deg, #FF6B6B, #FF8E53) !important;
-  font-weight: bold !important;
-}
-
-/* Enhanced drawer styling */
-.MuiDrawer-paper {
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
-}
-
-/* Custom rating stars */
-.MuiRating-root .MuiRating-iconFilled {
-  color: #0f2a2c !important;
-}
-
-.MuiRating-root .MuiRating-iconHover {
-  color: #1f3d3f !important;
-}
-
-/* Smooth page transitions */
-.page-transition {
-  transition: opacity 0.3s ease-in-out;
-}
-
-.page-transition-enter {
-  opacity: 0;
-}
-
-.page-transition-enter-active {
-  opacity: 1;
-}
-
-.page-transition-exit {
-  opacity: 1;
-}
-
-.page-transition-exit-active {
-  opacity: 0;
-}
-
-/* Custom Dual Range Slider */
+/* Custom Dual Range Slider (Used in filters) */
 .custom-range-slider {
   position: absolute;
   width: 100%;
-  height: 6px;
+  height: 4px;
   top: 0;
   background: none;
   pointer-events: none;
@@ -202,35 +72,19 @@ code {
 }
 
 .custom-range-slider::-webkit-slider-thumb {
-  height: 20px;
-  width: 20px;
+  height: 16px;
+  width: 16px;
   border-radius: 50%;
-  background: #D4AF37;
-  border: 2px solid #1f3d3f;
+  background: #CB843C;
+  border: 2px solid #FFFDF9;
   cursor: pointer;
   pointer-events: auto;
   -webkit-appearance: none;
   appearance: none;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
   transition: transform 0.1s ease;
 }
 
 .custom-range-slider::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
-}
-
-.custom-range-slider::-moz-range-thumb {
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
-  background: #D4AF37;
-  border: 2px solid #1f3d3f;
-  cursor: pointer;
-  pointer-events: auto;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-  transition: transform 0.1s ease;
-}
-
-.custom-range-slider::-moz-range-thumb:hover {
   transform: scale(1.15);
 }

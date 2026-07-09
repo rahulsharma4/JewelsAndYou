@@ -14,9 +14,11 @@ import BottomNav from "./components/BottomNav";
 import ScrollToTop from "./components/ScrollToTop";
 
 // Import pages
-// Import pages lazily
-const HomePage = lazy(() => import("./pages/HomePage"));
-const ProductsPage = lazy(() => import("./pages/ProductsPage"));
+// Import pages eagerly for instant load
+import HomePage from "./pages/HomePage";
+import ProductsPage from "./pages/ProductsPage";
+
+// Import other pages lazily to keep bundle size small
 const AboutPage = lazy(() => import("./pages/AboutPage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
 const CategoryPage = lazy(() => import("./pages/CategoryPage"));
