@@ -169,7 +169,7 @@ function AppContent({ user, setUser }) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-brand-teal text-brand-off font-body pb-16 md:pb-0">
+    <div className="min-h-screen flex flex-col bg-brand-cream text-brand-dark font-body pb-16 md:pb-0">
         {/* Header */}
         {!isAdminPage && (
           <Header
@@ -300,7 +300,7 @@ function AppContent({ user, setUser }) {
         {cartOpen && (
           <div className="fixed inset-0 z-50">
             <div className="absolute inset-0 bg-black/40" onClick={() => setCartOpen(false)} />
-            <div className={`absolute right-0 top-0 h-full w-full ${isMobile ? 'max-w-full' : 'max-w-sm'} bg-brand-tealDark text-brand-off shadow-2xl border-l border-brand-gold/20`}>
+            <div className={`absolute right-0 top-0 h-full w-full ${isMobile ? 'max-w-full' : 'max-w-sm'} bg-brand-light text-brand-dark shadow-2xl border-l border-brand-gold/20`}>
               <div className="p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="text-lg font-bold">Shopping Cart ({getTotalItems()} items)</h2>
@@ -308,10 +308,10 @@ function AppContent({ user, setUser }) {
                 </div>
 
                 {cart.length === 0 ? (
-                  <p className="text-brand-off/80">Your cart is empty</p>
+                  <p className="text-brand-dark/80">Your cart is empty</p>
                 ) : (
                   <>
-                    <ul className="divide-y divide-brand-off/10">
+                    <ul className="divide-y divide-brand-dark/10">
                       {cart.map((item) => (
                         <li key={item.id} className="py-3">
                           <div className="flex items-center gap-4">
@@ -328,7 +328,7 @@ function AppContent({ user, setUser }) {
                               <div className="flex items-center mt-2">
                                 <button
                                   onClick={() => updateCartItem(item.product._id, item.quantity - 1)}
-                                  className="px-2 py-1 rounded border border-brand-off/30 hover:bg-brand-teal/20"
+                                  className="px-2 py-1 rounded border border-brand-dark/30 hover:bg-brand-cream/20"
                                   aria-label="Decrease quantity"
                                 >
                                   -
@@ -336,7 +336,7 @@ function AppContent({ user, setUser }) {
                                 <span className="mx-3">{item.quantity}</span>
                                 <button
                                   onClick={() => updateCartItem(item.product._id, item.quantity + 1)}
-                                  className="px-2 py-1 rounded border border-brand-off/30 hover:bg-brand-teal/20"
+                                  className="px-2 py-1 rounded border border-brand-dark/30 hover:bg-brand-cream/20"
                                   aria-label="Increase quantity"
                                 >
                                   +
@@ -357,14 +357,14 @@ function AppContent({ user, setUser }) {
                       ))}
                     </ul>
 
-                    <div className="mt-4 border-t border-brand-off/10 pt-4">
+                    <div className="mt-4 border-t border-brand-dark/10 pt-4">
                       <div className="flex items-center justify-between font-bold mb-3">
                         <span>Total:</span>
                         <span className="text-brand-gold">₹{getTotalPrice().toLocaleString('en-IN')}</span>
                       </div>
                       <button
                         onClick={handleCheckout}
-                        className="w-full py-3 rounded-md font-semibold text-brand-tealDark bg-brand-gold hover:bg-brand-gold/90"
+                        className="w-full py-3 rounded-md font-semibold text-brand-light bg-brand-gold hover:bg-brand-gold/90"
                       >
                         Checkout
                       </button>

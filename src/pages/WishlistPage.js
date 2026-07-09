@@ -16,23 +16,23 @@ const WishlistPage = ({ products = [], favorites = [], onAddToCart, onToggleFavo
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-brand-tealDark text-brand-off p-10 rounded-2xl border border-brand-gold/15 text-center max-w-xl mx-auto mt-8"
+          className="bg-brand-light text-brand-dark p-10 rounded-2xl border border-brand-gold/15 text-center max-w-xl mx-auto mt-8"
         >
           <Heart className="w-14 h-14 text-brand-gold/30 mx-auto mb-4" />
           <h2 className="text-xl font-bold font-heading mb-2">Your Wishlist is Empty</h2>
-          <p className="text-brand-off/60 text-sm mb-6 max-w-xs mx-auto">Explore our premium collections and save your favorite designs here.</p>
+          <p className="text-brand-dark/60 text-sm mb-6 max-w-xs mx-auto">Explore our premium collections and save your favorite designs here.</p>
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => navigate('/products')}
-            className="px-6 py-3 rounded-lg bg-brand-gold text-brand-tealDark font-bold text-sm shadow-lg shadow-brand-gold/10"
+            className="px-6 py-3 rounded-lg bg-brand-gold text-brand-light font-bold text-sm shadow-lg shadow-brand-gold/10"
           >
             Start Exploring
           </motion.button>
         </motion.div>
       ) : (
         <>
-          <p className="text-brand-off/60 text-sm mb-8">You have saved {wishlistProducts.length} items in your wishlist</p>
+          <p className="text-brand-dark/60 text-sm mb-8">You have saved {wishlistProducts.length} items in your wishlist</p>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

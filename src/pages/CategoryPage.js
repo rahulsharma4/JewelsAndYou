@@ -30,16 +30,25 @@ const CategoryPage = ({ onAddToCart, onToggleFavorite, favorites = [] }) => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Hero */}
-      <section className="bg-brand-tealDark text-brand-off rounded-lg p-8 mb-8">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="text-center">
-          <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }} className="text-3xl sm:text-4xl font-extrabold mb-2">
+      <section className="bg-white rounded-[2rem] p-10 md:p-14 mb-10 border border-brand-gold/15 shadow-[0_8px_30px_rgb(0,0,0,0.06)] relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-40 h-40 bg-brand-gold/5 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+        
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="text-center relative z-10">
+          <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }} className="text-4xl sm:text-5xl font-heading font-bold mb-4 text-brand-dark">
             {normalized}
           </motion.h1>
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2, duration: 0.5 }} className="opacity-90">
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2, duration: 0.5 }} className="text-brand-dark/70 font-medium max-w-2xl mx-auto mb-8 text-lg">
             Discover our curated selection of {normalized.toLowerCase()} crafted with timeless elegance.
           </motion.p>
-          <div className="mt-4">
-            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }} onClick={() => navigate("/products")} className="rounded-md bg-brand-gold text-brand-tealDark px-6 py-2 font-semibold">
+          <div>
+            <motion.button 
+              whileHover={{ scale: 1.05 }} 
+              whileTap={{ scale: 0.98 }} 
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }} 
+              onClick={() => navigate("/products")} 
+              className="rounded-2xl bg-brand-gold text-white px-8 py-3.5 font-bold uppercase tracking-widest text-sm shadow-[0_8px_20px_rgba(212,175,55,0.25)] hover:shadow-[0_12px_25px_rgba(212,175,55,0.35)]"
+            >
               View All Products
             </motion.button>
           </div>
@@ -52,13 +61,13 @@ const CategoryPage = ({ onAddToCart, onToggleFavorite, favorites = [] }) => {
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-gold"></div>
         </div>
       ) : categoryProducts.length === 0 ? (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-brand-off/80 bg-brand-tealDark rounded-lg p-8">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-brand-dark/80 bg-brand-light rounded-lg p-8">
           No products found in this category.
         </motion.div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {categoryProducts.map((product) => (
-            <motion.div key={product._id || product.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }} whileHover={{ y: -8, boxShadow: '0 10px 30px rgba(0,0,0,0.35)' }}>
+            <motion.div key={product._id || product.id} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
               <ProductCard
                 product={product}
                 onAddToCart={onAddToCart}

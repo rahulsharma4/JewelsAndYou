@@ -5,6 +5,10 @@ import { Gem, Truck, Undo2, ArrowRight, Heart, Sparkles, ChevronRight, Lock, Ins
 import { getImageUrl, ImageWithFallback } from "../utils/imageUtils";
 import { CategorySkeleton, TestimonialSkeleton } from "../components/LoadingSpinner";
 import api from "../services/api";
+import slideImg1 from '../Assets/Jevel1.jpg';
+import slideImg2 from '../Assets/Jevel2.jpg';
+import slideImg3 from '../Assets/Jevel3.jpg';
+import ProductCard from '../components/ProductCard';
 
 /* ───────── tiny reusable shimmer button ───────── */
 const ShimmerButton = ({ children, className = "", ...props }) => (
@@ -47,7 +51,7 @@ const SectionHeading = ({ badge, title, subtitle }) => (
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ delay: 0.15 }}
-        className="text-brand-off/70 max-w-2xl mx-auto"
+        className="text-brand-dark/70 max-w-2xl mx-auto"
       >
         {subtitle}
       </motion.p>
@@ -62,6 +66,33 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
   const [siteSettings, setSiteSettings] = useState(null);
   const [heroIdx, setHeroIdx] = useState(0);
 
+  const heroSlides = [
+    {
+      title: "Timeless",
+      highlight: "Elegance",
+      subtitle: "Collection",
+      description: "Discover handcrafted pieces that celebrate life's most precious moments with breathtaking brilliance.",
+      image: slideImg1,
+      gradient: "from-brand-light via-brand-cream to-brand-light"
+    },
+    {
+      title: "Exquisite",
+      highlight: "Bridal",
+      subtitle: "Sets",
+      description: "Make your special day unforgettable with our premium bespoke bridal collections.",
+      image: slideImg2,
+      gradient: "from-[#FDFBF7] via-[#F4EDE4] to-[#FDFBF7]"
+    },
+    {
+      title: "Modern",
+      highlight: "Luxury",
+      subtitle: "Essentials",
+      description: "Elevate your everyday style with our chic and contemporary gold and diamond essentials.",
+      image: slideImg3,
+      gradient: "from-[#FCF9F2] via-[#F9F0E5] to-[#FCF9F2]"
+    }
+  ];
+
   useEffect(() => {
     const fetchSettings = async () => {
       try {
@@ -74,11 +105,10 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
     fetchSettings();
   }, []);
 
-  /* rotate hero background colour when there are no images */
   useEffect(() => {
-    const t = setInterval(() => setHeroIdx(i => (i + 1) % 3), 5000);
+    const t = setInterval(() => setHeroIdx(i => (i + 1) % heroSlides.length), 6000);
     return () => clearInterval(t);
-  }, []);
+  }, [heroSlides.length]);
 
   const featuredProducts = products.slice(0, 8);
   const newArrivals = [...products].reverse().slice(0, 4);
@@ -140,31 +170,20 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
       }
     }
   };
-
   const handleCategoryClick = (categoryName) => {
     navigate("/products", { state: { selectedCategory: categoryName } });
   };
 
-  const heroGradients = [
-    "from-brand-tealDark via-brand-teal to-brand-tealDark",
-    "from-brand-tealDark via-emerald-900 to-brand-tealDark",
-    "from-brand-tealDark via-slate-800 to-brand-tealDark",
-  ];
-
-  const heroImage = siteSettings?.hero?.image
-    ? getImageUrl(siteSettings.hero.image)
-    : null;
+  const activeSlide = heroSlides[heroIdx];
 
   return (
     <div className="overflow-hidden">
 
-      {/* ══════════ HERO ══════════ */}
+      {/* ══════════ PREMIUM STATIC HERO SLIDER ══════════ */}
       <section
-        className={`relative min-h-[85vh] flex items-center text-brand-off bg-gradient-to-br ${heroGradients[heroIdx]} transition-all duration-[2000ms]`}
-        style={heroImage ? { backgroundImage: `url(${heroImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
+        className={`relative min-h-[85vh] flex items-center text-brand-dark bg-gradient-to-br ${activeSlide.gradient} transition-all duration-[2000ms]`}
       >
-        {heroImage && <div className="absolute inset-0 bg-black/50" />}
-        {!heroImage && <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(201,168,106,0.12),transparent_60%)]" />}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(203,132,60,0.08),transparent_60%)]" />
 
         {/* floating sparkle dots */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -179,105 +198,110 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
           ))}
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }}>
-              <motion.span
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="inline-flex items-center gap-1.5 rounded-full bg-brand-gold/15 text-brand-gold text-xs font-semibold px-3 py-1 mb-4 border border-brand-gold/30 backdrop-blur-sm"
-              >
-                <Sparkles className="w-3 h-3" /> New Collection 2024
-              </motion.span>
-
-              <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight">
-                {siteSettings?.hero?.title || (
-                  <>Exquisite <span className="text-brand-gold">Jewellery</span> Collection</>
-                )}
-              </h1>
-
-              <p className="text-lg text-brand-off/80 mb-6 max-w-lg leading-relaxed">
-                {siteSettings?.hero?.description || "From classic diamonds to contemporary designs, discover handcrafted pieces that celebrate life's most precious moments."}
-              </p>
-
-              <div className="flex flex-wrap gap-3">
-                <ShimmerButton
-                  onClick={() => navigate("/products")}
-                  className="bg-brand-gold text-brand-tealDark px-7 py-3.5 text-base shadow-lg shadow-brand-gold/20"
-                >
-                  Shop Now <ArrowRight className="w-4 h-4" />
-                </ShimmerButton>
-                <motion.button
-                  whileHover={{ scale: 1.04 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => navigate("/about")}
-                  className="rounded-lg border border-brand-off/30 px-7 py-3.5 font-semibold text-brand-off hover:bg-white/5 backdrop-blur-sm transition"
-                >
-                  Our Story
-                </motion.button>
-              </div>
-
-              {/* trust stats */}
-              <div className="mt-8 flex gap-8">
-                {[
-                  { value: "500+", label: "Products" },
-                  { value: "10K+", label: "Happy Customers" },
-                  { value: "4.9★", label: "Avg. Rating" },
-                ].map((s, i) => (
-                  <motion.div
-                    key={s.label}
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 + i * 0.1 }}
-                  >
-                    <div className="text-2xl font-bold text-brand-gold">{s.value}</div>
-                    <div className="text-xs text-brand-off/60">{s.label}</div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* right side decorative card */}
-            <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="hidden md:flex justify-center"
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={heroIdx}
+              className="grid md:grid-cols-2 gap-12 items-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.7 }}
             >
-              <div className="relative">
-                <div className="w-80 h-80 rounded-full bg-gradient-to-br from-brand-gold/20 to-brand-gold/5 border border-brand-gold/20 flex items-center justify-center backdrop-blur-sm">
-                  <div className="w-64 h-64 rounded-full bg-gradient-to-br from-brand-gold/10 to-transparent border border-brand-gold/10 flex items-center justify-center">
-                    <div className="text-center">
-                      <Gem className="w-16 h-16 text-brand-gold mx-auto mb-3" />
-                      <div className="font-heading text-2xl font-bold text-brand-off">JewelsAndYou</div>
-                      <div className="text-sm text-brand-off/60 mt-1">Since 2020</div>
+              <div>
+                <motion.span
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-brand-gold/15 text-brand-gold text-xs font-semibold px-3 py-1 mb-4 border border-brand-gold/30 backdrop-blur-sm"
+                >
+                  <Sparkles className="w-3 h-3" /> New Collection 2024
+                </motion.span>
+
+                <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight text-[#523c2d]">
+                  {activeSlide.title} <span className="text-brand-gold">{activeSlide.highlight}</span> <br/>
+                  {activeSlide.subtitle}
+                </h1>
+
+                <p className="text-lg text-brand-dark/80 mb-6 max-w-lg leading-relaxed">
+                  {activeSlide.description}
+                </p>
+
+                <div className="flex flex-wrap gap-3">
+                  <ShimmerButton
+                    onClick={() => navigate("/products")}
+                    className="bg-brand-gold text-white px-7 py-3.5 text-base shadow-lg shadow-brand-gold/30 hover:bg-brand-gold/90"
+                  >
+                    Shop Now <ArrowRight className="w-4 h-4" />
+                  </ShimmerButton>
+                  <motion.button
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => navigate("/about")}
+                    className="rounded-lg border-2 border-brand-dark/20 px-7 py-3.5 font-semibold text-brand-dark hover:bg-white/50 backdrop-blur-sm transition"
+                  >
+                    Our Story
+                  </motion.button>
+                </div>
+
+                {/* trust stats */}
+                <div className="mt-10 flex gap-8">
+                  {[
+                    { value: "500+", label: "Premium Designs" },
+                    { value: "10K+", label: "Happy Customers" },
+                    { value: "4.9★", label: "Avg. Rating" },
+                  ].map((s, i) => (
+                    <div key={s.label}>
+                      <div className="text-2xl font-bold text-brand-gold">{s.value}</div>
+                      <div className="text-xs text-brand-dark/70 font-medium">{s.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* right side beautiful image presentation */}
+              <div className="hidden md:flex justify-center relative">
+                <div className="relative w-[380px] h-[480px] rounded-[2rem] p-3 bg-white/40 backdrop-blur-md shadow-2xl border border-white/60">
+                  <img 
+                    src={activeSlide.image} 
+                    alt={activeSlide.title} 
+                    className="w-full h-full object-cover rounded-[1.5rem] shadow-inner"
+                  />
+                  {/* Decorative Elements */}
+                  <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-2xl shadow-xl border border-brand-gold/10">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-brand-gold/15 flex items-center justify-center">
+                        <Star className="w-5 h-5 text-brand-gold fill-brand-gold" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-brand-dark">Premium Quality</div>
+                        <div className="text-[10px] text-brand-dark/60">Certified Diamonds</div>
+                      </div>
                     </div>
                   </div>
                 </div>
-                {/* orbiting dots */}
-                <motion.div
-                  className="absolute top-4 right-4 w-12 h-12 rounded-full bg-brand-gold/20 border border-brand-gold/30 flex items-center justify-center"
-                  animate={{ y: [0, -8, 0] }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                >
-                  <span className="text-lg">💍</span>
-                </motion.div>
-                <motion.div
-                  className="absolute bottom-8 left-0 w-10 h-10 rounded-full bg-brand-gold/20 border border-brand-gold/30 flex items-center justify-center"
-                  animate={{ y: [0, 8, 0] }}
-                  transition={{ duration: 3.5, repeat: Infinity }}
-                >
-                  <span className="text-lg">💎</span>
-                </motion.div>
               </div>
             </motion.div>
+          </AnimatePresence>
+
+          {/* Slider Controls */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+            {heroSlides.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setHeroIdx(idx)}
+                className={`transition-all duration-300 rounded-full ${
+                  heroIdx === idx ? "w-8 h-2 bg-brand-gold" : "w-2 h-2 bg-brand-gold/30 hover:bg-brand-gold/60"
+                }`}
+              />
+            ))}
           </div>
         </div>
       </section>
 
+
       {/* ══════════ TRUST MARQUEE ══════════ */}
-      <div className="bg-brand-tealDark border-y border-brand-gold/10 py-3 overflow-hidden">
+      <div className="bg-brand-light border-y border-brand-gold/10 py-3 overflow-hidden">
         <div className="flex animate-[marquee_30s_linear_infinite] whitespace-nowrap">
           {[...marqueeItems, ...marqueeItems].map((item, i) => (
             <span key={i} className="mx-6 text-sm text-brand-gold/70 font-medium tracking-wide">
@@ -288,13 +312,13 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
       </div>
 
       {/* ══════════ CATEGORIES ══════════ */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
         <SectionHeading
           badge="Collections"
           title="Shop by Category"
           subtitle="Browse our curated collections of handcrafted jewelry"
         />
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
           {loading ? (
             Array.from({ length: 6 }).map((_, i) => <CategorySkeleton key={i} />)
           ) : (
@@ -302,12 +326,12 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
               <motion.button
                 key={cat.name}
                 onClick={() => handleCategoryClick(cat.name)}
-                className="group relative rounded-xl overflow-hidden text-center bg-brand-tealDark border border-brand-gold/10 hover:border-brand-gold/40 transition-all duration-300 h-32 sm:h-40"
+                className="group relative rounded-[2rem] overflow-hidden text-center bg-white border border-brand-gold/15 shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-brand-gold/30 transition-all duration-500 h-40 sm:h-52"
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.06 }}
-                whileHover={{ y: -6, boxShadow: "0 12px 32px rgba(201,168,106,0.15)" }}
+                whileHover={{ y: -6 }}
               >
                 {cat.image ? (
                   <ImageWithFallback
@@ -316,14 +340,14 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                 ) : (
-                  <div className="absolute inset-0 bg-brand-tealDark/50 flex items-center justify-center">
+                  <div className="absolute inset-0 bg-[#FDFBF7] flex items-center justify-center">
                     <Gem className="w-8 h-8 text-brand-gold/30" />
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10 group-hover:from-black/90 transition-all" />
-                <div className="absolute inset-0 flex flex-col items-center justify-end p-4 pb-5">
-                  <div className="font-heading font-bold text-lg text-brand-off tracking-wide mb-0.5">{cat.name}</div>
-                  <div className="text-[10px] uppercase tracking-widest text-brand-gold font-semibold">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent group-hover:from-black/90 transition-all duration-500" />
+                <div className="absolute inset-0 flex flex-col items-center justify-end p-5 pb-6">
+                  <div className="font-heading font-bold text-lg md:text-xl text-white tracking-wide mb-1 group-hover:text-brand-gold transition-colors">{cat.name}</div>
+                  <div className="text-[10px] uppercase tracking-widest text-white/80 font-semibold group-hover:text-white transition-colors">
                     {cat.count > 0 ? `${cat.count} items` : "Explore"}
                   </div>
                 </div>
@@ -334,31 +358,32 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
       </section>
 
       {/* ══════════ WHY CHOOSE US ══════════ */}
-      <section className="py-16 bg-gradient-to-b from-brand-teal/5 to-transparent">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 md:py-24 bg-white border-y border-brand-gold/10 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.04),transparent_70%)]" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <SectionHeading
             badge="Why Us"
             title="Why Choose JewelsAndYou?"
             subtitle="We bring you the finest jewelry experience"
           />
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
             {features.map((f, i) => {
               const Icon = f.icon;
               return (
                 <motion.div
                   key={f.title}
-                  className="group text-center p-6 bg-brand-tealDark/90 backdrop-blur rounded-xl border border-brand-gold/10 hover:border-brand-gold/30 transition-all"
+                  className="group text-center p-8 bg-[#FDFBF7] rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-brand-gold/10 hover:border-brand-gold/20 transition-all duration-500"
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.08 }}
                   whileHover={{ y: -8 }}
                 >
-                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-brand-gold/10 mb-4 group-hover:bg-brand-gold/20 transition-colors">
-                    <Icon className="w-7 h-7 text-brand-gold" />
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white shadow-inner border border-brand-gold/15 mb-6 group-hover:bg-brand-gold transition-colors duration-500">
+                    <Icon className="w-8 h-8 text-brand-gold group-hover:text-white transition-colors duration-500" />
                   </div>
-                  <div className="font-semibold text-brand-off mb-1">{f.title}</div>
-                  <div className="text-sm text-brand-off/60 leading-relaxed">{f.description}</div>
+                  <div className="font-bold font-heading text-lg text-brand-dark mb-2">{f.title}</div>
+                  <div className="text-sm font-medium text-brand-dark/60 leading-relaxed">{f.description}</div>
                 </motion.div>
               );
             })}
@@ -367,7 +392,7 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
       </section>
 
       {/* ══════════ FEATURED PRODUCTS ══════════ */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-24">
         <SectionHeading
           badge="Bestsellers"
           title="Featured Collections"
@@ -375,147 +400,110 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
         />
 
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="rounded-xl bg-brand-tealDark animate-pulse">
-                <div className="h-60 bg-brand-off/10 rounded-t-xl" />
-                <div className="p-4 space-y-2">
-                  <div className="h-4 bg-brand-off/10 rounded w-3/4" />
-                  <div className="h-3 bg-brand-off/10 rounded w-1/2" />
-                  <div className="h-5 bg-brand-off/10 rounded w-1/3" />
+              <div key={i} className="rounded-[2rem] bg-white border border-brand-gold/10 animate-pulse">
+                <div className="h-60 bg-[#FDFBF7] rounded-t-[2rem]" />
+                <div className="p-5 space-y-3">
+                  <div className="h-4 bg-brand-dark/5 rounded w-3/4" />
+                  <div className="h-3 bg-brand-dark/5 rounded w-1/2" />
+                  <div className="h-5 bg-brand-dark/5 rounded w-1/3" />
                 </div>
               </div>
             ))}
           </div>
         ) : featuredProducts.length === 0 ? (
-          <div className="text-center py-12 rounded-xl bg-brand-tealDark/50 border border-brand-gold/10">
-            <Gem className="w-12 h-12 text-brand-gold/40 mx-auto mb-3" />
-            <p className="text-brand-off/60">Products coming soon! Stay tuned for our collection.</p>
+          <div className="text-center py-16 rounded-[2rem] bg-[#FDFBF7] border border-brand-gold/15 shadow-inner">
+            <Gem className="w-16 h-16 text-brand-gold/30 mx-auto mb-4" />
+            <p className="text-brand-dark/60 font-medium">Products coming soon! Stay tuned for our collection.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {featuredProducts.map((product, i) => (
               <motion.div
                 key={product._id || product.id}
-                className="group rounded-xl overflow-hidden bg-brand-tealDark border border-brand-gold/10 hover:border-brand-gold/30 cursor-pointer transition-all"
-                onClick={() => navigate(`/product/${product._id || product.id}`)}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.06 }}
-                whileHover={{ y: -6, boxShadow: "0 16px 40px rgba(0,0,0,0.3)" }}
               >
-                <div className="relative h-60 overflow-hidden">
-                  <ImageWithFallback
-                    src={product.image}
-                    alt={product.name}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                  {/* quick actions on hover */}
-                  <div className="absolute bottom-3 left-3 right-3 flex gap-2 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); onAddToCart(product); }}
-                      className="flex-1 bg-brand-gold text-brand-tealDark text-xs font-semibold py-2 rounded-lg backdrop-blur-sm hover:bg-brand-gold/90 transition"
-                    >
-                      Add to Cart
-                    </button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); onToggleFavorite(product._id || product.id); }}
-                      className="w-9 h-9 flex items-center justify-center bg-brand-tealDark/80 rounded-lg backdrop-blur-sm border border-brand-off/20 hover:bg-brand-tealDark transition"
-                    >
-                      <Heart className={`w-4 h-4 ${favorites.includes(product._id || product.id) ? 'fill-red-500 text-red-500' : 'text-brand-off'}`} />
-                    </button>
-                  </div>
-
-                  {/* category badge */}
-                  <span className="absolute top-3 left-3 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-brand-tealDark/80 text-brand-gold border border-brand-gold/20 backdrop-blur-sm">
-                    {product.category}
-                  </span>
-                </div>
-
-                <div className="p-4">
-                  <h3 className="font-semibold text-sm mb-1 truncate">{product.name}</h3>
-                  <div className="flex items-center gap-1 mb-2">
-                    <div className="flex text-yellow-500 text-xs">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <span key={i}>{i < Math.round(product.rating || 5) ? '★' : '☆'}</span>
-                      ))}
-                    </div>
-                    <span className="text-[10px] text-brand-off/50">({product.rating || 5})</span>
-                  </div>
-                  <div className="text-brand-gold font-bold">₹{product.price?.toLocaleString('en-IN')}</div>
-                </div>
+                <ProductCard 
+                  product={product} 
+                  onAddToCart={onAddToCart} 
+                  onToggleFavorite={onToggleFavorite} 
+                  isFavorite={favorites.includes(product._id || product.id)} 
+                />
               </motion.div>
             ))}
           </div>
         )}
 
-        <div className="text-center mt-8">
+        <div className="text-center mt-12">
           <ShimmerButton
             onClick={() => navigate("/products")}
-            className="bg-brand-gold text-brand-tealDark px-8 py-3 shadow-lg shadow-brand-gold/10"
+            className="bg-brand-gold text-white px-8 py-3.5 shadow-[0_8px_20px_rgba(212,175,55,0.25)] hover:shadow-[0_12px_25px_rgba(212,175,55,0.35)] hover:-translate-y-1 transition-all text-sm uppercase tracking-widest"
           >
-            View All Products <ChevronRight className="w-4 h-4" />
+            View All Products
           </ShimmerButton>
         </div>
       </section>
 
       {/* ══════════ SPOTLIGHT / NEW ARRIVALS ══════════ */}
       {spotlightProduct && (
-        <section className="py-16 bg-gradient-to-b from-brand-teal/5 to-transparent">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-20 bg-[#FDFBF7] relative overflow-hidden border-t border-brand-gold/10">
+          <div className="absolute -left-40 top-0 w-96 h-96 bg-brand-gold/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <SectionHeading
               badge="New Arrivals"
               title="Just Landed"
               subtitle="The latest additions to our collection"
             />
-            <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div className="grid md:grid-cols-2 gap-10 items-center">
               <motion.div
-                className="relative rounded-2xl overflow-hidden h-96 cursor-pointer group"
+                className="relative rounded-[2.5rem] overflow-hidden h-[450px] cursor-pointer group shadow-[0_12px_40px_rgb(0,0,0,0.08)] border border-white"
                 onClick={() => navigate(`/product/${spotlightProduct._id || spotlightProduct.id}`)}
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                whileHover={{ scale: 1.02 }}
               >
                 <ImageWithFallback
                   src={spotlightProduct.image}
                   alt={spotlightProduct.name}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                <div className="absolute bottom-6 left-6 right-6">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-brand-gold/90 text-brand-tealDark text-xs font-bold px-3 py-1 mb-2">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="absolute bottom-8 left-8 right-8">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white text-[10px] uppercase tracking-widest font-bold px-4 py-1.5 mb-3 shadow-sm">
                     <Star className="w-3 h-3" /> Featured
                   </span>
-                  <h3 className="text-2xl font-heading font-bold text-white">{spotlightProduct.name}</h3>
-                  <p className="text-white/70 text-sm mt-1">{spotlightProduct.description}</p>
+                  <h3 className="text-3xl font-heading font-bold text-white mb-2">{spotlightProduct.name}</h3>
+                  <p className="text-white/80 text-sm font-medium">{spotlightProduct.description}</p>
                 </div>
               </motion.div>
 
-              <div className="space-y-4">
+              <div className="space-y-5">
                 {newArrivals.slice(0, 3).map((product, i) => (
                   <motion.div
                     key={product._id || product.id}
-                    className="flex items-center gap-4 p-4 rounded-xl bg-brand-tealDark border border-brand-gold/10 hover:border-brand-gold/30 cursor-pointer transition-all"
+                    className="flex items-center gap-5 p-5 rounded-[2rem] bg-white border border-brand-gold/10 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_25px_rgb(0,0,0,0.06)] hover:border-brand-gold/30 cursor-pointer transition-all duration-300"
                     onClick={() => navigate(`/product/${product._id || product.id}`)}
                     initial={{ opacity: 0, x: 30 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.1 }}
-                    whileHover={{ x: 4 }}
+                    whileHover={{ x: 6 }}
                   >
-                    <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
-                      <ImageWithFallback src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                    <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 bg-[#FDFBF7]">
+                      <ImageWithFallback src={product.image} alt={product.name} className="w-full h-full object-cover mix-blend-multiply" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-sm truncate">{product.name}</h4>
-                      <p className="text-xs text-brand-off/50 truncate">{product.description}</p>
-                      <div className="text-brand-gold font-bold text-sm mt-1">₹{product.price?.toLocaleString('en-IN')}</div>
+                    <div className="flex-1 min-w-0 pr-4">
+                      <h4 className="font-bold font-heading text-brand-dark text-base truncate mb-1">{product.name}</h4>
+                      <p className="text-xs text-brand-dark/50 font-medium truncate mb-2">{product.description}</p>
+                      <div className="text-brand-gold font-bold">₹{product.price?.toLocaleString('en-IN')}</div>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-brand-off/30 flex-shrink-0" />
+                    <div className="w-10 h-10 rounded-full bg-[#FDFBF7] flex items-center justify-center flex-shrink-0 group-hover:bg-brand-gold group-hover:text-white transition-colors">
+                      <ChevronRight className="w-5 h-5 text-brand-gold" />
+                    </div>
                   </motion.div>
                 ))}
               </div>
@@ -538,23 +526,23 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
             testimonials.map((t, i) => (
               <motion.div
                 key={t.name}
-                className="p-6 bg-brand-tealDark rounded-xl border border-brand-gold/10 hover:border-brand-gold/25 transition-all"
+                className="p-8 bg-white rounded-[2rem] border border-brand-gold/15 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] hover:border-brand-gold/30 transition-all duration-500"
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.08 }}
-                whileHover={{ y: -4 }}
+                whileHover={{ y: -6 }}
               >
-                <div className="flex items-center gap-3 mb-4">
-                  <img src={t.avatar} alt={t.name} className="w-11 h-11 rounded-full ring-2 ring-brand-gold/20" />
+                <div className="flex items-center gap-4 mb-6">
+                  <img src={t.avatar} alt={t.name} className="w-14 h-14 rounded-full ring-2 ring-brand-gold/20 shadow-sm" />
                   <div>
-                    <div className="font-semibold text-sm">{t.name}</div>
-                    <div className="flex text-yellow-500 text-xs">
+                    <div className="font-bold font-heading text-brand-dark">{t.name}</div>
+                    <div className="flex text-brand-gold text-xs mt-1">
                       {Array.from({ length: t.rating }).map((_, i) => <span key={i}>★</span>)}
                     </div>
                   </div>
                 </div>
-                <p className="text-sm text-brand-off/70 italic leading-relaxed">"{t.comment}"</p>
+                <p className="text-sm font-medium text-brand-dark/70 italic leading-relaxed">"{t.comment}"</p>
               </motion.div>
             ))
           )}
@@ -562,19 +550,19 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
       </section>
 
       {/* ══════════ INSTAGRAM / SOCIAL PROOF ══════════ */}
-      <section className="py-16 bg-gradient-to-b from-brand-teal/5 to-transparent">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 bg-[#FDFBF7] relative overflow-hidden border-y border-brand-gold/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <SectionHeading
             badge="Social"
             title="Follow Us @jewelsandyou"
             subtitle="Join our community and get inspired"
           />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[...products.slice(0, 3), ...Array(Math.max(0, 3 - products.length)).fill(null)].slice(0, 3).map((p, i) => {
               const socials = [
-                { icon: Youtube, url: "https://youtube.com/@jewelsandyou?si=mjFfnbMps5rt_kIX", color: "hover:text-red-500" },
-                { icon: Instagram, url: "https://www.instagram.com/_jewellery_raw_material?igsh=MTM1dGJ5c2J2ZWNvag==", color: "hover:text-pink-500" },
-                { icon: Instagram, url: "https://www.instagram.com/jewels_and_you_?igsh=MTBvZXNrMHlmNmo2cA==", color: "hover:text-pink-500" },
+                { icon: Youtube, url: "https://youtube.com/@jewelsandyou?si=mjFfnbMps5rt_kIX", color: "text-brand-dark hover:text-red-500" },
+                { icon: Instagram, url: "https://www.instagram.com/_jewellery_raw_material?igsh=MTM1dGJ5c2J2ZWNvag==", color: "text-brand-dark hover:text-pink-500" },
+                { icon: Instagram, url: "https://www.instagram.com/jewels_and_you_?igsh=MTBvZXNrMHlmNmo2cA==", color: "text-brand-dark hover:text-pink-500" },
               ];
               const SocialIcon = socials[i].icon;
               return (
@@ -583,27 +571,30 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
                 target="_blank"
                 rel="noopener noreferrer"
                 key={i}
-                className="aspect-square rounded-lg overflow-hidden bg-brand-tealDark border border-brand-gold/10 group cursor-pointer relative block"
+                className="aspect-square rounded-[2rem] overflow-hidden bg-white border border-brand-gold/15 shadow-[0_8px_30px_rgb(0,0,0,0.05)] group cursor-pointer relative block"
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
-                whileHover={{ scale: 1.05 }}
               >
                 {p && p.image ? (
                   <>
-                    <ImageWithFallback src={p.image} alt={p.name || "Jewelry"} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                    <div className="absolute inset-0 bg-brand-tealDark/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
-                      <SocialIcon className={`w-8 h-8 text-white transition-colors duration-300 ${socials[i].color}`} />
-                      <span className="text-white text-xs font-semibold tracking-wider uppercase">Follow Us</span>
+                    <ImageWithFallback src={p.image} alt={p.name || "Jewelry"} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 mix-blend-multiply" />
+                    <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col items-center justify-center gap-3">
+                      <div className="w-16 h-16 bg-white rounded-full shadow-lg border border-brand-gold/20 flex items-center justify-center">
+                        <SocialIcon className={`w-8 h-8 transition-colors duration-300 ${socials[i].color}`} />
+                      </div>
+                      <span className="text-brand-dark font-bold tracking-widest uppercase text-xs">Follow Us</span>
                     </div>
                   </>
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-brand-tealDark group-hover:bg-brand-tealDark/80 transition-colors relative">
-                    <Gem className="w-8 h-8 text-brand-gold/20" />
-                    <div className="absolute inset-0 bg-brand-tealDark/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
-                      <SocialIcon className={`w-8 h-8 text-white transition-colors duration-300 ${socials[i].color}`} />
-                      <span className="text-white text-xs font-semibold tracking-wider uppercase">Follow Us</span>
+                  <div className="w-full h-full flex items-center justify-center bg-[#FDFBF7] relative">
+                    <Gem className="w-12 h-12 text-brand-gold/20" />
+                    <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col items-center justify-center gap-3">
+                      <div className="w-16 h-16 bg-white rounded-full shadow-lg border border-brand-gold/20 flex items-center justify-center">
+                        <SocialIcon className={`w-8 h-8 transition-colors duration-300 ${socials[i].color}`} />
+                      </div>
+                      <span className="text-brand-dark font-bold tracking-widest uppercase text-xs">Follow Us</span>
                     </div>
                   </div>
                 )}
@@ -615,41 +606,41 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
       </section>
 
       {/* ══════════ NEWSLETTER ══════════ */}
-      <section className="py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 md:py-28">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
-            className="relative rounded-2xl p-8 md:p-12 bg-gradient-to-br from-brand-tealDark to-brand-teal border border-brand-gold/15 overflow-hidden"
+            className="relative rounded-[3rem] p-10 md:p-16 bg-white border border-brand-gold/15 shadow-[0_20px_60px_rgb(0,0,0,0.06)] overflow-hidden"
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
             {/* decorative */}
-            <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-brand-gold/5 -translate-y-1/2 translate-x-1/2" />
-            <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-brand-gold/5 translate-y-1/2 -translate-x-1/2" />
+            <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-brand-gold/5 -translate-y-1/2 translate-x-1/2 blur-2xl" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-brand-gold/5 translate-y-1/2 -translate-x-1/2 blur-2xl" />
 
             <div className="relative z-10 text-center">
               <motion.span
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
-                className="inline-flex items-center gap-1.5 rounded-full bg-brand-gold/15 text-brand-gold text-xs font-semibold px-3 py-1 mb-4 border border-brand-gold/20"
+                className="inline-flex items-center gap-1.5 rounded-full bg-[#FDFBF7] text-brand-gold text-xs font-bold uppercase tracking-widest px-4 py-2 mb-6 border border-brand-gold/20 shadow-sm"
               >
-                <Sparkles className="w-3 h-3" /> Exclusive Offers
+                <Sparkles className="w-4 h-4" /> Exclusive Offers
               </motion.span>
-              <h2 className="text-3xl md:text-4xl font-heading font-bold mb-2">Stay in the Sparkle</h2>
-              <p className="text-brand-off/70 mb-6 max-w-md mx-auto">Subscribe for exclusive offers, early access to new collections, and styling tips.</p>
-              <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
+              <h2 className="text-4xl md:text-5xl font-heading font-bold mb-4 text-brand-dark">Stay in the Sparkle</h2>
+              <p className="text-brand-dark/70 font-medium mb-10 max-w-lg mx-auto leading-relaxed">Subscribe for exclusive offers, early access to new collections, and styling tips.</p>
+              <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
                 <input
                   type="email"
                   placeholder="Enter your email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="flex-1 rounded-lg border border-brand-off/20 bg-brand-tealDark/50 px-4 py-3 placeholder-brand-off/40 focus:outline-none focus:border-brand-gold/50 backdrop-blur-sm transition"
+                  className="flex-1 rounded-2xl border border-brand-dark/10 bg-[#FDFBF7] px-6 py-4 placeholder-brand-dark/40 focus:outline-none focus:border-brand-gold/50 focus:bg-white shadow-inner transition-all font-medium text-brand-dark"
                 />
                 <ShimmerButton
                   type="submit"
-                  className="bg-brand-gold text-brand-tealDark px-6 py-3"
+                  className="bg-brand-gold text-white px-8 py-4 rounded-2xl shadow-[0_8px_20px_rgba(212,175,55,0.25)] hover:shadow-[0_12px_25px_rgba(212,175,55,0.35)] text-sm font-bold tracking-widest uppercase"
                 >
                   Subscribe
                 </ShimmerButton>
@@ -660,18 +651,18 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
       </section>
 
       {/* ══════════ CTA ══════════ */}
-      <section className="py-16 bg-gradient-to-b from-brand-teal/5 to-transparent">
+      <section className="py-20 md:py-24 bg-white border-t border-brand-gold/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl md:text-4xl font-heading font-bold mb-3">Ready to Find Your Perfect Piece?</h2>
-            <p className="text-brand-off/70 mb-6 max-w-xl mx-auto">Explore our collection and discover jewelry that speaks to your soul</p>
+            <h2 className="text-4xl md:text-5xl font-heading font-bold mb-4 text-brand-dark">Ready to Find Your Perfect Piece?</h2>
+            <p className="text-brand-dark/70 font-medium mb-10 max-w-xl mx-auto leading-relaxed">Explore our collection and discover jewelry that speaks to your soul.</p>
             <ShimmerButton
               onClick={() => navigate("/products")}
-              className="bg-brand-gold text-brand-tealDark px-10 py-4 text-lg shadow-xl shadow-brand-gold/15"
+              className="bg-brand-dark text-white px-10 py-5 rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.15)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.2)] hover:-translate-y-1 text-sm font-bold tracking-widest uppercase"
             >
               Start Shopping <ArrowRight className="w-5 h-5" />
             </ShimmerButton>

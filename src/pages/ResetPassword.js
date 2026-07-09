@@ -52,38 +52,40 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-10">
+    <div className="min-h-[70vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-brand-tealDark text-brand-off rounded-lg p-6 shadow-sm border border-brand-gold/20"
+        className="max-w-md w-full bg-white rounded-3xl p-8 sm:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-brand-gold/20 space-y-8"
       >
-        <h1 className="text-2xl font-bold mb-4">Reset Password</h1>
-        <p className="text-brand-off/80 mb-6">
-          Enter your new password below.
-        </p>
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-bold font-heading text-brand-dark">Reset Password</h1>
+          <p className="text-brand-dark/60 text-sm font-medium">
+            Enter your new password below.
+          </p>
+        </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          <div className="p-4 bg-rose-500/10 border border-rose-500/30 text-rose-500 text-xs font-semibold rounded-xl text-center">
             {error}
           </div>
         )}
 
         {message && (
-          <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+          <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 text-xs font-semibold rounded-xl text-center">
             {message}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block font-semibold mb-2">New Password</label>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-dark/60 mb-1.5 ml-1">New Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded border border-brand-off/30 bg-transparent px-3 py-2"
+              className="w-full rounded-xl border border-brand-dark/15 bg-[#FDFBF7] px-4 py-3.5 text-sm focus:border-brand-gold/50 focus:ring-1 focus:ring-brand-gold/30 focus:outline-none transition-all shadow-inner"
               placeholder="Enter new password"
               required
               minLength="6"
@@ -91,12 +93,12 @@ const ResetPassword = () => {
           </div>
 
           <div>
-            <label className="block font-semibold mb-2">Confirm Password</label>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-dark/60 mb-1.5 ml-1">Confirm Password</label>
             <input
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full rounded border border-brand-off/30 bg-transparent px-3 py-2"
+              className="w-full rounded-xl border border-brand-dark/15 bg-[#FDFBF7] px-4 py-3.5 text-sm focus:border-brand-gold/50 focus:ring-1 focus:ring-brand-gold/30 focus:outline-none transition-all shadow-inner"
               placeholder="Confirm new password"
               required
               minLength="6"
@@ -105,22 +107,21 @@ const ResetPassword = () => {
 
           <motion.button
             type="submit"
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            className="w-full rounded-md bg-brand-gold text-brand-tealDark py-2 font-semibold disabled:opacity-50"
+            className="w-full rounded-xl bg-brand-gold text-white py-4 font-bold text-xs uppercase tracking-widest shadow-xl shadow-brand-gold/20 hover:bg-brand-gold/90 transition-all mt-2 disabled:opacity-50"
             disabled={loading}
           >
             {loading ? "Resetting..." : "Reset Password"}
           </motion.button>
         </form>
 
-        <div className="mt-6 text-center">
+        <div className="pt-4 border-t border-brand-dark/5 text-center text-sm">
           <button
             onClick={() => navigate('/login')}
-            className="text-brand-gold hover:underline"
+            className="text-brand-dark/60 font-medium hover:text-brand-gold transition-all"
           >
-            Back to Login
+            <span className="text-brand-gold font-bold">&larr;</span> Back to Login
           </button>
         </div>
       </motion.div>

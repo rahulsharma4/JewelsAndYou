@@ -15,18 +15,18 @@ const CheckoutSteps = ({ currentStep }) => {
       {steps.map((step, idx) => (
         <React.Fragment key={step.id}>
           <div className="flex items-center gap-2">
-            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-              currentStep === step.id ? 'bg-brand-gold text-brand-tealDark font-extrabold shadow-lg shadow-brand-gold/15' :
-              currentStep > step.id ? 'bg-emerald-600 text-white' : 'bg-brand-tealDark text-brand-off/40 border border-brand-off/10'
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+              currentStep === step.id ? 'bg-brand-gold text-white font-extrabold shadow-lg shadow-brand-gold/20 scale-110' :
+              currentStep > step.id ? 'bg-brand-dark text-white shadow-sm' : 'bg-white text-brand-dark/40 border border-brand-dark/15 shadow-sm'
             }`}>
               {currentStep > step.id ? "✓" : step.id}
             </div>
             <span className={`text-[10px] font-bold uppercase tracking-wider ${
-              currentStep === step.id ? 'text-brand-gold' : 'text-brand-off/40'
+              currentStep === step.id ? 'text-brand-gold' : 'text-brand-dark/40'
             }`}>{step.name}</span>
           </div>
           {idx < steps.length - 1 && (
-            <div className={`w-12 h-px transition-all ${currentStep > step.id ? 'bg-emerald-600' : 'bg-brand-off/15'}`} />
+            <div className={`w-12 h-px transition-all ${currentStep > step.id ? 'bg-emerald-600' : 'bg-brand-dark/15'}`} />
           )}
         </React.Fragment>
       ))}
@@ -74,19 +74,19 @@ const CheckoutAddress = () => {
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-brand-tealDark p-6 md:p-8 rounded-2xl border border-brand-gold/15 shadow-xl space-y-6"
+        className="bg-white p-6 md:p-8 rounded-3xl border border-brand-gold/20 shadow-2xl shadow-brand-gold/5 space-y-6"
       >
         <div className="flex items-center gap-2 border-b border-brand-gold/10 pb-4">
           <MapPin className="w-5 h-5 text-brand-gold" />
-          <h2 className="text-xl font-bold font-heading text-brand-gold">Shipping Address</h2>
+          <h2 className="text-2xl font-bold font-heading text-brand-dark">Shipping Address</h2>
         </div>
 
         <form onSubmit={submit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Full Name */}
           <div className="sm:col-span-2">
-            <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Full Name</label>
+            <label className="block text-xs font-semibold uppercase text-brand-dark/60 mb-2">Full Name</label>
             <input 
-              className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2.5 text-sm focus:border-brand-gold/40 focus:outline-none" 
+              className="w-full rounded-xl border border-brand-dark/15 bg-[#FDFBF7] px-4 py-3 text-sm focus:border-brand-gold/50 focus:ring-1 focus:ring-brand-gold/30 focus:outline-none transition-all" 
               placeholder="e.g. Rahul Sharma" 
               name="name" 
               value={form.name} 
@@ -97,9 +97,9 @@ const CheckoutAddress = () => {
 
           {/* Address */}
           <div className="sm:col-span-2">
-            <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Street Address</label>
+            <label className="block text-xs font-semibold uppercase text-brand-dark/60 mb-2">Street Address</label>
             <input 
-              className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2.5 text-sm focus:border-brand-gold/40 focus:outline-none" 
+              className="w-full rounded-xl border border-brand-dark/15 bg-[#FDFBF7] px-4 py-3 text-sm focus:border-brand-gold/50 focus:ring-1 focus:ring-brand-gold/30 focus:outline-none transition-all" 
               placeholder="e.g. 123 Luxury Lane, Apartment 4B" 
               name="address" 
               value={form.address} 
@@ -110,9 +110,9 @@ const CheckoutAddress = () => {
 
           {/* City */}
           <div>
-            <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">City</label>
+            <label className="block text-xs font-semibold uppercase text-brand-dark/60 mb-2">City</label>
             <input 
-              className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2.5 text-sm focus:border-brand-gold/40 focus:outline-none" 
+              className="w-full rounded-xl border border-brand-dark/15 bg-[#FDFBF7] px-4 py-3 text-sm focus:border-brand-gold/50 focus:ring-1 focus:ring-brand-gold/30 focus:outline-none transition-all" 
               placeholder="e.g. Mumbai" 
               name="city" 
               value={form.city} 
@@ -123,9 +123,9 @@ const CheckoutAddress = () => {
 
           {/* Country */}
           <div>
-            <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Country</label>
+            <label className="block text-xs font-semibold uppercase text-brand-dark/60 mb-2">Country</label>
             <input 
-              className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2.5 text-sm focus:border-brand-gold/40 focus:outline-none" 
+              className="w-full rounded-xl border border-brand-dark/15 bg-[#FDFBF7] px-4 py-3 text-sm focus:border-brand-gold/50 focus:ring-1 focus:ring-brand-gold/30 focus:outline-none transition-all" 
               placeholder="e.g. India" 
               name="country" 
               value={form.country} 
@@ -136,9 +136,9 @@ const CheckoutAddress = () => {
 
           {/* ZIP */}
           <div>
-            <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">ZIP / Postal Code</label>
+            <label className="block text-xs font-semibold uppercase text-brand-dark/60 mb-2">ZIP / Postal Code</label>
             <input 
-              className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2.5 text-sm focus:border-brand-gold/40 focus:outline-none" 
+              className="w-full rounded-xl border border-brand-dark/15 bg-[#FDFBF7] px-4 py-3 text-sm focus:border-brand-gold/50 focus:ring-1 focus:ring-brand-gold/30 focus:outline-none transition-all" 
               placeholder="e.g. 400001" 
               name="zip" 
               value={form.zip} 
@@ -148,9 +148,9 @@ const CheckoutAddress = () => {
           </div>
 
           {/* Secure Assurances */}
-          <div className="sm:col-span-2 bg-brand-teal/20 rounded-xl p-3 border border-brand-gold/5 flex gap-2.5 items-center mt-3">
+          <div className="sm:col-span-2 bg-[#FDFBF7] rounded-xl p-4 border border-brand-gold/15 shadow-inner flex gap-3 items-center mt-3">
             <ShieldCheck className="w-5 h-5 text-brand-gold flex-shrink-0" />
-            <span className="text-[10px] text-brand-off/60">SSL Encryption protocols are active. Your shipping details are protected.</span>
+            <span className="text-[10px] text-brand-dark/70 font-medium">SSL Encryption protocols are active. Your shipping details are fully protected.</span>
           </div>
 
           {/* Actions */}
@@ -158,13 +158,13 @@ const CheckoutAddress = () => {
             <button 
               type="button" 
               onClick={() => navigate('/cart')} 
-              className="text-xs text-brand-off/50 hover:text-brand-gold transition"
+              className="text-xs text-brand-dark/50 hover:text-brand-gold transition"
             >
               Return to Shopping Bag
             </button>
             <button 
               type="submit" 
-              className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-brand-gold text-brand-tealDark rounded-lg text-sm font-bold shadow-lg shadow-brand-gold/10 hover:bg-brand-gold/90 transition"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-brand-gold text-white rounded-xl text-xs font-bold tracking-widest uppercase shadow-xl shadow-brand-gold/20 hover:bg-brand-gold/90 transition-all"
             >
               Continue to Delivery <ArrowRight className="w-4 h-4" />
             </button>

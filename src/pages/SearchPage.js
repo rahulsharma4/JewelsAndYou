@@ -70,7 +70,7 @@ const SearchPage = ({ onAddToCart, onToggleFavorite, favorites = [] }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-brand-teal pt-4 md:pt-8">
+    <div className="min-h-screen bg-brand-cream pt-4 md:pt-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Search Header */}
         <motion.div
@@ -78,10 +78,10 @@ const SearchPage = ({ onAddToCart, onToggleFavorite, favorites = [] }) => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-6"
         >
-          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-brand-off mb-1">
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-brand-dark mb-1">
             {query ? <>Results for <span className="text-brand-gold">"{query}"</span></> : 'Search Products'}
           </h1>
-          <p className="text-brand-off/60 text-sm">
+          <p className="text-brand-dark/60 text-sm">
             {loading ? 'Searching...' : `${searchResults.length} product${searchResults.length !== 1 ? 's' : ''} found`}
           </p>
         </motion.div>
@@ -95,32 +95,32 @@ const SearchPage = ({ onAddToCart, onToggleFavorite, favorites = [] }) => {
         >
           {/* Category Filter */}
           <div className="flex-1">
-            <label className="block text-xs font-semibold text-brand-off/50 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-brand-dark/50 uppercase tracking-wider mb-1.5">
               Category
             </label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-lg border border-brand-off/15 bg-brand-tealDark text-brand-off text-sm focus:outline-none focus:border-brand-gold/50 transition"
+              className="w-full px-3 py-2.5 rounded-lg border border-brand-dark/15 bg-brand-light text-brand-dark text-sm focus:outline-none focus:border-brand-gold/50 transition"
             >
               {categories.map((cat) => (
-                <option key={cat} value={cat} className="bg-brand-tealDark">{cat}</option>
+                <option key={cat} value={cat} className="bg-brand-light">{cat}</option>
               ))}
             </select>
           </div>
 
           {/* Sort Filter */}
           <div className="flex-1">
-            <label className="block text-xs font-semibold text-brand-off/50 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-brand-dark/50 uppercase tracking-wider mb-1.5">
               Sort By
             </label>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-lg border border-brand-off/15 bg-brand-tealDark text-brand-off text-sm focus:outline-none focus:border-brand-gold/50 transition"
+              className="w-full px-3 py-2.5 rounded-lg border border-brand-dark/15 bg-brand-light text-brand-dark text-sm focus:outline-none focus:border-brand-gold/50 transition"
             >
               {sortOptions.map((option) => (
-                <option key={option.value} value={option.value} className="bg-brand-tealDark">
+                <option key={option.value} value={option.value} className="bg-brand-light">
                   {option.label}
                 </option>
               ))}
@@ -137,8 +137,8 @@ const SearchPage = ({ onAddToCart, onToggleFavorite, favorites = [] }) => {
                 onClick={() => setCategory(cat)}
                 className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all ${
                   category === cat
-                    ? 'bg-brand-gold text-brand-tealDark border-brand-gold shadow-md shadow-brand-gold/20'
-                    : 'border-brand-off/20 text-brand-off/70 hover:border-brand-gold/40 hover:text-brand-off bg-brand-tealDark/40'
+                    ? 'bg-brand-gold text-brand-light border-brand-gold shadow-md shadow-brand-gold/20'
+                    : 'border-brand-dark/20 text-brand-dark/70 hover:border-brand-gold/40 hover:text-brand-dark bg-brand-light/40'
                 }`}
               >
                 {cat}
@@ -174,13 +174,13 @@ const SearchPage = ({ onAddToCart, onToggleFavorite, favorites = [] }) => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-center py-16 rounded-2xl bg-brand-tealDark/50 border border-brand-gold/10"
+            className="text-center py-16 rounded-2xl bg-brand-light/50 border border-brand-gold/10"
           >
             <div className="text-5xl mb-4">🔍</div>
-            <h3 className="text-xl font-heading font-semibold text-brand-off mb-2">
+            <h3 className="text-xl font-heading font-semibold text-brand-dark mb-2">
               No products found for "{query}"
             </h3>
-            <p className="text-brand-off/50 text-sm">
+            <p className="text-brand-dark/50 text-sm">
               Try a different word or remove the category filter
             </p>
           </motion.div>

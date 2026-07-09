@@ -17,18 +17,18 @@ const CheckoutSteps = ({ currentStep }) => {
       {steps.map((step, idx) => (
         <React.Fragment key={step.id}>
           <div className="flex items-center gap-2">
-            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-              currentStep === step.id ? 'bg-brand-gold text-brand-tealDark font-extrabold shadow-lg shadow-brand-gold/15' :
-              currentStep > step.id ? 'bg-emerald-600 text-white' : 'bg-brand-tealDark text-brand-off/40 border border-brand-off/10'
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+              currentStep === step.id ? 'bg-brand-gold text-white font-extrabold shadow-lg shadow-brand-gold/20 scale-110' :
+              currentStep > step.id ? 'bg-brand-dark text-white shadow-sm' : 'bg-white text-brand-dark/40 border border-brand-dark/15 shadow-sm'
             }`}>
               {currentStep > step.id ? "✓" : step.id}
             </div>
             <span className={`text-[10px] font-bold uppercase tracking-wider ${
-              currentStep === step.id ? 'text-brand-gold' : 'text-brand-off/40'
+              currentStep === step.id ? 'text-brand-gold' : 'text-brand-dark/40'
             }`}>{step.name}</span>
           </div>
           {idx < steps.length - 1 && (
-            <div className={`w-12 h-px transition-all ${currentStep > step.id ? 'bg-emerald-600' : 'bg-brand-off/15'}`} />
+            <div className={`w-12 h-px transition-all ${currentStep > step.id ? 'bg-emerald-600' : 'bg-brand-dark/15'}`} />
           )}
         </React.Fragment>
       ))}
@@ -152,10 +152,10 @@ const CheckoutPayment = () => {
 
       {loading && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-brand-tealDark p-8 rounded-2xl border border-brand-gold/20 text-center space-y-4 max-w-xs mx-auto shadow-2xl">
+          <div className="bg-brand-light p-8 rounded-2xl border border-brand-gold/20 text-center space-y-4 max-w-xs mx-auto shadow-2xl">
             <div className="w-12 h-12 border-4 border-brand-gold border-t-transparent rounded-full animate-spin mx-auto" />
             <h3 className="text-brand-gold font-bold font-heading">Processing Order</h3>
-            <p className="text-brand-off/60 text-xs">Please do not refresh the page or press back.</p>
+            <p className="text-brand-dark/60 text-xs">Please do not refresh the page or press back.</p>
           </div>
         </div>
       )}
@@ -164,14 +164,14 @@ const CheckoutPayment = () => {
       <motion.div 
         initial={{ opacity: 0, y: 16 }} 
         animate={{ opacity: 1, y: 0 }} 
-        className="bg-brand-tealDark p-6 md:p-8 rounded-2xl border border-brand-gold/15 shadow-xl space-y-6"
+        className="bg-white p-6 md:p-8 rounded-3xl border border-brand-gold/20 shadow-2xl shadow-brand-gold/5 space-y-6"
       >
         <div className="flex items-center justify-between border-b border-brand-gold/10 pb-4">
           <div className="flex items-center gap-2">
             <CreditCard className="w-5 h-5 text-brand-gold" />
-            <h2 className="text-xl font-bold font-heading text-brand-gold">Payment Details</h2>
+            <h2 className="text-2xl font-bold font-heading text-brand-dark">Payment Details</h2>
           </div>
-          <span className="text-lg font-bold text-brand-gold">Total: ₹{totalAmount.toLocaleString('en-IN')}</span>
+          <span className="text-xl font-bold text-brand-gold">Total: ₹{totalAmount.toLocaleString('en-IN')}</span>
         </div>
         
         {error && (
@@ -187,13 +187,13 @@ const CheckoutPayment = () => {
         <div className="space-y-6">
           {/* Method choice */}
           <div className="space-y-3">
-            <label className="block text-xs font-semibold uppercase text-brand-off/60">Choose Payment Method</label>
+            <label className="block text-xs font-semibold uppercase text-brand-dark/60">Choose Payment Method</label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Stripe */}
-              <label className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${
+              <label className={`flex items-center gap-4 p-5 rounded-2xl border cursor-pointer transition-all ${
                 paymentMethod === 'stripe' 
-                  ? 'border-brand-gold bg-brand-gold/5 text-brand-off'
-                  : 'border-brand-off/10 hover:border-brand-gold/30 text-brand-off/70'
+                  ? 'border-brand-gold bg-[#FDFBF7] text-brand-dark shadow-md shadow-brand-gold/10 scale-[1.02]'
+                  : 'border-brand-dark/10 hover:border-brand-gold/40 text-brand-dark/70 hover:shadow-sm bg-white'
               }`}>
                 <input 
                   type="radio" 
@@ -205,15 +205,15 @@ const CheckoutPayment = () => {
                 />
                 <div>
                   <div className="text-sm font-bold">Credit/Debit Card</div>
-                  <div className="text-xs text-brand-off/50 mt-0.5">Pay online via Stripe</div>
+                  <div className="text-xs text-brand-dark/50 mt-0.5">Pay online via Stripe</div>
                 </div>
               </label>
 
               {/* Cash on Delivery / Test Order */}
-              <label className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${
+              <label className={`flex items-center gap-4 p-5 rounded-2xl border cursor-pointer transition-all ${
                 paymentMethod === 'cod' 
-                  ? 'border-brand-gold bg-brand-gold/5 text-brand-off'
-                  : 'border-brand-off/10 hover:border-brand-gold/30 text-brand-off/70'
+                  ? 'border-brand-gold bg-[#FDFBF7] text-brand-dark shadow-md shadow-brand-gold/10 scale-[1.02]'
+                  : 'border-brand-dark/10 hover:border-brand-gold/40 text-brand-dark/70 hover:shadow-sm bg-white'
               }`}>
                 <input 
                   type="radio" 
@@ -225,7 +225,7 @@ const CheckoutPayment = () => {
                 />
                 <div>
                   <div className="text-sm font-bold">Cash on Delivery (COD)</div>
-                  <div className="text-xs text-brand-off/50 mt-0.5">Place a test/demo order instantly</div>
+                  <div className="text-xs text-brand-dark/50 mt-0.5">Place a test/demo order instantly</div>
                 </div>
               </label>
             </div>
@@ -233,7 +233,7 @@ const CheckoutPayment = () => {
 
           {/* Stripe Card Field Container */}
           {paymentMethod === "stripe" && (
-            <div className="bg-brand-teal/20 p-5 rounded-xl border border-brand-off/10">
+            <div className="bg-[#FDFBF7] p-6 rounded-2xl border border-brand-dark/15 shadow-inner">
               <StripePayment
                 amount={totalAmount}
                 orderId={orderId}
@@ -246,15 +246,15 @@ const CheckoutPayment = () => {
 
           {/* COD Button Container */}
           {paymentMethod === "cod" && (
-            <div className="bg-brand-teal/20 p-6 rounded-xl border border-brand-off/10 text-center space-y-4">
-              <p className="text-sm text-brand-off/70">
+            <div className="bg-[#FDFBF7] p-8 rounded-2xl border border-brand-dark/15 shadow-inner text-center space-y-5">
+              <p className="text-sm text-brand-dark/70">
                 You have selected Cash on Delivery. This allows you to place a test order instantly without entering card details.
               </p>
               <motion.button
                 onClick={handleCodOrderSubmit}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full py-3 bg-brand-gold text-brand-tealDark rounded-lg font-bold text-sm shadow-lg shadow-brand-gold/10 hover:bg-brand-gold/90 transition"
+                className="w-full py-4 bg-brand-gold text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-xl shadow-brand-gold/20 hover:bg-brand-gold/90 transition-all"
               >
                 Place Order (Cash on Delivery)
               </motion.button>
@@ -262,9 +262,9 @@ const CheckoutPayment = () => {
           )}
 
           {/* Guarantee Assurances */}
-          <div className="bg-brand-teal/20 rounded-xl p-3 border border-brand-gold/5 flex gap-2.5 items-center mt-3">
+          <div className="bg-[#FDFBF7] rounded-xl p-4 border border-brand-gold/15 shadow-inner flex gap-3 items-center mt-4">
             <ShieldCheck className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-            <span className="text-[10px] text-brand-off/60">Payment transactions are protected by Stripe 256-bit SSL encrypted connection.</span>
+            <span className="text-[10px] text-brand-dark/70 font-medium">Payment transactions are fully protected by Stripe 256-bit SSL encrypted connection.</span>
           </div>
 
           {/* Navigation */}
@@ -272,11 +272,11 @@ const CheckoutPayment = () => {
             <button 
               type="button" 
               onClick={() => navigate('/checkout/shipping')} 
-              className="inline-flex items-center gap-1.5 px-4 py-2 border border-brand-off/20 hover:bg-brand-off/5 rounded-lg text-xs font-semibold transition"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-white border border-brand-dark/15 hover:border-brand-dark/30 shadow-sm rounded-xl text-xs font-bold uppercase tracking-wider text-brand-dark transition-all"
             >
               <ArrowLeft className="w-4 h-4" /> Back
             </button>
-            <div className="text-right text-[10px] text-brand-off/40">
+            <div className="text-right text-[10px] text-brand-dark/40">
               Powered by Stripe.
             </div>
           </div>

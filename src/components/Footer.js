@@ -74,26 +74,29 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-brand-tealDark text-white pt-10 pb-6 mt-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <footer className="bg-brand-dark text-white/90 pt-16 pb-12 mt-10 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-brand-gold/10 via-brand-dark to-brand-dark opacity-50" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
           {/* Company info */}
           <div className="md:col-span-4">
-            <div className="mb-3">
-              <img src={logo} alt="Logo" className="h-20 mb-2" style={{filter: 'invert(1)'}} />
-              <p className="text-sm opacity-80 leading-relaxed">
+            <div className="mb-6">
+              <div className="inline-block bg-white/10 backdrop-blur-sm p-3 rounded-2xl border border-white/20 mb-4 shadow-inner">
+                <img src={logo} alt="Logo" className="h-16 object-contain" />
+              </div>
+              <p className="text-sm text-white/60 leading-relaxed font-medium">
                 Crafting timeless jewelry pieces that tell your unique story. From classic diamonds to contemporary designs, we bring you the finest quality jewelry that celebrates life's precious moments.
               </p>
             </div>
 
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2"><MapPin className="w-4 h-4  " /><span>123 Jewelry Street, Luxury District, NY 10001</span></div>
-              <div className="flex items-center gap-2"><Phone className="w-4 h-4  " /><span>+1 (555) 123-4567</span></div>
-              <div className="flex items-center gap-2"><Mail className="w-4 h-4  " /><span>info@jewelsandyou.com</span></div>
-              <div className="flex items-center gap-2"><Clock className="w-4 h-4  " /><span>Mon-Fri: 9AM-6PM, Sat: 10AM-4PM</span></div>
+            <div className="space-y-3 text-sm font-medium text-white/70">
+              <div className="flex items-center gap-3"><MapPin className="w-4 h-4 text-brand-gold" /><span>123 Jewelry Street, Luxury District, NY 10001</span></div>
+              <div className="flex items-center gap-3"><Phone className="w-4 h-4 text-brand-gold" /><span>+1 (555) 123-4567</span></div>
+              <div className="flex items-center gap-3"><Mail className="w-4 h-4 text-brand-gold" /><span>info@jewelsandyou.com</span></div>
+              <div className="flex items-center gap-3"><Clock className="w-4 h-4 text-brand-gold" /><span>Mon-Fri: 9AM-6PM, Sat: 10AM-4PM</span></div>
             </div>
 
-            <div className="mt-4 flex gap-2 flex-wrap">
+            <div className="mt-8 flex gap-3 flex-wrap">
               {socialLinks.map((s) => {
                 const Icon = s.icon;
                 return (
@@ -102,7 +105,7 @@ const Footer = () => {
                     href={s.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-9 h-9 inline-flex items-center justify-center rounded border border-white/20 hover:bg-brand-gold hover:text-brand-tealDark hover:border-brand-gold transition-all duration-200"
+                    className="w-10 h-10 inline-flex items-center justify-center rounded-full bg-white/5 border border-white/10 hover:bg-brand-gold hover:border-brand-gold transition-all duration-300 shadow-sm text-white"
                     aria-label={s.label}
                   >
                     <Icon className="w-4 h-4" />
@@ -114,14 +117,14 @@ const Footer = () => {
 
           {/* Links */}
           {footerSections.map((section) => (
-            <div key={section.title} className="md:col-span-2">
-              <div className="text-lg font-bold mb-2  ">{section.title}</div>
-              <ul className="space-y-1">
+            <div key={section.title} className="md:col-span-2 mt-8 md:mt-0">
+              <div className="text-lg font-bold font-heading mb-4 text-white tracking-wide">{section.title}</div>
+              <ul className="space-y-2.5">
                 {section.links.map((link) => (
                   <li key={link.name}>
                     <button
                       onClick={() => navigate(link.path)}
-                      className="text-sm text-white/80 hover:  transition"
+                      className="text-sm text-white/60 hover:text-brand-gold hover:translate-x-1 transition-all font-medium text-left"
                     >
                       {link.name}
                     </button>
@@ -132,30 +135,36 @@ const Footer = () => {
           ))}
 
           {/* Newsletter */}
-          <div className="md:col-span-3">
-            <div className="text-lg font-bold mb-2  ">Newsletter</div>
-            <p className="text-sm opacity-80 mb-3">Subscribe to get special offers, free giveaways, and updates on new collections.</p>
-            <form onSubmit={handleNewsletterSubmit} className="flex flex-col gap-2">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="rounded-md px-3 py-2 bg-transparent border border-white/30 placeholder-white/70 focus:outline-none"
-              />
-              <button type="submit" className="rounded-md bg-brand-gold px-4 py-2 font-semibold text-black">
-                Subscribe
-              </button>
-            </form>
+          <div className="md:col-span-3 mt-8 md:mt-0">
+            <div className="p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm">
+              <div className="text-lg font-bold font-heading mb-2 text-white">Join Our Newsletter</div>
+              <p className="text-sm text-white/60 mb-5 font-medium leading-relaxed">Subscribe to get special offers, free giveaways, and updates on new collections.</p>
+              <form onSubmit={handleNewsletterSubmit} className="flex flex-col gap-3">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="rounded-xl px-4 py-3 bg-white/10 border border-white/20 text-white placeholder-white/40 focus:border-brand-gold focus:outline-none focus:bg-white/15 transition-all text-sm font-medium shadow-inner"
+                />
+                <button type="submit" className="rounded-xl bg-brand-gold hover:bg-brand-gold/90 px-4 py-3 font-bold text-brand-dark text-xs uppercase tracking-widest shadow-[0_4px_14px_0_rgba(212,175,55,0.39)] hover:shadow-[0_6px_20px_rgba(212,175,55,0.23)] hover:-translate-y-0.5 transition-all">
+                  Subscribe
+                </button>
+              </form>
+            </div>
           </div>
         </div>
 
-        <div className="my-6 h-px  bg-brand-tealDark/20" />
+        <div className="my-10 h-px bg-white/10" />
 
         {/* Bottom */}
-        <div className="flex flex-col sm:flex-row items-center justify-center text-sm opacity-80 pt-2">
-          <div>© 2024 JewelsAndYou. All rights reserved.</div>
+        <div className="flex flex-col sm:flex-row items-center justify-between text-xs font-medium text-white/40 pt-2">
+          <div>© {new Date().getFullYear()} Jewels And You. All rights reserved.</div>
+          <div className="mt-2 sm:mt-0 flex gap-4">
+            <span className="hover:text-brand-gold cursor-pointer transition-colors" onClick={() => navigate('/privacy')}>Privacy Policy</span>
+            <span className="hover:text-brand-gold cursor-pointer transition-colors" onClick={() => navigate('/terms')}>Terms of Service</span>
+          </div>
         </div>
       </div>
 

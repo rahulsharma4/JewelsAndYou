@@ -58,7 +58,7 @@ const FormInput = ({
     ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-transparent'}
     ${hasError 
       ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
-      : 'border-brand-off/30 focus:border-brand-gold focus:ring-brand-gold'
+      : 'border-brand-dark/30 focus:border-brand-gold focus:ring-brand-gold'
     }
     focus:outline-none focus:ring-2
     ${className}

@@ -19,11 +19,11 @@ const SortSelect = ({ value, onChange, options }) => {
     <div className="relative" onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false); }} tabIndex={-1}>
       <button
         onClick={() => setOpen(o => !o)}
-        className="inline-flex items-center gap-2 rounded-lg border border-brand-off/20 bg-brand-tealDark px-3 py-2 text-sm text-brand-off/90 hover:border-brand-gold/30 transition"
+        className="inline-flex items-center gap-2 rounded-xl border border-brand-dark/15 bg-white shadow-sm px-4 py-2 text-sm text-brand-dark/90 hover:border-brand-gold/40 hover:shadow-md transition-all"
       >
-        <ArrowUpDown className="w-3.5 h-3.5 text-brand-gold" />
-        <span>{selected?.label}</span>
-        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ArrowUpDown className="w-4 h-4 text-brand-gold" />
+        <span className="font-medium">{selected?.label}</span>
+        <ChevronDown className={`w-4 h-4 text-brand-dark/50 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       <AnimatePresence>
         {open && (
@@ -31,7 +31,7 @@ const SortSelect = ({ value, onChange, options }) => {
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
-            className="absolute right-0 z-30 mt-1 min-w-[180px] overflow-hidden rounded-xl border border-brand-off/20 bg-brand-tealDark shadow-xl"
+            className="absolute right-0 z-30 mt-2 min-w-[200px] overflow-hidden rounded-2xl border border-brand-dark/10 bg-white shadow-xl shadow-brand-gold/5"
           >
             {options.map(opt => (
               <button
@@ -41,7 +41,7 @@ const SortSelect = ({ value, onChange, options }) => {
                 className={`block w-full px-4 py-2.5 text-left text-sm transition ${
                   opt.value === value
                     ? 'bg-brand-gold/15 text-brand-gold font-medium'
-                    : 'text-brand-off/80 hover:bg-brand-teal/20'
+                    : 'text-brand-dark/80 hover:bg-brand-cream/20'
                 }`}
               >
                 {opt.label}
@@ -203,14 +203,14 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
             </button>
           )}
           {onClose && (
-            <button onClick={onClose} className="p-1 rounded-lg hover:bg-brand-teal/20 md:hidden">
+            <button onClick={onClose} className="p-1 rounded-lg hover:bg-brand-cream/20 md:hidden">
               <X className="w-5 h-5" />
             </button>
           )}
         </div>
       </div>
 
-      <div className="h-px bg-brand-off/10" />
+      <div className="h-px bg-brand-dark/10" />
 
       {/* Category */}
       <div>
@@ -224,8 +224,8 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
               onClick={() => setSelectedCategory(cat)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                 selectedCategory === cat
-                  ? 'bg-brand-gold text-brand-tealDark border-brand-gold shadow-sm'
-                  : 'border-brand-off/15 text-brand-off/70 hover:border-brand-gold/30 hover:text-brand-off'
+                  ? 'bg-brand-gold text-brand-light border-brand-gold shadow-sm'
+                  : 'border-brand-dark/15 text-brand-dark/70 hover:border-brand-gold/30 hover:text-brand-dark'
               }`}
             >
               {cat}
@@ -242,7 +242,7 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
         <div className="space-y-4 px-1">
           {/* Clean Custom Dual Range Slider */}
           <div className="pt-2 pb-4 px-1">
-            <div className="relative w-full h-1.5 bg-brand-off/10 rounded-full mt-2">
+            <div className="relative w-full h-1.5 bg-brand-dark/10 rounded-full mt-2">
               <div 
                 className="absolute h-full bg-brand-gold rounded-full"
                 style={{
@@ -279,7 +279,7 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
 
           <div className="flex items-center gap-2 pt-2">
             <div className="flex-1 relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-off/40 text-xs">₹</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-dark/40 text-xs">₹</span>
               <input
                 type="number"
                 value={inputMin}
@@ -292,13 +292,13 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
                   setInputMin(val.toString());
                 }}
                 onKeyDown={e => e.key === 'Enter' && e.target.blur()}
-                className="w-full rounded-lg border border-brand-off/15 bg-transparent pl-6 pr-2 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                className="w-full rounded-lg border border-brand-dark/15 bg-transparent pl-6 pr-2 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
                 placeholder="Min"
               />
             </div>
-            <span className="text-brand-off/30">—</span>
+            <span className="text-brand-dark/30">—</span>
             <div className="flex-1 relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-off/40 text-xs">₹</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-dark/40 text-xs">₹</span>
               <input
                 type="number"
                 value={inputMax}
@@ -311,7 +311,7 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
                   setInputMax(val.toString());
                 }}
                 onKeyDown={e => e.key === 'Enter' && e.target.blur()}
-                className="w-full rounded-lg border border-brand-off/15 bg-transparent pl-6 pr-2 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                className="w-full rounded-lg border border-brand-dark/15 bg-transparent pl-6 pr-2 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
                 placeholder="Max"
               />
             </div>
@@ -333,7 +333,7 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                   selectedMaterials.includes(m)
                     ? 'bg-brand-gold/15 text-brand-gold border-brand-gold/30'
-                    : 'border-brand-off/15 text-brand-off/60 hover:border-brand-gold/20'
+                    : 'border-brand-dark/15 text-brand-dark/60 hover:border-brand-gold/20'
                 }`}
               >
                 {m}
@@ -357,7 +357,7 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                   selectedColors.includes(c)
                     ? 'bg-brand-gold/15 text-brand-gold border-brand-gold/30'
-                    : 'border-brand-off/15 text-brand-off/60 hover:border-brand-gold/20'
+                    : 'border-brand-dark/15 text-brand-dark/60 hover:border-brand-gold/20'
                 }`}
               >
                 {c}
@@ -380,7 +380,7 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
               className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
                 selectedRatings.includes(r)
                   ? 'bg-brand-gold/10 border border-brand-gold/20'
-                  : 'hover:bg-brand-teal/10 border border-transparent'
+                  : 'hover:bg-brand-cream/10 border border-transparent'
               }`}
             >
               <span className="flex text-yellow-500 text-xs">
@@ -388,7 +388,7 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
                   <span key={i}>{i < r ? '★' : '☆'}</span>
                 ))}
               </span>
-              <span className="text-xs text-brand-off/50">& up</span>
+              <span className="text-xs text-brand-dark/50">& up</span>
             </button>
           ))}
         </div>
@@ -400,16 +400,16 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* ── Page Header ── */}
       <div className="mb-6">
-        <div className="flex items-center gap-2 text-xs text-brand-off/50 mb-3">
+        <div className="flex items-center gap-2 text-xs text-brand-dark/50 mb-3">
           <button onClick={() => navigate("/")} className="hover:text-brand-gold transition">Home</button>
           <span>/</span>
-          <span className="text-brand-off/80">Products</span>
+          <span className="text-brand-dark/80">Products</span>
         </div>
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h1 className="text-3xl md:text-4xl font-heading font-bold mb-1">Our Collection</h1>
-            <p className="text-brand-off/60 text-sm">
+            <p className="text-brand-dark/60 text-sm">
               {loading ? 'Loading...' : `Showing ${filteredAndSortedProducts.length} of ${products.length} products`}
             </p>
           </div>
@@ -418,12 +418,12 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
           <div className="flex flex-wrap items-center gap-3">
             {/* Search */}
             <div className="relative flex-1 min-w-[180px] md:min-w-[220px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-off/40" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-dark/40" />
               <input
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full rounded-lg border border-brand-off/15 bg-brand-tealDark pl-9 pr-3 py-2 text-sm placeholder-brand-off/40 focus:outline-none focus:border-brand-gold/40 transition"
+                className="w-full rounded-xl border border-brand-dark/15 bg-white shadow-sm pl-10 pr-4 py-2.5 text-sm placeholder-brand-dark/40 focus:outline-none focus:border-brand-gold/50 focus:ring-1 focus:ring-brand-gold/30 transition-all"
               />
             </div>
 
@@ -441,16 +441,16 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
             />
 
             {/* View mode */}
-            <div className="hidden md:flex items-center rounded-lg border border-brand-off/15 overflow-hidden">
+            <div className="hidden md:flex items-center rounded-lg border border-brand-dark/15 overflow-hidden">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 transition ${viewMode === 'grid' ? 'bg-brand-gold/15 text-brand-gold' : 'text-brand-off/50 hover:text-brand-off'}`}
+                className={`p-2 transition ${viewMode === 'grid' ? 'bg-brand-gold/15 text-brand-gold' : 'text-brand-dark/50 hover:text-brand-dark'}`}
               >
                 <LayoutGrid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 transition ${viewMode === 'list' ? 'bg-brand-gold/15 text-brand-gold' : 'text-brand-off/50 hover:text-brand-off'}`}
+                className={`p-2 transition ${viewMode === 'list' ? 'bg-brand-gold/15 text-brand-gold' : 'text-brand-dark/50 hover:text-brand-dark'}`}
               >
                 <ListIcon className="w-4 h-4" />
               </button>
@@ -459,12 +459,12 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
             {/* Mobile filter toggle */}
             <button
               onClick={() => setMobileFilterOpen(true)}
-              className="md:hidden inline-flex items-center gap-2 rounded-lg border border-brand-off/15 bg-brand-tealDark px-3 py-2 text-sm transition hover:border-brand-gold/30"
+              className="md:hidden inline-flex items-center gap-2 rounded-xl border border-brand-dark/15 bg-white shadow-sm px-4 py-2.5 text-sm font-medium transition hover:border-brand-gold/40 hover:shadow-md"
             >
               <SlidersHorizontal className="w-4 h-4 text-brand-gold" />
               Filters
               {activeFilterCount > 0 && (
-                <span className="w-5 h-5 rounded-full bg-brand-gold text-brand-tealDark text-[10px] font-bold flex items-center justify-center">
+                <span className="w-5 h-5 rounded-full bg-brand-gold text-brand-light text-[10px] font-bold flex items-center justify-center">
                   {activeFilterCount}
                 </span>
               )}
@@ -499,7 +499,7 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
                 {r}★ & up <X className="w-3 h-3" />
               </button>
             ))}
-            <button onClick={handleClearFilters} className="inline-flex items-center gap-1 rounded-full text-brand-off/50 px-3 py-1 text-xs border border-brand-off/10 hover:border-brand-off/30 transition">
+            <button onClick={handleClearFilters} className="inline-flex items-center gap-1 rounded-full text-brand-dark/50 px-3 py-1 text-xs border border-brand-dark/10 hover:border-brand-dark/30 transition">
               Clear All <X className="w-3 h-3" />
             </button>
           </motion.div>
@@ -510,7 +510,7 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         {/* Desktop Sidebar */}
         <div className="hidden md:block md:col-span-3">
-          <div className="sticky top-20 rounded-xl bg-brand-tealDark p-5 border border-brand-gold/10">
+          <div className="sticky top-24 rounded-2xl bg-white shadow-xl shadow-brand-gold/5 p-6 border border-brand-gold/10">
             {FilterContent({})}
           </div>
         </div>
@@ -527,16 +527,16 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="py-16 text-center rounded-2xl bg-brand-tealDark/50 border border-brand-gold/10"
+              className="py-20 text-center rounded-3xl bg-white shadow-sm border border-brand-gold/10"
             >
               <Gem className="w-16 h-16 text-brand-gold/30 mx-auto mb-4" />
               <h3 className="text-xl font-bold mb-2">No Products Found</h3>
-              <p className="text-brand-off/50 text-sm mb-4 max-w-sm mx-auto">
+              <p className="text-brand-dark/50 text-sm mb-4 max-w-sm mx-auto">
                 We couldn't find any products matching your filters. Try adjusting your search or clearing the filters.
               </p>
               <button
                 onClick={handleClearFilters}
-                className="inline-flex items-center gap-2 rounded-lg bg-brand-gold text-brand-tealDark px-5 py-2.5 font-semibold text-sm hover:bg-brand-gold/90 transition"
+                className="inline-flex items-center gap-2 rounded-lg bg-brand-gold text-brand-light px-5 py-2.5 font-semibold text-sm hover:bg-brand-gold/90 transition"
               >
                 <X className="w-4 h-4" /> Clear All Filters
               </button>
@@ -551,7 +551,6 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: Math.min(i * 0.04, 0.3) }}
-                    whileHover={{ y: -6, boxShadow: '0 12px 32px rgba(0,0,0,0.3)' }}
                   >
                     <ProductCard
                       product={product}
@@ -563,7 +562,7 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
                 ) : (
                   <motion.div
                     key={product._id || product.id}
-                    className="flex items-center gap-4 p-4 rounded-xl bg-brand-tealDark border border-brand-gold/10 hover:border-brand-gold/30 transition-all cursor-pointer"
+                    className="flex items-center gap-4 p-4 rounded-2xl bg-white shadow-sm border border-brand-gold/10 hover:shadow-xl hover:shadow-brand-gold/5 hover:border-brand-gold/30 transition-all cursor-pointer"
                     onClick={() => navigate(`/product/${product._id || product.id}`)}
                     initial={{ opacity: 0, y: 12 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -576,7 +575,7 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="font-semibold mb-1 truncate">{product.name}</div>
-                      <div className="text-sm text-brand-off/60 mb-1 line-clamp-1">{product.description}</div>
+                      <div className="text-sm text-brand-dark/60 mb-1 line-clamp-1">{product.description}</div>
                       <div className="flex items-center gap-3">
                         <span className="text-brand-gold font-bold">₹{product.price?.toLocaleString('en-IN')}</span>
                         <span className="flex text-yellow-500 text-xs">
@@ -589,13 +588,13 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
                     <div className="flex gap-2 flex-shrink-0">
                       <button
                         onClick={e => { e.stopPropagation(); onToggleFavorite(product._id || product.id); }}
-                        className="p-2 rounded-lg border border-brand-off/15 hover:border-brand-gold/30 transition"
+                        className="p-2 rounded-lg border border-brand-dark/15 hover:border-brand-gold/30 transition"
                       >
-                        <Heart className={`w-4 h-4 ${favorites.includes(product._id || product.id) ? 'fill-red-500 text-red-500' : 'text-brand-off/50'}`} />
+                        <Heart className={`w-4 h-4 ${favorites.includes(product._id || product.id) ? 'fill-red-500 text-red-500' : 'text-brand-dark/50'}`} />
                       </button>
                       <button
                         onClick={e => { e.stopPropagation(); onAddToCart(product); }}
-                        className="px-4 py-2 rounded-lg bg-brand-gold text-brand-tealDark text-sm font-semibold hover:bg-brand-gold/90 transition"
+                        className="px-4 py-2 rounded-lg bg-brand-gold text-brand-light text-sm font-semibold hover:bg-brand-gold/90 transition"
                       >
                         Add to Cart
                       </button>
@@ -624,14 +623,14 @@ const ProductsPage = ({ products, onAddToCart, onToggleFavorite, favorites = [],
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="absolute bottom-0 left-0 right-0 max-h-[85vh] bg-brand-tealDark rounded-t-2xl p-5 overflow-y-auto border-t border-brand-gold/20"
+              className="absolute bottom-0 left-0 right-0 max-h-[85vh] bg-[#FDFBF7] rounded-t-[2rem] p-6 overflow-y-auto shadow-2xl"
             >
-              <div className="w-10 h-1 rounded-full bg-brand-off/20 mx-auto mb-4" />
+              <div className="w-12 h-1.5 rounded-full bg-brand-dark/15 mx-auto mb-6" />
               {FilterContent({ onClose: () => setMobileFilterOpen(false) })}
-              <div className="mt-6 sticky bottom-0 pt-4 bg-brand-tealDark border-t border-brand-off/10">
+              <div className="mt-8 sticky bottom-0 pt-4 bg-gradient-to-t from-[#FDFBF7] via-[#FDFBF7] to-transparent">
                 <button
                   onClick={() => setMobileFilterOpen(false)}
-                  className="w-full py-3 rounded-xl bg-brand-gold text-brand-tealDark font-semibold text-sm"
+                  className="w-full py-3.5 rounded-xl bg-brand-gold hover:bg-brand-gold/90 shadow-md text-white font-bold text-sm transition-all"
                 >
                   Show {filteredAndSortedProducts.length} Results
                 </button>

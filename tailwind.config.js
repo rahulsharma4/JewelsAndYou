@@ -8,11 +8,11 @@ module.exports = {
     extend: {
       colors: {
         brand: {
-          teal: "#1f3d3f",
-          tealDark: "#0f2a2c",
-          gold: "#c9a86a",
-          goldLight: "#e0c792",
-          off: "#f5efe6"
+          light: "#FFFDF9",     // Main background (Cream)
+          cream: "#FFF9F0",     // Secondary background (Slightly warmer cream)
+          gold: "#CB843C",      // Accent color (Orange-Gold from logo)
+          goldLight: "#D19455", // Lighter accent
+          dark: "#5E4834"       // Main text color (Dark Brown)
         }
       },
       fontFamily: {

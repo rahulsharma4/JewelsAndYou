@@ -26,7 +26,7 @@ const NotFoundPage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="text-3xl font-bold mb-4 text-brand-off"
+          className="text-3xl font-bold mb-4 text-brand-dark"
         >
           Page Not Found
         </motion.h1>
@@ -35,7 +35,7 @@ const NotFoundPage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="text-brand-off/80 mb-8 max-w-md mx-auto"
+          className="text-brand-dark/80 mb-8 max-w-md mx-auto"
         >
           Sorry, the page you are looking for doesn't exist or has been moved.
         </motion.p>
@@ -50,7 +50,7 @@ const NotFoundPage = () => {
             onClick={() => navigate('/')}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
-            className="px-6 py-3 rounded-md bg-brand-gold text-brand-tealDark font-semibold"
+            className="px-6 py-3 rounded-md bg-brand-gold text-brand-light font-semibold"
           >
             Go Home
           </motion.button>
@@ -58,7 +58,7 @@ const NotFoundPage = () => {
             onClick={() => navigate('/products')}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
-            className="px-6 py-3 rounded border border-brand-off/30 text-brand-off hover:bg-brand-teal/20"
+            className="px-6 py-3 rounded border border-brand-dark/30 text-brand-dark hover:bg-brand-cream/20"
           >
             Browse Products
           </motion.button>

@@ -28,76 +28,88 @@ const ProductCard = ({ product, onAddToCart, onToggleFavorite, isFavorite = fals
   return (
     <div
       onClick={handleCardClick}
-      className="group h-full flex flex-col rounded-xl overflow-hidden bg-brand-tealDark border border-brand-gold/10 hover:border-brand-gold/30 cursor-pointer transition-all duration-300"
+      className="group flex flex-col bg-white rounded-[2rem] p-3 border border-brand-gold/15 shadow-[0_10px_40px_rgba(0,0,0,0.03)] hover:shadow-[0_15px_50px_rgba(212,175,55,0.12)] hover:border-brand-gold/40 transition-all duration-700 cursor-pointer h-full relative overflow-hidden"
     >
-      {/* Image Container */}
-      <div className="relative h-64 overflow-hidden">
+      {/* Decorative Glow on Hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-brand-gold/0 via-brand-gold/0 to-brand-gold/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+
+      {/* Premium Image Container */}
+      <div className="relative h-[280px] w-full rounded-[1.5rem] bg-gradient-to-br from-[#ffffff] via-[#FDFBF7] to-[#F4EFE6] overflow-hidden border border-brand-gold/10">
         <ImageWithFallback
           src={product.image || (product.images && product.images.length > 0 ? product.images[0] : null)}
           alt={product.name}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+          className="w-full h-full object-contain mix-blend-multiply p-6 drop-shadow-md transition-all duration-700 group-hover:scale-110 group-hover:drop-shadow-2xl"
         />
 
-        {/* Gradient overlay on hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        {/* Floating Actions */}
+        <div className="absolute top-4 w-full px-4 flex justify-between items-start z-10">
+          {/* Category Badge */}
+          <span className="inline-block px-3 py-1.5 bg-white/90 backdrop-blur-md rounded-full text-[9px] font-bold uppercase tracking-widest text-brand-gold border border-brand-gold/20 shadow-sm">
+            {product.category}
+          </span>
 
-        {/* Favorite button */}
-        <button
-          onClick={handleToggleFavorite}
-          className="absolute top-3 right-3 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-brand-tealDark/80 backdrop-blur-sm border border-brand-off/10 hover:bg-brand-tealDark transition group/fav"
-          aria-label="Toggle favorite"
-        >
-          <Heart
-            className={`w-4 h-4 transition-all ${
-              isFavorite
-                ? 'fill-red-500 text-red-500 scale-110'
-                : 'text-brand-off/70 group-hover/fav:text-red-400'
-            }`}
-          />
-        </button>
-
-        {/* Category badge */}
-        <span className="absolute top-3 left-3 z-10 text-[10px] font-semibold px-2.5 py-1 rounded-md bg-brand-tealDark/80 text-brand-gold border border-brand-gold/20 backdrop-blur-sm">
-          {product.category}
-        </span>
-
-        {/* Hover action buttons */}
-        <div className="absolute bottom-3 left-3 right-3 flex gap-2 opacity-0 translate-y-3 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+          {/* Favorite Button */}
           <button
-            onClick={handleAddToCart}
-            className="flex-1 inline-flex items-center justify-center gap-1.5 bg-brand-gold text-brand-tealDark text-xs font-semibold py-2.5 rounded-lg hover:bg-brand-gold/90 transition"
+            onClick={handleToggleFavorite}
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-md shadow-md border border-brand-gold/20 hover:bg-red-50 hover:border-red-100 hover:scale-110 transition-all duration-300 group/fav"
+            aria-label="Toggle favorite"
           >
-            <ShoppingBag className="w-3.5 h-3.5" /> Add to Cart
+            <Heart
+              className={`w-4 h-4 transition-all duration-300 ${
+                isFavorite
+                  ? 'fill-red-500 text-red-500'
+                  : 'text-brand-dark/40 group-hover/fav:text-red-500'
+              }`}
+            />
           </button>
-          <button
-            onClick={handleViewDetails}
-            className="w-10 h-10 flex items-center justify-center bg-brand-tealDark/80 backdrop-blur-sm rounded-lg border border-brand-off/20 hover:bg-brand-tealDark transition"
-            title="Quick View"
-          >
-            <Eye className="w-4 h-4 text-brand-off" />
-          </button>
+        </div>
+
+        {/* Quick View Button overlay */}
+        <div className="absolute inset-x-4 bottom-4 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 z-10 hidden sm:block">
+           <button
+             onClick={handleAddToCart}
+             className="w-full py-3 rounded-xl bg-white/90 backdrop-blur-md border border-brand-gold/20 text-brand-dark text-xs font-bold uppercase tracking-widest shadow-lg hover:bg-brand-gold hover:text-white transition-colors duration-300 flex items-center justify-center gap-2"
+           >
+             <ShoppingBag className="w-4 h-4" /> Quick Add
+           </button>
         </div>
       </div>
 
-      {/* Product Info */}
-      <div className="flex-1 p-4 flex flex-col">
-        <h3 className="font-semibold text-sm mb-1 truncate">{product.name}</h3>
-        <p className="text-xs text-brand-off/50 mb-2 line-clamp-2 flex-1">{product.description}</p>
-
-        {/* Rating */}
-        <div className="flex items-center gap-1.5 mb-2">
-          <div className="flex text-yellow-500 text-xs">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <span key={i}>{i < Math.round(product.rating || 0) ? '★' : '☆'}</span>
-            ))}
+      {/* Elegant Info Section */}
+      <div className="pt-5 px-2 flex flex-col flex-1 bg-transparent relative z-10">
+        <h3 className="font-heading text-lg font-bold text-brand-dark leading-snug line-clamp-1 mb-1 group-hover:text-brand-gold transition-colors">
+          {product.name}
+        </h3>
+        
+        <div className="flex items-center justify-between mt-1 mb-2">
+           {/* Minimalist Rating */}
+          <div className="flex items-center gap-1.5">
+            <div className="flex text-brand-gold text-[10px]">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <span key={i}>{i < Math.round(product.rating || 5) ? '★' : '☆'}</span>
+              ))}
+            </div>
+            <span className="text-[10px] text-brand-dark/40 font-semibold">
+              ({product.rating || 5})
+            </span>
           </div>
-          <span className="text-[10px] text-brand-off/40">({product.rating || 0})</span>
+
+          <span className="text-brand-gold font-bold text-lg">
+            ₹{product.price?.toLocaleString('en-IN')}
+          </span>
         </div>
 
-        {/* Price */}
-        <div className="text-brand-gold font-bold text-base">
-          ₹{product.price?.toLocaleString('en-IN')}
-        </div>
+        <p className="text-xs font-medium text-brand-dark/50 mb-4 line-clamp-2">
+          {product.description}
+        </p>
+
+        {/* Add to Cart - Mobile only since desktop has hover button */}
+        <button
+          onClick={handleAddToCart}
+          className="mt-auto sm:hidden w-full py-3 rounded-xl border border-brand-gold/30 bg-brand-light text-brand-dark text-[11px] font-bold uppercase tracking-widest active:bg-brand-gold active:text-white transition-colors duration-300 flex items-center justify-center gap-2"
+        >
+          <ShoppingBag className="w-4 h-4" /> Add to Bag
+        </button>
       </div>
     </div>
   );

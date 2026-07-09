@@ -75,7 +75,7 @@ const StripePaymentForm = ({ amount, orderId, items, onSuccess, onError }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="p-4 bg-brand-teal/20 rounded-lg border border-brand-gold/20">
+      <div className="p-4 bg-brand-cream/20 rounded-lg border border-brand-gold/20">
         <h3 className="text-lg font-semibold mb-3">Payment Information</h3>
         <div className="p-3 bg-white rounded border">
           <CardElement
@@ -112,7 +112,7 @@ const StripePaymentForm = ({ amount, orderId, items, onSuccess, onError }) => {
           disabled={!stripe || loading}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.98 }}
-          className="px-6 py-3 bg-brand-gold text-brand-tealDark rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-3 bg-brand-gold text-brand-light rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? 'Processing...' : `Pay $${amount.toFixed(2)}`}
         </motion.button>

@@ -43,13 +43,12 @@ const AdminPanel = () => {
 
   // Settings states
   const [siteSettings, setSiteSettings] = useState({
-    heroTitle: '',
-    heroSubtitle: '',
-    heroDescription: '',
+    aboutTitle: '',
+    aboutDescription: '',
+    aboutImage: null,
+    currentAboutImage: null,
     promoText: '',
     promoActive: true,
-    heroImage: null,
-    currentHeroImage: null,
     metalRates: {
       gold24k: 7200,
       gold22k: 6600,
@@ -95,13 +94,12 @@ const AdminPanel = () => {
       const data = await api.getSettings();
       if (data) {
         setSiteSettings({
-          heroTitle: data.hero?.title || '',
-          heroSubtitle: data.hero?.subtitle || '',
-          heroDescription: data.hero?.description || '',
+          aboutTitle: data.about?.title || '',
+          aboutDescription: data.about?.description || '',
+          aboutImage: null,
+          currentAboutImage: data.about?.image || null,
           promoText: data.promotions?.bannerText || '',
           promoActive: data.promotions?.isActive !== false,
-          heroImage: null,
-          currentHeroImage: data.hero?.image || null,
           metalRates: data.metalRates || {
             gold24k: 7200,
             gold22k: 6600,
@@ -356,15 +354,14 @@ const AdminPanel = () => {
     e.preventDefault();
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append('heroTitle', siteSettings.heroTitle);
-      formDataToSend.append('heroSubtitle', siteSettings.heroSubtitle);
-      formDataToSend.append('heroDescription', siteSettings.heroDescription);
       formDataToSend.append('promoText', siteSettings.promoText);
       formDataToSend.append('promoActive', siteSettings.promoActive);
       formDataToSend.append('metalRates', JSON.stringify(siteSettings.metalRates));
+      formDataToSend.append('aboutTitle', siteSettings.aboutTitle);
+      formDataToSend.append('aboutDescription', siteSettings.aboutDescription);
       
-      if (siteSettings.heroImage) {
-        formDataToSend.append('heroImage', siteSettings.heroImage);
+      if (siteSettings.aboutImage) {
+        formDataToSend.append('aboutImage', siteSettings.aboutImage);
       }
 
       await api.updateSettings(formDataToSend);
@@ -401,7 +398,7 @@ const AdminPanel = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-brand-teal text-brand-off flex items-center justify-center">
+      <div className="min-h-screen bg-brand-cream text-brand-dark flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Gem className="w-10 h-10 animate-spin text-brand-gold" />
           <span>Loading admin panel...</span>
@@ -411,22 +408,22 @@ const AdminPanel = () => {
   }
 
   return (
-    <div className="min-h-screen bg-brand-teal text-brand-off p-4 md:p-8 pb-24">
+    <div className="min-h-screen bg-brand-cream text-brand-dark p-4 md:p-8 pb-24">
       <div className="max-w-7xl mx-auto">
         
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 border-b border-brand-gold/10 pb-6">
           <div>
             <h1 className="text-3xl font-heading font-bold tracking-tight">Admin Dashboard</h1>
-            <p className="text-brand-off/60 text-sm mt-1">Manage luxury collections and live metal configurations</p>
+            <p className="text-brand-dark/60 text-sm mt-1">Manage luxury collections and live metal configurations</p>
           </div>
           
           {/* Tabs */}
-          <div className="flex gap-1 p-1 bg-brand-tealDark rounded-xl border border-brand-gold/10 max-w-fit">
+          <div className="flex gap-1 p-1 bg-brand-light rounded-xl border border-brand-gold/10 max-w-fit">
             <button
               onClick={() => setActiveTab('products')}
               className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition ${
-                activeTab === 'products' ? 'bg-brand-gold text-brand-tealDark' : 'text-brand-off/70 hover:bg-brand-teal/20'
+                activeTab === 'products' ? 'bg-brand-gold text-brand-light' : 'text-brand-dark/70 hover:bg-brand-cream/20'
               }`}
             >
               <Gem className="w-4 h-4" /> Products
@@ -434,7 +431,7 @@ const AdminPanel = () => {
             <button
               onClick={() => setActiveTab('settings')}
               className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition ${
-                activeTab === 'settings' ? 'bg-brand-gold text-brand-tealDark' : 'text-brand-off/70 hover:bg-brand-teal/20'
+                activeTab === 'settings' ? 'bg-brand-gold text-brand-light' : 'text-brand-dark/70 hover:bg-brand-cream/20'
               }`}
             >
               <Settings className="w-4 h-4" /> Store Settings
@@ -442,14 +439,14 @@ const AdminPanel = () => {
             <button
               onClick={() => setActiveTab('tags')}
               className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition ${
-                activeTab === 'tags' ? 'bg-brand-gold text-brand-tealDark' : 'text-brand-off/70 hover:bg-brand-teal/20'
+                activeTab === 'tags' ? 'bg-brand-gold text-brand-light' : 'text-brand-dark/70 hover:bg-brand-cream/20'
               }`}
             >
               <Tag className="w-4 h-4" /> Tags & Categories
             </button>
             <button
               onClick={() => navigate('/admin/dashboard')}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition text-brand-off/70 hover:bg-brand-teal/20"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition text-brand-dark/70 hover:bg-brand-cream/20"
             >
               <TrendingUp className="w-4 h-4" /> Inventory Dashboard
             </button>
@@ -488,7 +485,7 @@ const AdminPanel = () => {
                 </button>
                 <button
                   onClick={handleExport}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 border border-brand-off/20 text-brand-off/80 rounded-lg text-sm font-semibold hover:bg-brand-off/5 transition"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 border border-brand-dark/20 text-brand-dark/80 rounded-lg text-sm font-semibold hover:bg-brand-dark/5 transition"
                 >
                   <Download className="w-4 h-4" /> Export CSV
                 </button>
@@ -498,7 +495,7 @@ const AdminPanel = () => {
                     resetForm();
                     setShowAddForm(true);
                   }}
-                  className="inline-flex items-center gap-1.5 px-5 py-2 bg-brand-gold text-brand-tealDark rounded-lg text-sm font-bold shadow-lg shadow-brand-gold/10"
+                  className="inline-flex items-center gap-1.5 px-5 py-2 bg-brand-gold text-brand-light rounded-lg text-sm font-bold shadow-lg shadow-brand-gold/10"
                 >
                   <Plus className="w-4 h-4" /> Add New
                 </button>
@@ -512,7 +509,7 @@ const AdminPanel = () => {
                   initial={{ opacity: 0, y: -12 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -12 }}
-                  className="bg-brand-tealDark p-6 rounded-2xl border border-brand-gold/20 shadow-xl"
+                  className="bg-brand-light p-6 rounded-2xl border border-brand-gold/20 shadow-xl"
                 >
                   <h3 className="text-lg font-bold font-heading mb-4 text-brand-gold border-b border-brand-gold/10 pb-2">
                     {editingProduct ? 'Edit Product Details' : 'Introduce New Product'}
@@ -521,13 +518,13 @@ const AdminPanel = () => {
                   <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-5">
                     {/* Name */}
                     <div>
-                      <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Product Name</label>
+                      <label className="block text-xs font-semibold uppercase text-brand-dark/60 mb-2">Product Name</label>
                       <input
                         type="text"
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
-                        className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                        className="w-full rounded-lg border border-brand-dark/15 bg-brand-cream/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
                         required
                       />
                     </div>
@@ -535,7 +532,7 @@ const AdminPanel = () => {
                     {/* Category */}
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <label className="block text-xs font-semibold uppercase text-brand-off/60">Category</label>
+                        <label className="block text-xs font-semibold uppercase text-brand-dark/60">Category</label>
                         {isNewCategory && (
                           <button type="button" onClick={() => { setIsNewCategory(false); setFormData(p => ({...p, category: ''})) }} className="text-[10px] text-brand-gold hover:underline">Select Existing</button>
                         )}
@@ -546,7 +543,7 @@ const AdminPanel = () => {
                           name="category"
                           value={formData.category}
                           onChange={handleInputChange}
-                          className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                          className="w-full rounded-lg border border-brand-dark/15 bg-brand-cream/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
                           placeholder="Type new category..."
                         />
                       ) : (
@@ -560,13 +557,13 @@ const AdminPanel = () => {
                               setFormData(p => ({ ...p, category: e.target.value }));
                             }
                           }}
-                          className="w-full rounded-lg border border-brand-off/15 bg-brand-tealDark px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                          className="w-full rounded-lg border border-brand-dark/15 bg-brand-light px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
                         >
                           <option value="" disabled>Select Category...</option>
                           {categories.map(cat => (
                             <option key={cat} value={cat}>{cat}</option>
                           ))}
-                          <option value="ADD_NEW" className="font-bold text-brand-gold bg-brand-teal/20">+ Add New Category</option>
+                          <option value="ADD_NEW" className="font-bold text-brand-gold bg-brand-cream/20">+ Add New Category</option>
                         </select>
                       )}
                     </div>
@@ -574,7 +571,7 @@ const AdminPanel = () => {
                     {/* Material */}
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <label className="block text-xs font-semibold uppercase text-brand-off/60">Material</label>
+                        <label className="block text-xs font-semibold uppercase text-brand-dark/60">Material</label>
                         {isNewMaterial && (
                           <button 
                             type="button" 
@@ -591,7 +588,7 @@ const AdminPanel = () => {
                           name="material"
                           value={formData.material}
                           onChange={handleInputChange}
-                          className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                          className="w-full rounded-lg border border-brand-dark/15 bg-brand-cream/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
                           placeholder="Type new material..."
                         />
                       ) : (
@@ -606,13 +603,13 @@ const AdminPanel = () => {
                                 setFormData({ ...formData, material: e.target.value });
                               }
                             }}
-                            className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                            className="w-full rounded-lg border border-brand-dark/15 bg-brand-cream/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
                           >
                             <option value="">Select Material...</option>
                             {materials.map(mat => (
                               <option key={mat} value={mat}>{mat}</option>
                             ))}
-                            <option value="ADD_NEW" className="font-bold text-brand-gold bg-brand-tealDark">+ Add New Material...</option>
+                            <option value="ADD_NEW" className="font-bold text-brand-gold bg-brand-light">+ Add New Material...</option>
                           </select>
                         </div>
                       )}
@@ -621,7 +618,7 @@ const AdminPanel = () => {
                   {/* Color Selection (Dynamic Dropdown) */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <label className="block text-xs font-semibold uppercase text-brand-off/60">Color</label>
+                      <label className="block text-xs font-semibold uppercase text-brand-dark/60">Color</label>
                       {isNewColor && (
                         <button 
                           type="button" 
@@ -639,7 +636,7 @@ const AdminPanel = () => {
                           value={formData.color}
                           onChange={(e) => setFormData({ ...formData, color: e.target.value })}
                           placeholder="Type new color..."
-                          className="w-full rounded-lg border border-brand-gold/40 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/70 focus:outline-none placeholder-brand-off/30"
+                          className="w-full rounded-lg border border-brand-gold/40 bg-brand-cream/30 px-3.5 py-2 text-sm focus:border-brand-gold/70 focus:outline-none placeholder-brand-dark/30"
                         />
                       </div>
                     ) : (
@@ -654,13 +651,13 @@ const AdminPanel = () => {
                               setFormData({ ...formData, color: e.target.value });
                             }
                           }}
-                          className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                          className="w-full rounded-lg border border-brand-dark/15 bg-brand-cream/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
                         >
                           <option value="">Select Color...</option>
                           {colors.map(c => (
                             <option key={c} value={c}>{c}</option>
                           ))}
-                          <option value="ADD_NEW" className="font-bold text-brand-gold bg-brand-tealDark">+ Add New Color...</option>
+                          <option value="ADD_NEW" className="font-bold text-brand-gold bg-brand-light">+ Add New Color...</option>
                         </select>
                       </div>
                     )}
@@ -669,13 +666,13 @@ const AdminPanel = () => {
 
                     {/* Stock */}
                     <div>
-                      <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Stock Inventory</label>
+                      <label className="block text-xs font-semibold uppercase text-brand-dark/60 mb-2">Stock Inventory</label>
                       <input
                         type="number"
                         name="stock"
                         value={formData.stock}
                         onChange={handleInputChange}
-                        className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                        className="w-full rounded-lg border border-brand-dark/15 bg-brand-cream/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
                         required
                         min="0"
                       />
@@ -683,12 +680,12 @@ const AdminPanel = () => {
 
                     {/* Pricing Model */}
                     <div>
-                      <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Pricing model</label>
+                      <label className="block text-xs font-semibold uppercase text-brand-dark/60 mb-2">Pricing model</label>
                       <select
                         name="priceType"
                         value={formData.priceType}
                         onChange={handleInputChange}
-                        className="w-full rounded-lg border border-brand-off/15 bg-brand-tealDark px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                        className="w-full rounded-lg border border-brand-dark/15 bg-brand-light px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
                       >
                         <option value="fixed">Fixed Price Tag</option>
                         <option value="weight-based">Weight & Metal Dynamic Price</option>
@@ -698,15 +695,15 @@ const AdminPanel = () => {
                     {/* Dynamic Fields vs Fixed Price */}
                     {formData.priceType === 'fixed' ? (
                       <div>
-                        <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Retail Price (₹)</label>
+                        <label className="block text-xs font-semibold uppercase text-brand-dark/60 mb-2">Retail Price (₹)</label>
                         <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-off/40 text-sm">₹</span>
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-dark/40 text-sm">₹</span>
                           <input
                             type="number"
                             name="price"
                             value={formData.price}
                             onChange={handleInputChange}
-                            className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 pl-8 pr-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                            className="w-full rounded-lg border border-brand-dark/15 bg-brand-cream/30 pl-8 pr-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
                             required={formData.priceType === 'fixed'}
                             min="1"
                           />
@@ -718,7 +715,7 @@ const AdminPanel = () => {
 
                         {/* Weight */}
                         <div>
-                          <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Weight (Grams)</label>
+                          <label className="block text-xs font-semibold uppercase text-brand-dark/60 mb-2">Weight (Grams)</label>
                           <div className="relative">
                             <input
                               type="number"
@@ -726,25 +723,25 @@ const AdminPanel = () => {
                               name="weight"
                               value={formData.weight}
                               onChange={handleInputChange}
-                              className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                              className="w-full rounded-lg border border-brand-dark/15 bg-brand-cream/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
                               required={formData.priceType === 'weight-based'}
                               placeholder="e.g. 8.45"
                             />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-off/40 text-xs">grams</span>
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-dark/40 text-xs">grams</span>
                           </div>
                         </div>
 
                         {/* Making Charge */}
                         <div>
-                          <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Making Charges (Flat ₹)</label>
+                          <label className="block text-xs font-semibold uppercase text-brand-dark/60 mb-2">Making Charges (Flat ₹)</label>
                           <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-off/40 text-sm">₹</span>
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-dark/40 text-sm">₹</span>
                             <input
                               type="number"
                               name="makingCharge"
                               value={formData.makingCharge}
                               onChange={handleInputChange}
-                              className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 pl-8 pr-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                              className="w-full rounded-lg border border-brand-dark/15 bg-brand-cream/30 pl-8 pr-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
                               required={formData.priceType === 'weight-based'}
                               placeholder="e.g. 2500"
                             />
@@ -757,24 +754,24 @@ const AdminPanel = () => {
 
                     {/* Description */}
                     <div className="md:col-span-3">
-                      <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Specifications & Story</label>
+                      <label className="block text-xs font-semibold uppercase text-brand-dark/60 mb-2">Specifications & Story</label>
                       <textarea
                         name="description"
                         value={formData.description}
                         onChange={handleInputChange}
-                        className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none h-20 resize-none"
+                        className="w-full rounded-lg border border-brand-dark/15 bg-brand-cream/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none h-20 resize-none"
                         required
                       />
                     </div>
 
                     {/* Image selector */}
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Product Images</label>
+                      <label className="block text-xs font-semibold uppercase text-brand-dark/60 mb-2">Product Images</label>
                       <div className="flex flex-col">
                         <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
                           {formData.images.length > 0 ? (
                             formData.images.map((img, idx) => (
-                              <div key={idx} className="flex items-center gap-3 bg-brand-teal/20 p-2 rounded-lg border border-brand-off/10">
+                              <div key={idx} className="flex items-center gap-3 bg-brand-cream/20 p-2 rounded-lg border border-brand-dark/10">
                                 <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-brand-gold/25 flex-shrink-0">
                                   <img src={URL.createObjectURL(img)} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
                                 </div>
@@ -788,14 +785,14 @@ const AdminPanel = () => {
                                       newColors[idx] = e.target.value;
                                       setFormData(prev => ({ ...prev, imageColors: newColors }));
                                     }}
-                                    className="w-full px-2.5 py-1 text-xs rounded border border-brand-off/15 bg-brand-tealDark/50 text-brand-off focus:outline-none focus:border-brand-gold/30"
+                                    className="w-full px-2.5 py-1 text-xs rounded border border-brand-dark/15 bg-brand-light/50 text-brand-dark focus:outline-none focus:border-brand-gold/30"
                                   />
                                 </div>
                               </div>
                             ))
                           ) : editingProduct && editingProduct.images && editingProduct.images.length > 0 ? (
                             editingProduct.images.map((img, idx) => (
-                              <div key={idx} className="flex items-center gap-3 bg-brand-teal/20 p-2 rounded-lg border border-brand-off/10">
+                              <div key={idx} className="flex items-center gap-3 bg-brand-cream/20 p-2 rounded-lg border border-brand-dark/10">
                                 <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-brand-gold/25 flex-shrink-0">
                                   <img src={getImageUrl(img)} alt={`Current ${idx}`} className="w-full h-full object-cover" />
                                 </div>
@@ -809,13 +806,13 @@ const AdminPanel = () => {
                                       newColors[idx] = e.target.value;
                                       setFormData(prev => ({ ...prev, imageColors: newColors }));
                                     }}
-                                    className="w-full px-2.5 py-1 text-xs rounded border border-brand-off/15 bg-brand-tealDark/50 text-brand-off focus:outline-none focus:border-brand-gold/30"
+                                    className="w-full px-2.5 py-1 text-xs rounded border border-brand-dark/15 bg-brand-light/50 text-brand-dark focus:outline-none focus:border-brand-gold/30"
                                   />
                                 </div>
                               </div>
                             ))
                           ) : editingProduct && editingProduct.image && !formData.images.length && (
-                            <div className="flex items-center gap-3 bg-brand-teal/20 p-2 rounded-lg border border-brand-off/10">
+                            <div className="flex items-center gap-3 bg-brand-cream/20 p-2 rounded-lg border border-brand-dark/10">
                               <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-brand-gold/25 flex-shrink-0">
                                 <img src={getImageUrl(editingProduct.image)} alt="Current" className="w-full h-full object-cover" />
                               </div>
@@ -829,7 +826,7 @@ const AdminPanel = () => {
                                     newColors[0] = e.target.value;
                                     setFormData(prev => ({ ...prev, imageColors: newColors }));
                                   }}
-                                  className="w-full px-2.5 py-1 text-xs rounded border border-brand-off/15 bg-brand-tealDark/50 text-brand-off focus:outline-none focus:border-brand-gold/30"
+                                  className="w-full px-2.5 py-1 text-xs rounded border border-brand-dark/15 bg-brand-light/50 text-brand-dark focus:outline-none focus:border-brand-gold/30"
                                 />
                               </div>
                             </div>
@@ -863,7 +860,7 @@ const AdminPanel = () => {
                     <div className="md:col-span-3 flex gap-3 border-t border-brand-gold/10 pt-4 mt-2">
                       <button
                         type="submit"
-                        className="px-6 py-2.5 bg-brand-gold text-brand-tealDark rounded-lg font-bold shadow-lg hover:bg-brand-gold/90 transition"
+                        className="px-6 py-2.5 bg-brand-gold text-brand-light rounded-lg font-bold shadow-lg hover:bg-brand-gold/90 transition"
                       >
                         {editingProduct ? 'Update Inventory' : 'Create Product'}
                       </button>
@@ -874,7 +871,7 @@ const AdminPanel = () => {
                           setEditingProduct(null);
                           resetForm();
                         }}
-                        className="px-6 py-2.5 border border-brand-off/20 hover:bg-brand-off/5 rounded-lg font-semibold text-brand-off/80 transition"
+                        className="px-6 py-2.5 border border-brand-dark/20 hover:bg-brand-dark/5 rounded-lg font-semibold text-brand-dark/80 transition"
                       >
                         Cancel
                       </button>
@@ -885,11 +882,11 @@ const AdminPanel = () => {
             </AnimatePresence>
 
             {/* Inventory table */}
-            <div className="bg-brand-tealDark rounded-2xl border border-brand-gold/10 overflow-hidden shadow-lg">
+            <div className="bg-brand-light rounded-2xl border border-brand-gold/10 overflow-hidden shadow-lg">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-brand-teal/40 border-b border-brand-gold/10">
+                    <tr className="bg-brand-cream/40 border-b border-brand-gold/10">
                       <th className="p-4 text-xs font-bold uppercase tracking-wider text-brand-gold">Image</th>
                       <th className="p-4 text-xs font-bold uppercase tracking-wider text-brand-gold">Product</th>
                       <th className="p-4 text-xs font-bold uppercase tracking-wider text-brand-gold">Category</th>
@@ -899,14 +896,14 @@ const AdminPanel = () => {
                       <th className="p-4 text-xs font-bold uppercase tracking-wider text-brand-gold text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-brand-off/5">
+                  <tbody className="divide-y divide-brand-dark/5">
                     {products.map((p, idx) => (
                       <motion.tr
                         key={p._id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: Math.min(idx * 0.03, 0.4) }}
-                        className="hover:bg-brand-teal/10 transition"
+                        className="hover:bg-brand-cream/10 transition"
                       >
                         <td className="p-4">
                           <ImageWithFallback
@@ -916,7 +913,7 @@ const AdminPanel = () => {
                           />
                         </td>
                         <td className="p-4 font-semibold text-sm max-w-[200px] truncate">{p.name}</td>
-                        <td className="p-4 text-xs font-medium text-brand-off/70">{p.category}</td>
+                        <td className="p-4 text-xs font-medium text-brand-dark/70">{p.category}</td>
                         <td className="p-4 text-xs">
                           {p.priceType === 'weight-based' ? (
                             <span className="inline-flex items-center gap-1 text-brand-gold">
@@ -924,7 +921,7 @@ const AdminPanel = () => {
                               {p.metalType && p.metalType !== 'None' ? `${p.metalType} ` : ''}({p.weight}g)
                             </span>
                           ) : (
-                            <span className="text-brand-off/50">Fixed Price</span>
+                            <span className="text-brand-dark/50">Fixed Price</span>
                           )}
                         </td>
                         <td className="p-4 text-sm font-bold text-brand-gold">₹{p.price?.toLocaleString('en-IN')}</td>
@@ -940,7 +937,7 @@ const AdminPanel = () => {
                               className={`p-1.5 rounded-lg border transition ${
                                 p.featured 
                                   ? 'bg-amber-500/10 border-amber-500/30 text-amber-500 hover:bg-amber-500/20' 
-                                  : 'border-brand-off/15 hover:border-amber-500/40 text-brand-off/50 hover:text-amber-500'
+                                  : 'border-brand-dark/15 hover:border-amber-500/40 text-brand-dark/50 hover:text-amber-500'
                               }`}
                               title={p.featured ? "Unfeature Product" : "Feature Product"}
                             >
@@ -948,14 +945,14 @@ const AdminPanel = () => {
                             </button>
                             <button
                               onClick={() => handleEdit(p)}
-                              className="p-1.5 rounded-lg border border-brand-off/15 hover:border-brand-gold/40 text-brand-off/80 hover:text-brand-gold transition"
+                              className="p-1.5 rounded-lg border border-brand-dark/15 hover:border-brand-gold/40 text-brand-dark/80 hover:text-brand-gold transition"
                               title="Edit"
                             >
                               <Edit2 className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleDelete(p._id)}
-                              className="p-1.5 rounded-lg border border-brand-off/15 hover:border-red-400/40 text-brand-off/80 hover:text-red-400 transition"
+                              className="p-1.5 rounded-lg border border-brand-dark/15 hover:border-red-400/40 text-brand-dark/80 hover:text-red-400 transition"
                               title="Delete"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -978,52 +975,41 @@ const AdminPanel = () => {
             animate={{ opacity: 1, y: 0 }}
             className="grid grid-cols-1 lg:grid-cols-3 gap-6"
           >
-            {/* Rates config removed per user request */}
-
             {/* Banner details config */}
-            <div className="bg-brand-tealDark p-6 rounded-2xl border border-brand-gold/10 lg:col-span-2 space-y-5">
+            <div className="bg-brand-light p-6 rounded-2xl border border-brand-gold/10 lg:col-span-2 space-y-5">
               <h3 className="text-lg font-bold font-heading text-brand-gold border-b border-brand-gold/10 pb-2">
-                Storefront Banner Configuration
+                Storefront Configuration
               </h3>
               
               <form onSubmit={handleSettingsSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Hero Title</label>
+                    <label className="block text-xs font-semibold uppercase text-brand-dark/60 mb-2">About Title</label>
                     <input
                       type="text"
-                      value={siteSettings.heroTitle}
-                      onChange={e => setSiteSettings(prev => ({...prev, heroTitle: e.target.value}))}
-                      className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Hero Subtitle</label>
-                    <input
-                      type="text"
-                      value={siteSettings.heroSubtitle}
-                      onChange={e => setSiteSettings(prev => ({...prev, heroSubtitle: e.target.value}))}
-                      className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                      value={siteSettings.aboutTitle}
+                      onChange={e => setSiteSettings(prev => ({...prev, aboutTitle: e.target.value}))}
+                      className="w-full rounded-lg border border-brand-dark/15 bg-brand-cream/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Hero Description</label>
+                  <label className="block text-xs font-semibold uppercase text-brand-dark/60 mb-2">About Description</label>
                   <textarea
-                    value={siteSettings.heroDescription}
-                    onChange={e => setSiteSettings(prev => ({...prev, heroDescription: e.target.value}))}
-                    className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none h-20 resize-none"
+                    value={siteSettings.aboutDescription}
+                    onChange={e => setSiteSettings(prev => ({...prev, aboutDescription: e.target.value}))}
+                    className="w-full rounded-lg border border-brand-dark/15 bg-brand-cream/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none h-20 resize-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Hero Image</label>
-                  {siteSettings.currentHeroImage && (
+                  <label className="block text-xs font-semibold uppercase text-brand-dark/60 mb-2">About Image</label>
+                  {siteSettings.currentAboutImage && (
                     <div className="mb-3">
                       <img 
-                        src={getImageUrl(siteSettings.currentHeroImage)} 
-                        alt="Hero bg" 
+                        src={getImageUrl(siteSettings.currentAboutImage)} 
+                        alt="About img" 
                         className="w-32 h-16 object-cover rounded-lg border border-brand-gold/20"
                       />
                     </div>
@@ -1033,7 +1019,7 @@ const AdminPanel = () => {
                     accept="image/*"
                     onChange={e => {
                       const file = e.target.files[0];
-                      if (file) setSiteSettings(prev => ({...prev, heroImage: file}));
+                      if (file) setSiteSettings(prev => ({...prev, aboutImage: file}));
                     }}
                     className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-gold/15 file:text-brand-gold hover:file:bg-brand-gold/20"
                   />
@@ -1043,12 +1029,12 @@ const AdminPanel = () => {
                   <h4 className="text-sm font-bold text-brand-gold mb-3">Promotional Ticker Banner</h4>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Banner Message</label>
+                      <label className="block text-xs font-semibold uppercase text-brand-dark/60 mb-2">Banner Message</label>
                       <input
                         type="text"
                         value={siteSettings.promoText}
                         onChange={e => setSiteSettings(prev => ({...prev, promoText: e.target.value}))}
-                        className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
+                        className="w-full rounded-lg border border-brand-dark/15 bg-brand-cream/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none"
                       />
                     </div>
                     
@@ -1067,7 +1053,7 @@ const AdminPanel = () => {
                 <div className="border-t border-brand-gold/10 pt-4">
                   <button
                     type="submit"
-                    className="px-8 py-3 bg-brand-gold text-brand-tealDark rounded-lg font-bold shadow-lg hover:bg-brand-gold/90 transition"
+                    className="px-8 py-3 bg-brand-gold text-brand-light rounded-lg font-bold shadow-lg hover:bg-brand-gold/90 transition"
                   >
                     Save Changes & Live Rates
                   </button>
@@ -1080,26 +1066,26 @@ const AdminPanel = () => {
         {activeTab === 'tags' && (
           <div className="space-y-8">
             <h2 className="text-xl font-bold font-heading">Manage Categories & Materials</h2>
-            <p className="text-brand-off/60 text-sm mb-6">Editing a name here will instantly update all products that currently use it.</p>
+            <p className="text-brand-dark/60 text-sm mb-6">Editing a name here will instantly update all products that currently use it.</p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Categories */}
-              <div className="bg-brand-tealDark rounded-2xl p-6 border border-brand-gold/10">
+              <div className="bg-brand-light rounded-2xl p-6 border border-brand-gold/10">
                 <h3 className="text-lg font-bold font-heading mb-4 text-brand-gold">Categories</h3>
                 <div className="space-y-3">
-                  {categories.length === 0 ? <p className="text-brand-off/50 text-sm">No categories found.</p> : null}
+                  {categories.length === 0 ? <p className="text-brand-dark/50 text-sm">No categories found.</p> : null}
                   {categories.map(cat => (
-                    <div key={cat} className="flex items-center justify-between p-3 bg-brand-teal/30 rounded-lg border border-brand-off/5">
+                    <div key={cat} className="flex items-center justify-between p-3 bg-brand-cream/30 rounded-lg border border-brand-dark/5">
                       {editingCategory.oldName === cat ? (
                         <div className="flex gap-2 w-full">
                           <input
                             type="text"
                             value={editingCategory.newName}
                             onChange={(e) => setEditingCategory({ ...editingCategory, newName: e.target.value })}
-                            className="w-full rounded-lg border border-brand-off/15 bg-brand-tealDark px-3 py-1.5 text-sm focus:border-brand-gold/40 focus:outline-none"
+                            className="w-full rounded-lg border border-brand-dark/15 bg-brand-light px-3 py-1.5 text-sm focus:border-brand-gold/40 focus:outline-none"
                           />
                           <button onClick={handleRenameCategory} className="text-emerald-400 text-xs font-bold hover:underline">Save</button>
-                          <button onClick={() => setEditingCategory({ oldName: '', newName: '' })} className="text-brand-off/60 text-xs hover:underline">Cancel</button>
+                          <button onClick={() => setEditingCategory({ oldName: '', newName: '' })} className="text-brand-dark/60 text-xs hover:underline">Cancel</button>
                         </div>
                       ) : (
                         <>
@@ -1119,22 +1105,22 @@ const AdminPanel = () => {
               </div>
 
               {/* Materials */}
-              <div className="bg-brand-tealDark rounded-2xl p-6 border border-brand-gold/10">
+              <div className="bg-brand-light rounded-2xl p-6 border border-brand-gold/10">
                 <h3 className="text-lg font-bold font-heading mb-4 text-brand-gold">Materials</h3>
                 <div className="space-y-3">
-                  {materials.length === 0 ? <p className="text-brand-off/50 text-sm">No materials found.</p> : null}
+                  {materials.length === 0 ? <p className="text-brand-dark/50 text-sm">No materials found.</p> : null}
                   {materials.map(mat => (
-                    <div key={mat} className="flex items-center justify-between p-3 bg-brand-teal/30 rounded-lg border border-brand-off/5">
+                    <div key={mat} className="flex items-center justify-between p-3 bg-brand-cream/30 rounded-lg border border-brand-dark/5">
                       {editingMaterial.oldName === mat ? (
                         <div className="flex gap-2 w-full">
                           <input
                             type="text"
                             value={editingMaterial.newName}
                             onChange={(e) => setEditingMaterial({ ...editingMaterial, newName: e.target.value })}
-                            className="w-full rounded-lg border border-brand-off/15 bg-brand-tealDark px-3 py-1.5 text-sm focus:border-brand-gold/40 focus:outline-none"
+                            className="w-full rounded-lg border border-brand-dark/15 bg-brand-light px-3 py-1.5 text-sm focus:border-brand-gold/40 focus:outline-none"
                           />
                           <button onClick={handleRenameMaterial} className="text-emerald-400 text-xs font-bold hover:underline">Save</button>
-                          <button onClick={() => setEditingMaterial({ oldName: '', newName: '' })} className="text-brand-off/60 text-xs hover:underline">Cancel</button>
+                          <button onClick={() => setEditingMaterial({ oldName: '', newName: '' })} className="text-brand-dark/60 text-xs hover:underline">Cancel</button>
                         </div>
                       ) : (
                         <>
