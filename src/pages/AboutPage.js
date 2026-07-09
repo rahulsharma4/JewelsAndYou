@@ -72,46 +72,7 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* Milestones */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h2 className="text-3xl font-bold text-center mb-8">Our Journey</h2>
-        <div className="space-y-6">
-          {milestones.map((m, index) => (
-            <div key={m.year} className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-              <div className={`${index % 2 === 0 ? 'order-1' : 'order-2'} md:order-1`}>
-                <motion.div className="p-6 rounded-lg bg-brand-tealDark shadow-sm" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-                  <div className="text-2xl text-brand-gold font-bold mb-1">{m.year}</div>
-                  <div className="text-xl font-bold mb-1">{m.title}</div>
-                  <div className="text-brand-off/80">{m.description}</div>
-                </motion.div>
-              </div>
-              <div className={`${index % 2 === 0 ? 'order-2' : 'order-1'} md:order-2`}>
-                <motion.div className="rounded-lg p-6 text-center text-brand-off bg-brand-tealDark" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-                  <div className="flex justify-center mb-2"><ScrollText className="w-10 h-10" /></div>
-                  <div className="text-2xl font-bold">{m.year}</div>
-                </motion.div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
 
-      {/* Team */}
-      <section className="py-12 bg-brand-teal/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-8">Meet Our Team</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {teamMembers.map((member) => (
-              <motion.div key={member.name} className="bg-brand-tealDark rounded-lg shadow-sm p-6 text-center border border-brand-gold/20" initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }} whileHover={{ y: -6 }}>
-                <img src={member.image} alt={member.name} className="w-28 h-28 rounded-full object-cover mx-auto mb-3 border-4 border-brand-gold/30" />
-                <div className="text-xl font-bold mb-1">{member.name}</div>
-                <div className="text-brand-gold font-semibold mb-2">{member.position}</div>
-                <div className="text-sm text-brand-off/80">{member.bio}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Awards */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

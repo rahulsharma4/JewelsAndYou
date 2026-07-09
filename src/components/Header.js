@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import logo from '../Assets/Logo.png';
+import logo from '../Assets/LogoLatest.png';
 import SearchBar from './SearchBar';
 import { useCart } from '../contexts/CartContext';
 import api from '../services/api';
@@ -65,7 +65,7 @@ const Header = ({ cartItemCount, onCartClick, selectedCategory, onCategoryChange
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex h-14 items-center justify-between">
               {/* Brand */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <img
                   src={logo}
                   alt="Logo"
@@ -73,12 +73,6 @@ const Header = ({ cartItemCount, onCartClick, selectedCategory, onCategoryChange
                   onClick={() => navigate('/')}
                   style={{filter: 'invert(1)'}}
                 />
-                <button
-                  onClick={() => navigate('/')}
-                  className="text-brand-off font-heading tracking-wide text-lg"
-                >
-                  JewelsAndYou
-                </button>
               </div>
 
               {/* Desktop nav */}

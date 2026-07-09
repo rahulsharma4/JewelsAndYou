@@ -24,7 +24,7 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
   // Extract unique colors mapped to images
   const uniqueImageColors = useMemo(() => {
     if (!product || !product.imageColors || !product.images) return [];
-    const colors = product.images.map((_, idx) => 
+    const colors = product.images.map((_, idx) =>
       product.imageColors[idx] ? product.imageColors[idx].trim() : ''
     ).filter(Boolean);
     return Array.from(new Set(colors));
@@ -40,7 +40,7 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
       }
     }
   }, [product]);
-  
+
   // Use cart context
   const { addToCart } = useCart();
 
@@ -207,7 +207,7 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      
+
       {/* Dynamic Toast Alert */}
       <AnimatePresence>
         {toastMessage && (
@@ -215,9 +215,8 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl shadow-xl flex items-center gap-2 border border-white/10 text-white ${
-              toastMessage.type === 'error' ? 'bg-rose-600' : 'bg-emerald-600'
-            }`}
+            className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl shadow-xl flex items-center gap-2 border border-white/10 text-white ${toastMessage.type === 'error' ? 'bg-rose-600' : 'bg-emerald-600'
+              }`}
           >
             {toastMessage.Icon && <toastMessage.Icon className="w-4 h-4" />}
             <span>{toastMessage.message}</span>
@@ -236,7 +235,7 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start mb-12">
         {/* Left Side: Premium Image Container */}
-        <motion.div 
+        <motion.div
           className="space-y-4"
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -261,7 +260,7 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
               <span className="absolute top-4 left-4 inline-flex items-center rounded-lg bg-brand-tealDark/80 text-brand-gold text-xs font-bold px-3 py-1 border border-brand-gold/20 backdrop-blur-sm">
                 {product.category}
               </span>
-              
+
               {/* Favorite button */}
               <button
                 onClick={handleToggleFavorite}
@@ -280,9 +279,8 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
                 <button
                   key={idx}
                   onClick={() => handleThumbnailClick(idx)}
-                  className={`relative w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${
-                    selectedImageIdx === idx ? 'border-brand-gold scale-105 shadow-lg' : 'border-transparent opacity-60 hover:opacity-100'
-                  }`}
+                  className={`relative w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${selectedImageIdx === idx ? 'border-brand-gold scale-105 shadow-lg' : 'border-transparent opacity-60 hover:opacity-100'
+                    }`}
                 >
                   <ImageWithFallback
                     src={img}
@@ -296,9 +294,9 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
         </motion.div>
 
         {/* Right Side: Information Panel */}
-        <motion.div 
-          initial={{ opacity: 0, x: 20 }} 
-          animate={{ opacity: 1, x: 0 }} 
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
           className="space-y-6"
         >
@@ -307,7 +305,7 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
               <ArrowLeft className="w-3.5 h-3.5" /> Back to listings
             </button>
             <h1 className="text-3xl md:text-4xl font-heading font-bold leading-tight mb-2">{product.name}</h1>
-            
+
             <div className="flex items-center gap-2">
               <div className="flex text-yellow-500 text-sm">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -344,7 +342,7 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
 
           {/* Dynamic Weight Pricing Breakdown Card */}
           {product.priceType === 'weight-based' && metalRates && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className="rounded-xl bg-brand-tealDark p-4 border border-brand-gold/15 space-y-3"
@@ -355,21 +353,17 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
                 </span>
                 <span className="text-[10px] text-brand-off/40 bg-brand-gold/10 px-2 py-0.5 rounded border border-brand-gold/20">Verified Gold Rate</span>
               </div>
-              
+
               <div className="space-y-1.5 text-xs">
                 <div className="flex justify-between text-brand-off/70">
-                  <span>Metal Weight ({product.metalType})</span>
+                  <span>Product Weight ({product.metalType})</span>
                   <span>{product.weight} grams</span>
-                </div>
-                <div className="flex justify-between text-brand-off/70">
-                  <span>Current Live Rate</span>
-                  <span>₹{metalRatePerGram.toLocaleString('en-IN')} / gram</span>
                 </div>
                 <div className="flex justify-between text-brand-off/70 border-b border-brand-off/5 pb-1.5">
                   <span>Crafting/Making Charges</span>
                   <span>+ ₹{product.makingCharge?.toLocaleString('en-IN')}</span>
                 </div>
-                
+
                 <div className="flex justify-between text-sm font-bold text-brand-gold pt-1">
                   <span>Final Dynamic Sum</span>
                   <span>₹{(product.price * quantity).toLocaleString('en-IN')}</span>
@@ -397,11 +391,10 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
                           setSelectedImageIdx(matchedIdx);
                         }
                       }}
-                      className={`px-3.5 py-1.5 rounded-lg border text-xs font-bold transition-all duration-200 ${
-                        isSelected 
-                          ? 'border-brand-gold bg-brand-gold/15 text-brand-gold shadow-lg shadow-brand-gold/5 scale-105' 
-                          : 'border-brand-off/15 hover:border-brand-gold/40 text-brand-off/70 bg-brand-tealDark/30 hover:text-brand-off'
-                      }`}
+                      className={`px-3.5 py-1.5 rounded-lg border text-xs font-bold transition-all duration-200 ${isSelected
+                        ? 'border-brand-gold bg-brand-gold/15 text-brand-gold shadow-lg shadow-brand-gold/5 scale-105'
+                        : 'border-brand-off/15 hover:border-brand-gold/40 text-brand-off/70 bg-brand-tealDark/30 hover:text-brand-off'
+                        }`}
                     >
                       {color}
                     </button>
@@ -454,11 +447,10 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
             <button
               key={label}
               onClick={() => setSelectedTab(idx)}
-              className={`px-5 py-3 border-b-2 text-sm font-semibold tracking-wide transition ${
-                selectedTab === idx 
-                  ? 'border-brand-gold text-brand-gold font-bold' 
-                  : 'border-transparent text-brand-off/50 hover:text-brand-off/80'
-              }`}
+              className={`px-5 py-3 border-b-2 text-sm font-semibold tracking-wide transition ${selectedTab === idx
+                ? 'border-brand-gold text-brand-gold font-bold'
+                : 'border-transparent text-brand-off/50 hover:text-brand-off/80'
+                }`}
             >
               {label}
             </button>
@@ -467,7 +459,7 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
 
         {/* Tab 1: Specs */}
         {selectedTab === 0 && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"
@@ -483,7 +475,7 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
 
         {/* Tab 2: Reviews */}
         {selectedTab === 1 && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             className="mt-6 space-y-6"
@@ -492,14 +484,14 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
             {user ? (
               <form onSubmit={handleReviewSubmit} className="p-6 rounded-xl bg-brand-tealDark border border-brand-gold/10 space-y-4 max-w-xl">
                 <h3 className="font-heading font-semibold text-lg text-brand-gold">Share Your Experience</h3>
-                
+
                 <div>
                   <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Rating</label>
                   <div className="flex gap-1.5 text-2xl text-yellow-500">
                     {[1, 2, 3, 4, 5].map(num => (
-                      <button 
-                        key={num} 
-                        type="button" 
+                      <button
+                        key={num}
+                        type="button"
                         onClick={() => setReviewForm(prev => ({ ...prev, rating: num }))}
                         className="hover:scale-115 transition"
                       >
@@ -511,7 +503,7 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
 
                 <div>
                   <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Detailed Feedback</label>
-                  <textarea 
+                  <textarea
                     className="w-full rounded-lg border border-brand-off/15 bg-brand-teal/30 px-3.5 py-2 text-sm focus:border-brand-gold/40 focus:outline-none h-20 resize-none"
                     value={reviewForm.comment}
                     onChange={e => setReviewForm(prev => ({ ...prev, comment: e.target.value }))}
@@ -521,10 +513,10 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
 
                 <div>
                   <label className="block text-xs font-semibold uppercase text-brand-off/60 mb-2">Upload Images</label>
-                  <input 
-                    type="file" 
-                    multiple 
-                    accept="image/*" 
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
                     onChange={handleImageChange}
                     className="text-xs text-brand-off/60 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-brand-gold/15 file:text-brand-gold"
                   />
@@ -539,8 +531,8 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
                   )}
                 </div>
 
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={isSubmittingReview}
                   className="bg-brand-gold text-brand-tealDark px-6 py-2 rounded-lg text-sm font-bold shadow hover:bg-brand-gold/90 transition disabled:opacity-50"
                 >
@@ -550,7 +542,7 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
             ) : (
               <div className="p-6 rounded-xl bg-brand-tealDark border border-brand-gold/10 text-center max-w-xl space-y-3">
                 <p className="text-brand-off/60 text-sm">Please log in to share your experience with this masterpiece.</p>
-                <button 
+                <button
                   type="button"
                   onClick={() => navigate('/login')}
                   className="px-5 py-2 bg-brand-gold text-brand-tealDark font-bold text-xs rounded-lg shadow-lg hover:bg-brand-gold/90 transition"
@@ -566,8 +558,8 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
             ) : (
               <div className="space-y-4">
                 {productReviews.map((rev, idx) => (
-                  <motion.div 
-                    key={idx} 
+                  <motion.div
+                    key={idx}
                     className="p-5 rounded-xl bg-brand-tealDark border border-brand-gold/5 space-y-2"
                     initial={{ opacity: 0, y: 12 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -583,15 +575,15 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
                     </div>
                     <span className="text-[10px] text-brand-off/40 block">{new Date(rev.date).toLocaleDateString()}</span>
                     <p className="text-sm text-brand-off/80 leading-relaxed italic">"{rev.comment}"</p>
-                    
+
                     {rev.images && rev.images.length > 0 && (
                       <div className="flex gap-2 flex-wrap pt-2">
                         {rev.images.map((img, i) => (
-                          <img 
-                            key={i} 
-                            src={getImageUrl(img)} 
-                            alt="Client Review" 
-                            className="w-16 h-16 object-cover rounded-lg border border-brand-gold/10" 
+                          <img
+                            key={i}
+                            src={getImageUrl(img)}
+                            alt="Client Review"
+                            className="w-16 h-16 object-cover rounded-lg border border-brand-gold/10"
                           />
                         ))}
                       </div>
@@ -605,7 +597,7 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
 
         {/* Tab 3: Assurances */}
         {selectedTab === 2 && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6"
@@ -632,7 +624,7 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
           <h2 className="text-xl font-bold font-heading mb-6 border-b border-brand-gold/10 pb-2">Complete The Look</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {relatedProducts.map(rel => (
-              <motion.div 
+              <motion.div
                 key={rel._id}
                 whileHover={{ y: -5 }}
                 onClick={() => { navigate(`/product/${rel._id}`); window.scrollTo(0, 0); }}

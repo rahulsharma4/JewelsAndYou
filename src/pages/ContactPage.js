@@ -140,20 +140,7 @@ const ContactPage = () => {
         </div>
       </section>
 
-      {/* Map placeholder */}
-      <section className="py-12 bg-brand-teal/5">
-        <motion.div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-          <h2 className="text-3xl font-bold mb-6 text-brand-off">Visit Our Showroom</h2>
-          <motion.div className="rounded-lg p-6 bg-brand-tealDark text-brand-off h-80 flex items-center justify-center mb-3" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45, delay: 0.1 }}>
-            <div>
-              <MapPin className="w-16 h-16 text-brand-gold mx-auto mb-4" />
-              <div className="text-xl font-bold mb-1">Interactive Map Coming Soon</div>
-              <div>123 Jewelry Street, New York, NY 10001</div>
-            </div>
-          </motion.div>
-          <div className="text-brand-off/80">Our showroom is open by appointment only. Please contact us to schedule a visit.</div>
-        </motion.div>
-      </section>
+
 
       {snackbarOpen && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">

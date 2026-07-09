@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Facebook, Twitter, Instagram, Youtube, Linkedin, MapPin, Phone, Mail, Clock } from "lucide-react";
+import logo from '../Assets/LogoLatest.png';
 import api from "../services/api";
 
 const Footer = () => {
@@ -45,21 +46,15 @@ const Footer = () => {
     ]},
     { title: "About", links: [
       { name: "Our Story", path: "/about" },
-      { name: "Craftsmanship", path: "/about" },
-      { name: "Sustainability", path: "/about" },
-      { name: "Press", path: "/about" },
-      { name: "Careers", path: "/about" },
       { name: "Privacy Policy", path: "/privacy" },
       { name: "Terms of Service", path: "/terms" },
     ]},
   ];
 
   const socialLinks = [
-    { label: "Facebook", icon: Facebook, url: "https://facebook.com/jewelsandyou" },
-    { label: "Twitter", icon: Twitter, url: "https://twitter.com/jewelsandyou" },
-    { label: "Instagram", icon: Instagram, url: "https://instagram.com/jewelsandyou" },
-    { label: "YouTube", icon: Youtube, url: "https://youtube.com/@jewelsandyou" },
-    { label: "LinkedIn", icon: Linkedin, url: "https://linkedin.com/company/jewelsandyou" },
+    { label: "YouTube", icon: Youtube, url: "https://youtube.com/@jewelsandyou?si=mjFfnbMps5rt_kIX" },
+    { label: "Instagram (Raw Material)", icon: Instagram, url: "https://www.instagram.com/_jewellery_raw_material?igsh=MTM1dGJ5c2J2ZWNvag==" },
+    { label: "Instagram (Jewels & You)", icon: Instagram, url: "https://www.instagram.com/jewels_and_you_?igsh=MTBvZXNrMHlmNmo2cA==" },
   ];
 
   const handleNewsletterSubmit = async (e) => {
@@ -85,7 +80,7 @@ const Footer = () => {
           {/* Company info */}
           <div className="md:col-span-4">
             <div className="mb-3">
-              <div className="text-3xl font-bold mb-2  ">JewelsAndYou</div>
+              <img src={logo} alt="Logo" className="h-20 mb-2" style={{filter: 'invert(1)'}} />
               <p className="text-sm opacity-80 leading-relaxed">
                 Crafting timeless jewelry pieces that tell your unique story. From classic diamonds to contemporary designs, we bring you the finest quality jewelry that celebrates life's precious moments.
               </p>
@@ -159,13 +154,8 @@ const Footer = () => {
         <div className="my-6 h-px  bg-brand-tealDark/20" />
 
         {/* Bottom */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-sm opacity-80">
+        <div className="flex flex-col sm:flex-row items-center justify-center text-sm opacity-80 pt-2">
           <div>© 2024 JewelsAndYou. All rights reserved.</div>
-          <div className="flex gap-4 flex-wrap">
-            <button className="hover: ">Privacy Policy</button>
-            <button className="hover: ">Terms of Service</button>
-            <button className="hover: ">Cookie Policy</button>
-          </div>
         </div>
       </div>
 

@@ -569,15 +569,12 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
             title="Follow Us @jewelsandyou"
             subtitle="Join our community and get inspired"
           />
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-            {[...products.slice(0, 6), ...Array(Math.max(0, 6 - products.length)).fill(null)].slice(0, 6).map((p, i) => {
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[...products.slice(0, 3), ...Array(Math.max(0, 3 - products.length)).fill(null)].slice(0, 3).map((p, i) => {
               const socials = [
-                { icon: Instagram, url: "https://instagram.com", color: "hover:text-pink-500" },
-                { icon: Facebook, url: "https://facebook.com", color: "hover:text-blue-500" },
-                { icon: Youtube, url: "https://youtube.com", color: "hover:text-red-500" },
-                { icon: Instagram, url: "https://instagram.com", color: "hover:text-pink-500" },
-                { icon: Facebook, url: "https://facebook.com", color: "hover:text-blue-500" },
-                { icon: Youtube, url: "https://youtube.com", color: "hover:text-red-500" },
+                { icon: Youtube, url: "https://youtube.com/@jewelsandyou?si=mjFfnbMps5rt_kIX", color: "hover:text-red-500" },
+                { icon: Instagram, url: "https://www.instagram.com/_jewellery_raw_material?igsh=MTM1dGJ5c2J2ZWNvag==", color: "hover:text-pink-500" },
+                { icon: Instagram, url: "https://www.instagram.com/jewels_and_you_?igsh=MTBvZXNrMHlmNmo2cA==", color: "hover:text-pink-500" },
               ];
               const SocialIcon = socials[i].icon;
               return (

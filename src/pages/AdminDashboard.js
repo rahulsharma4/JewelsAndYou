@@ -15,6 +15,8 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [stockUpdatingId, setStockUpdatingId] = useState(null);
   const [localStockValues, setLocalStockValues] = useState({});
+  const [inventorySearch, setInventorySearch] = useState('');
+  const [inventoryFilter, setInventoryFilter] = useState('all');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -67,6 +69,29 @@ const AdminDashboard = () => {
       setLoading(false);
     }
   };
+
+  const handleDeleteProduct = async (productId) => {
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
+    try {
+      await api.deleteAdminProduct(productId);
+      loadDashboardData();
+    } catch (error) {
+      console.error("Failed to delete product:", error);
+    }
+  };
+
+  const filteredInventoryProducts = products.filter(p => {
+    const matchesSearch = p.name?.toLowerCase().includes(inventorySearch.toLowerCase()) || 
+                          p.category?.toLowerCase().includes(inventorySearch.toLowerCase());
+    
+    if (!matchesSearch) return false;
+    
+    if (inventoryFilter === 'low') return (p.stock || 0) <= 10 && (p.stock || 0) > 0;
+    if (inventoryFilter === 'out') return (p.stock || 0) === 0;
+    if (inventoryFilter === 'in') return (p.stock || 0) > 10;
+    
+    return true; // 'all'
+  });
 
   const updateStock = async (productId, newStock) => {
     try {
@@ -597,36 +622,32 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            {/* Gram-based Catalog Weight calculation */}
-            <div className="bg-brand-tealDark p-5 rounded-lg border border-brand-gold/20 shadow-md mb-8">
-              <h3 className="text-md font-bold mb-3 text-brand-gold uppercase tracking-wide">Dynamic Stock Metal Volume Analysis</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-brand-teal/20 p-4 rounded border border-brand-gold/10">
-                  <div className="text-sm font-semibold text-brand-off/80">Total Gold Stock Weight</div>
-                  <div className="text-2xl font-bold text-brand-gold mt-1">
-                    {products
-                      .filter(p => p.priceType === 'weight-based' && (p.metalType || '').toLowerCase() === 'gold')
-                      .reduce((acc, p) => acc + ((p.weight || 0) * (p.stock || 0)), 0)
-                      .toFixed(2)} g
-                  </div>
-                  <div className="text-xs text-brand-off/40 mt-1">Total weight across all Gold catalog items in stock</div>
-                </div>
-                <div className="bg-brand-teal/20 p-4 rounded border border-brand-gold/10">
-                  <div className="text-sm font-semibold text-brand-off/80">Total Silver Stock Weight</div>
-                  <div className="text-2xl font-bold text-brand-gold mt-1">
-                    {products
-                      .filter(p => p.priceType === 'weight-based' && (p.metalType || '').toLowerCase() === 'silver')
-                      .reduce((acc, p) => acc + ((p.weight || 0) * (p.stock || 0)), 0)
-                      .toFixed(2)} g
-                  </div>
-                  <div className="text-xs text-brand-off/40 mt-1">Total weight across all Silver catalog items in stock</div>
-                </div>
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+              <h3 className="text-lg font-bold">Stock Alerts & Catalog List</h3>
+              
+              <div className="flex gap-4 w-full sm:w-auto">
+                <input 
+                  type="text" 
+                  placeholder="Search by product or category..." 
+                  value={inventorySearch}
+                  onChange={(e) => setInventorySearch(e.target.value)}
+                  className="bg-brand-teal/30 border border-brand-gold/20 rounded-md px-3 py-2 text-sm text-brand-off focus:outline-none focus:border-brand-gold flex-1 sm:w-64"
+                />
+                <select 
+                  value={inventoryFilter} 
+                  onChange={(e) => setInventoryFilter(e.target.value)}
+                  className="bg-brand-teal/30 border border-brand-gold/20 rounded-md px-3 py-2 text-sm text-brand-off focus:outline-none focus:border-brand-gold"
+                >
+                  <option value="all">All Stock</option>
+                  <option value="in">In Stock (&gt; 10)</option>
+                  <option value="low">Low Stock (&le; 10)</option>
+                  <option value="out">Out of Stock</option>
+                </select>
               </div>
             </div>
 
             {/* Inventory table */}
             <div className="bg-brand-tealDark rounded-lg border border-brand-gold/20 p-6">
-              <h3 className="text-lg font-bold mb-4">Stock Alerts & Catalog List</h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead className="bg-brand-teal/30">
@@ -641,7 +662,11 @@ const AdminDashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-brand-off/10 text-sm">
-                    {products.map((p) => {
+                    {filteredInventoryProducts.length === 0 ? (
+                      <tr>
+                        <td colSpan="7" className="p-8 text-center text-brand-off/50">No products found matching your search.</td>
+                      </tr>
+                    ) : filteredInventoryProducts.map((p) => {
                       const isLow = (p.stock || 0) <= 10;
                       const isOut = (p.stock || 0) === 0;
                       const totalWeight = p.priceType === 'weight-based' ? ((p.weight || 0) * (p.stock || 0)).toFixed(2) : null;
