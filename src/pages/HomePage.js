@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Gem, Truck, Undo2, ArrowRight, Heart, Sparkles, ChevronRight, Lock, Instagram, Facebook, Youtube, Star } from "lucide-react";
-import { getImageUrl, ImageWithFallback } from "../utils/imageUtils";
+import { Gem, Truck, Undo2, ArrowRight, Sparkles, ChevronRight, Lock, Instagram, Youtube, Star } from "lucide-react";
+import { ImageWithFallback } from "../utils/imageUtils";
 import { CategorySkeleton, TestimonialSkeleton } from "../components/LoadingSpinner";
 import api from "../services/api";
 import slideImg1 from '../Assets/Jevel1.jpg';
@@ -63,7 +63,6 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [siteSettings, setSiteSettings] = useState(null);
   const [heroIdx, setHeroIdx] = useState(0);
 
   const heroSlides = [
@@ -93,7 +92,7 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
     }
   ];
 
-  useEffect(() => {
+  /* useEffect(() => {
     const fetchSettings = async () => {
       try {
         const data = await api.getSettings();
@@ -103,7 +102,7 @@ const HomePage = ({ products, onAddToCart, onToggleFavorite, favorites = [], loa
       }
     };
     fetchSettings();
-  }, []);
+  }, []); */
 
   useEffect(() => {
     const t = setInterval(() => setHeroIdx(i => (i + 1) % heroSlides.length), 6000);

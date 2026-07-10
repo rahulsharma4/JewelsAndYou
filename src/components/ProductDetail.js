@@ -178,7 +178,7 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
     setReviewForm(prev => ({ ...prev, images: files }));
   };
 
-  // Live Metal Rate per gram computation details
+  /* // Live Metal Rate per gram computation details
   const metalRatePerGram = (() => {
     if (product.priceType !== 'weight-based' || !metalRates) return 0;
     switch (product.metalType) {
@@ -189,7 +189,7 @@ const ProductDetail = ({ products, onAddToCart, onToggleFavorite, favorites = []
       case 'Platinum': return metalRates.platinum;
       default: return 0;
     }
-  })();
+  })(); */
 
   const specifications = [
     { label: "Material Type", value: product.material || (product.priceType === 'weight-based' ? product.metalType : (product.specifications?.material || "Premium Alloy")) },

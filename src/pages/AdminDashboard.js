@@ -70,7 +70,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDeleteProduct = async (productId) => {
+  /* const handleDeleteProduct = async (productId) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
     try {
       await api.deleteAdminProduct(productId);
@@ -78,7 +78,7 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error("Failed to delete product:", error);
     }
-  };
+  }; */
 
   const filteredInventoryProducts = products.filter(p => {
     const matchesSearch = p.name?.toLowerCase().includes(inventorySearch.toLowerCase()) || 

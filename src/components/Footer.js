@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Facebook, Twitter, Instagram, Youtube, Linkedin, MapPin, Phone, Mail, Clock } from "lucide-react";
+import { Instagram, Youtube, MapPin, Phone, Mail, Clock } from 'lucide-react';
 import logo from '../Assets/LogoLatest.png';
 import api from "../services/api";
 

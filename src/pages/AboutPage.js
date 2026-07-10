@@ -1,8 +1,9 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Gem, Heart, Users, Star, ScrollText, Trophy, Building } from "lucide-react";
+import { Gem, Heart, Users, Star, Trophy, Building } from "lucide-react";
 
 const AboutPage = () => {
+  /*
   const teamMembers = [
     { name: "Sarah Johnson", position: "Founder & CEO", image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop&crop=face", bio: "With over 15 years in the jewelry industry, Sarah founded JewelsAndYou with a vision to make luxury jewelry accessible to everyone." },
     { name: "Michael Chen", position: "Head Designer", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face", bio: "A master craftsman with a passion for creating unique pieces that tell stories and capture emotions." },
@@ -16,6 +17,7 @@ const AboutPage = () => {
     { year: "2020", title: "International Reach", description: "Started shipping to customers worldwide" },
     { year: "2024", title: "Innovation Leader", description: "Pioneering sustainable luxury jewelry" },
   ];
+  */
 
   const values = [
     { icon: Gem, title: "Excellence", description: "We never compromise on quality, ensuring every piece meets the highest standards." },

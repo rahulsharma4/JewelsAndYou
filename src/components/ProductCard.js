@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ImageWithFallback } from '../utils/imageUtils';
-import { Heart, ShoppingBag, Eye } from 'lucide-react';
+import { Heart, ShoppingBag } from 'lucide-react';
 
 const ProductCard = ({ product, onAddToCart, onToggleFavorite, isFavorite = false }) => {
   const navigate = useNavigate();
@@ -20,10 +20,6 @@ const ProductCard = ({ product, onAddToCart, onToggleFavorite, isFavorite = fals
     onToggleFavorite(product._id || product.id);
   };
 
-  const handleViewDetails = (e) => {
-    e.stopPropagation();
-    navigate(`/product/${product._id || product.id}`);
-  };
 
   return (
     <div
