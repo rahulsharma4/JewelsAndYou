@@ -1,14 +1,47 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
 import { ShoppingBag, Trash2, ArrowRight, ShieldCheck, Truck, Plus, Minus, Gem } from "lucide-react";
 import { ImageWithFallback } from "../utils/imageUtils";
+import api from "../services/api";
 
 const CartPage = () => {
   const navigate = useNavigate();
   const { cart, loading, updateCartItem, removeFromCart, getTotalPrice } = useCart();
-  const total = getTotalPrice();
+  const [couponCode, setCouponCode] = useState('');
+  const [couponError, setCouponError] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(JSON.parse(localStorage.getItem('appliedCoupon')) || null);
+  const [isApplying, setIsApplying] = useState(false);
+
+  const baseTotal = getTotalPrice();
+  const total = appliedCoupon ? Math.max(0, baseTotal - appliedCoupon.discountAmount) : baseTotal;
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode) return;
+    try {
+      setIsApplying(true);
+      setCouponError('');
+      const data = await api.applyCoupon(couponCode, baseTotal);
+      if (data.success) {
+        setAppliedCoupon(data);
+        localStorage.setItem('appliedCoupon', JSON.stringify(data));
+      } else {
+        setCouponError(data.message || 'Invalid coupon');
+      }
+    } catch (err) {
+      setCouponError(err.response?.data?.message || 'Failed to apply coupon');
+    } finally {
+      setIsApplying(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode('');
+    localStorage.removeItem('appliedCoupon');
+  };
+
 
   const getCartItemImage = (item) => {
     if (item.color && item.product.images && item.product.imageColors) {
@@ -179,12 +212,18 @@ const CartPage = () => {
               <div className="space-y-3.5 text-xs">
                 <div className="flex justify-between text-brand-dark/70">
                   <span>Bag Subtotal</span>
-                  <span>₹{total.toLocaleString('en-IN')}</span>
+                  <span>₹{baseTotal.toLocaleString('en-IN')}</span>
                 </div>
+                {appliedCoupon && (
+                  <div className="flex justify-between text-emerald-600">
+                    <span>Discount ({appliedCoupon.code || 'Coupon'})</span>
+                    <span>- ₹{appliedCoupon.discountAmount.toLocaleString('en-IN')}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-brand-dark/70">
                   <span>Insured Delivery</span>
                   <span className="text-brand-gold">
-                    {total >= freeShippingThreshold ? "FREE" : "₹150"}
+                    {baseTotal >= freeShippingThreshold ? "FREE" : "₹150"}
                   </span>
                 </div>
                 
@@ -193,9 +232,42 @@ const CartPage = () => {
                 <div className="flex justify-between text-sm font-bold text-brand-dark">
                   <span>Total Sum</span>
                   <span className="text-brand-gold">
-                    ₹{(total + (total >= freeShippingThreshold ? 0 : 150)).toLocaleString('en-IN')}
+                    ₹{(total + (baseTotal >= freeShippingThreshold ? 0 : 150)).toLocaleString('en-IN')}
                   </span>
                 </div>
+              </div>
+
+              {/* Coupon Code Section */}
+              <div className="space-y-2 mt-4">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-brand-dark/60">Promo Code</label>
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 p-3 rounded-xl">
+                    <span className="text-xs font-bold text-emerald-700">{appliedCoupon.code || 'COUPON APPLIED'}</span>
+                    <button onClick={removeCoupon} className="text-emerald-700/60 hover:text-emerald-700">
+                      <Minus className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        placeholder="Enter code"
+                        className="flex-1 bg-brand-cream/30 border border-brand-dark/10 rounded-xl px-3 py-2 text-xs uppercase focus:outline-none focus:border-brand-gold/50 transition"
+                      />
+                      <button 
+                        onClick={handleApplyCoupon}
+                        disabled={isApplying || !couponCode}
+                        className="px-4 bg-brand-dark text-white rounded-xl text-[10px] font-bold tracking-wider uppercase hover:bg-brand-gold transition disabled:opacity-50"
+                      >
+                        {isApplying ? '...' : 'Apply'}
+                      </button>
+                    </div>
+                    {couponError && <p className="text-red-500 text-[10px] mt-1">{couponError}</p>}
+                  </div>
+                )}
               </div>
 
               {/* Secure Checkout Banner */}

@@ -270,6 +270,16 @@ class ApiService {
     return response.json();
   }
 
+  // Coupons
+  async applyCoupon(code, purchaseAmount) {
+    const response = await fetch(`${API_BASE_URL}/coupons/apply`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ code, purchaseAmount }),
+    });
+    return response.json();
+  }
+
   // Product Reviews API
   async addProductReview(productId, reviewData) {
     const formData = new FormData();
